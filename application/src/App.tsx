@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -41,7 +42,7 @@ function App() {
                   <Route path="/" element={<Index />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/services/:id" element={<ServiceDetail />} />
+                  <Route path="/service/:id" element={<ServiceDetail />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/operational-page" element={<OperationalPage />} />
