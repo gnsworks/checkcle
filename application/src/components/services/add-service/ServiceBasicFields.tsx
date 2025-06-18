@@ -10,44 +10,21 @@ interface ServiceBasicFieldsProps {
 
 export function ServiceBasicFields({ form }: ServiceBasicFieldsProps) {
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Service Name</FormLabel>
-            <FormControl>
-              <Input 
-                placeholder="Service Name" 
-                {...field} 
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="url"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Service URL</FormLabel>
-            <FormControl>
-              <Input 
-                placeholder="https://example.com" 
-                {...field}
-                onChange={(e) => {
-                  console.log("URL field changed:", e.target.value);
-                  field.onChange(e);
-                }}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
+    <FormField
+      control={form.control}
+      name="name"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Service Name</FormLabel>
+          <FormControl>
+            <Input 
+              placeholder="Enter a descriptive name for your service" 
+              {...field} 
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 }
