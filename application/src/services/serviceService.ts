@@ -1,4 +1,3 @@
-
 import { pb } from '@/lib/pocketbase';
 import { Service, CreateServiceParams, UptimeData } from '@/types/service.types';
 import { monitoringService } from './monitoring';
@@ -144,7 +143,6 @@ export const serviceService = {
   startMonitoringService: monitoringService.startMonitoringService,
   pauseMonitoring: monitoringService.pauseMonitoring,
   resumeMonitoring: monitoringService.resumeMonitoring,
-  checkHttpService: monitoringService.checkHttpService,
   startAllActiveServices: monitoringService.startAllActiveServices,
   
   // Re-export uptime functions

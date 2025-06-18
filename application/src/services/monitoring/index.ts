@@ -1,6 +1,5 @@
 
 import { monitoringIntervals } from './monitoringIntervals';
-import { checkHttpService } from './httpChecker';
 import { 
   startMonitoringService, 
   pauseMonitoring, 
@@ -12,6 +11,5 @@ export const monitoringService = {
   startMonitoringService,
   pauseMonitoring,
   resumeMonitoring,
-  checkHttpService,
   startAllActiveServices
 };
