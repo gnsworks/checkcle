@@ -51,7 +51,7 @@ export function ServiceEditDialog({ open, onOpenChange, service }: ServiceEditDi
         onOpenChange(newOpen);
       }
     }}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl">Edit Service</DialogTitle>
           <DialogDescription>
