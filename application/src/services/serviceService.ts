@@ -1,3 +1,4 @@
+
 import { pb } from '@/lib/pocketbase';
 import { Service, CreateServiceParams, UptimeData } from '@/types/service.types';
 import { monitoringService } from './monitoring';
@@ -16,6 +17,9 @@ export const serviceService = {
         id: item.id,
         name: item.name,
         url: item.url || "",  // Ensure proper URL mapping
+        host: item.host || "",  // Map host field for PING and TCP services
+        port: item.port || undefined,  // Map port field for TCP services
+        domain: item.domain || "",  // Map domain field
         type: item.service_type || item.type || "HTTP",  // Map service_type to type
         status: item.status || "paused",
         responseTime: item.response_time || item.responseTime || 0,
@@ -40,12 +44,11 @@ export const serviceService = {
       // Convert service type to lowercase to avoid validation issues
       const serviceType = params.type.toLowerCase();
       
-      // Debug log to check URL
-      console.log("Creating service with URL:", params.url);
+      // Debug log to check what we're sending
+      console.log("Creating service with params:", params);
       
       const data = {
         name: params.name,
-        url: params.url,  // Ensure URL is included
         service_type: serviceType,  // Using lowercase value to avoid validation errors
         status: "up", // Changed from "active" to "up" to match the expected enum values
         response_time: 0,
@@ -55,6 +58,15 @@ export const serviceService = {
         max_retries: params.retries,
         notification_id: params.notificationChannel,
         template_id: params.alertTemplate,
+        // Conditionally add fields based on service type
+        ...(serviceType === "dns" 
+          ? { domain: params.domain, url: "", host: "", port: null }  // DNS: store in domain field
+          : serviceType === "ping"
+          ? { host: params.host, url: "", domain: "", port: null }    // PING: store in host field
+          : serviceType === "tcp"
+          ? { host: params.host, port: params.port, url: "", domain: "" }  // TCP: store in host and port fields
+          : { url: params.url, domain: "", host: "", port: null }     // HTTP: store in url field
+        )
       };
 
       console.log("Creating service with data:", data);
@@ -65,7 +77,10 @@ export const serviceService = {
       const newService = {
         id: record.id,
         name: record.name,
-        url: record.url,  // Include the URL in returned service
+        url: record.url || "",
+        host: record.host || "",
+        port: record.port || undefined,
+        domain: record.domain || "",
         type: record.service_type || "http",
         status: record.status || "up", // Changed to match the status we set
         responseTime: record.response_time || 0,
@@ -92,17 +107,25 @@ export const serviceService = {
       // Convert service type to lowercase to avoid validation issues
       const serviceType = params.type.toLowerCase();
       
-      // Debug log to check URL
-      console.log("Updating service with URL:", params.url);
+      // Debug log to check what we're updating
+      console.log("Updating service with params:", params);
       
       const data = {
         name: params.name,
-        url: params.url,  // Ensure URL is included
         service_type: serviceType,
         heartbeat_interval: params.interval,
         max_retries: params.retries,
         notification_id: params.notificationChannel || null,
         template_id: params.alertTemplate || null,
+        // Conditionally update fields based on service type
+        ...(serviceType === "dns" 
+          ? { domain: params.domain, url: "", host: "", port: null }  // DNS: update domain field
+          : serviceType === "ping"
+          ? { host: params.host, url: "", domain: "", port: null }    // PING: update host field
+          : serviceType === "tcp"
+          ? { host: params.host, port: params.port, url: "", domain: "" }  // TCP: update host and port fields
+          : { url: params.url, domain: "", host: "", port: null }     // HTTP: update url field
+        )
       };
 
       console.log("Updating service with data:", data);
@@ -120,7 +143,10 @@ export const serviceService = {
       const updatedService = {
         id: record.id,
         name: record.name,
-        url: record.url,  // Include the URL in returned service
+        url: record.url || "",
+        host: record.host || "",
+        port: record.port || undefined,
+        domain: record.domain || "",
         type: record.service_type || "http",
         status: record.status,
         responseTime: record.response_time || 0,
