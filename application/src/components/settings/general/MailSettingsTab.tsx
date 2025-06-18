@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -27,18 +26,15 @@ const MailSettingsTab: React.FC<MailSettingsTabProps> = ({
       setIsTestingEmail(true);
       console.log('Testing email with data:', data);
       
-      const response = await fetch('/api/settings', {
+      const response = await fetch('/api/settings/test/email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'sendTestEmail',
-          data: {
-            email: data.email,
-            template: data.template,
-            ...(data.collection && { collection: data.collection })
-          }
+          email: data.email,
+          template: data.template,
+          ...(data.collection && { collection: data.collection })
         })
       });
 
@@ -257,10 +253,16 @@ const MailSettingsTab: React.FC<MailSettingsTabProps> = ({
             )}
           />
         </div>
-        
-        {/* Only show Test Email button, removed Test Connection button */}
-        {isEditing && form.watch('smtp.enabled') && (
-          <div className="mt-4">
+      </div>
+
+      {/* Test Email button - outside the form area and always visible when SMTP is enabled */}
+      {form.watch('smtp.enabled') && (
+        <div className="mt-6 pt-4 border-t border-border">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-medium">{t("testEmailSettings", "settings")}</h3>
+              <p className="text-sm text-muted-foreground">{t("testEmailDescription", "settings")}</p>
+            </div>
             <Button 
               type="button" 
               variant="outline" 
@@ -272,8 +274,8 @@ const MailSettingsTab: React.FC<MailSettingsTabProps> = ({
               {t("testEmail", "settings")}
             </Button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <TestEmailDialog
         open={showTestEmailDialog}

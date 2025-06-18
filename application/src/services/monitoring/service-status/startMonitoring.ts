@@ -1,7 +1,6 @@
 
 import { pb } from '@/lib/pocketbase';
 import { monitoringIntervals } from '../monitoringIntervals';
-import { checkHttpService } from '../httpChecker';
 
 /**
  * Start monitoring for a specific service
@@ -30,34 +29,20 @@ export async function startMonitoringService(serviceId: string): Promise<void> {
       status: "up",
     });
     
-    // Start with an immediate check
-    await checkHttpService(serviceId);
+    // The actual service checking is now handled by the Go microservice
+    // This frontend service just tracks the monitoring state
+    const intervalMs = (service.heartbeat_interval || 60) * 1000;
+    console.log(`Service ${service.name} monitoring delegated to backend service`);
     
-    // Then schedule regular checks based on the interval
-    const intervalMs = (service.heartbeat_interval || 60) * 1000; // Convert from seconds to milliseconds
-    console.log(`Setting check interval for ${service.name} to ${intervalMs}ms (${service.heartbeat_interval || 60} seconds)`);
-    
-    // Store the interval ID so we can clear it later if needed
-    const intervalId = window.setInterval(async () => {
-      try {
-        // Check if service has been paused since scheduling
-        const currentService = await pb.collection('services').getOne(serviceId);
-        if (currentService.status === "paused") {
-          console.log(`Service ${serviceId} is now paused. Skipping scheduled check.`);
-          return;
-        }
-        
-        console.log(`Running scheduled check for service ${service.name}`);
-        await checkHttpService(serviceId);
-      } catch (error) {
-        console.error(`Error in scheduled check for ${service.name}:`, error);
-      }
+    // Store a placeholder interval to track that this service is being monitored
+    const intervalId = window.setInterval(() => {
+      console.log(`Monitoring active for service ${service.name} (handled by backend)`);
     }, intervalMs);
     
     // Store the interval ID for this service
     monitoringIntervals.set(serviceId, intervalId);
     
-    console.log(`Monitoring scheduled for service ${serviceId} every ${service.heartbeat_interval || 60} seconds`);
+    console.log(`Monitoring registered for service ${serviceId}`);
   } catch (error) {
     console.error("Error starting service monitoring:", error);
   }

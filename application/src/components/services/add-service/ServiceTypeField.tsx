@@ -1,7 +1,7 @@
 
 import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Globe } from "lucide-react";
+import { Globe, Wifi, Server, Globe2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { ServiceFormData } from "./types";
 
@@ -10,6 +10,21 @@ interface ServiceTypeFieldProps {
 }
 
 export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
+  const getServiceIcon = (type: string) => {
+    switch (type) {
+      case "http":
+        return <Globe className="w-4 h-4" />;
+      case "ping":
+        return <Wifi className="w-4 h-4" />;
+      case "tcp":
+        return <Server className="w-4 h-4" />;
+      case "dns":
+        return <Globe2 className="w-4 h-4" />;
+      default:
+        return <Globe className="w-4 h-4" />;
+    }
+  };
+
   return (
     <FormField
       control={form.control}
@@ -24,13 +39,13 @@ export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
             >
               <SelectTrigger>
                 <SelectValue>
-                  {field.value === "http" && (
+                  {field.value && (
                     <div className="flex items-center gap-2">
-                      <Globe className="w-4 h-4" />
-                      <span>HTTP/S</span>
+                      {getServiceIcon(field.value)}
+                      <span>{field.value.toUpperCase()}</span>
                     </div>
                   )}
-                  {field.value !== "http" && "Select a service type"}
+                  {!field.value && "Select a service type"}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -41,13 +56,43 @@ export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
                       <span>HTTP/S</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Monitor websites and REST APIs with HTTP/HTTPS protocol
+                      Monitor websites and REST APIs with HTTP/HTTPS Protocol 
                     </p>
                   </div>
                 </SelectItem>
-                <SelectItem value="ping">PING</SelectItem>
-                <SelectItem value="tcp">TCP</SelectItem>
-                <SelectItem value="dns">DNS</SelectItem>
+                <SelectItem value="ping">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <Wifi className="w-4 h-4" />
+                      <span>PING</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Monitor host availability with PING Protocol
+                    </p>
+                  </div>
+                </SelectItem>
+                <SelectItem value="tcp">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <Server className="w-4 h-4" />
+                      <span>TCP</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Monitor TCP port connectivity with TCP Protocol
+                    </p>
+                  </div>
+                </SelectItem>
+                <SelectItem value="dns">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <Globe2 className="w-4 h-4" />
+                      <span>DNS</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Monitor DNS resolution
+                    </p>
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </FormControl>

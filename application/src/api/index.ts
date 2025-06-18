@@ -19,7 +19,7 @@ const api = {
       return await realtime(body);
     } else if (path === '/api/settings' || path.startsWith('/api/settings/')) {
       console.log("Routing to settings handler");
-      return await settingsApi(body);
+      return await settingsApi(body, path);
     }
     
     // Return 404 for unknown routes
