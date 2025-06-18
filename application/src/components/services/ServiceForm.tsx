@@ -38,6 +38,7 @@ export function ServiceForm({
       name: "",
       type: "http",
       url: "",
+      port: "",
       interval: "60",
       retries: "3",
       notificationChannel: "",
@@ -49,19 +50,41 @@ export function ServiceForm({
   // Populate form when initialData changes (separate from initialization)
   useEffect(() => {
     if (initialData && isEdit) {
+      // Ensure the type is one of the allowed values
+      const serviceType = (initialData.type || "http").toLowerCase();
+      const validType = ["http", "ping", "tcp", "dns"].includes(serviceType) 
+        ? serviceType as "http" | "ping" | "tcp" | "dns"
+        : "http";
+
+      // For PING services, use host field; for DNS use domain field; for TCP use host field; others use url
+      let urlValue = "";
+      let portValue = "";
+      
+      if (validType === "ping") {
+        urlValue = initialData.host || "";
+      } else if (validType === "dns") {
+        urlValue = initialData.domain || "";
+      } else if (validType === "tcp") {
+        urlValue = initialData.host || "";
+        portValue = String(initialData.port || "");
+      } else {
+        urlValue = initialData.url || "";
+      }
+
       // Reset the form with initial data values
       form.reset({
         name: initialData.name || "",
-        type: (initialData.type || "http").toLowerCase(),
-        url: initialData.url || "",
+        type: validType,
+        url: urlValue,
+        port: portValue,
         interval: String(initialData.interval || 60),
         retries: String(initialData.retries || 3),
-        notificationChannel: initialData.notificationChannel || "",
-        alertTemplate: initialData.alertTemplate || "",
+        notificationChannel: initialData.notificationChannel === "none" ? "" : initialData.notificationChannel || "",
+        alertTemplate: initialData.alertTemplate === "default" ? "" : initialData.alertTemplate || "",
       });
 
       // Log for debugging
-      console.log("Populating form with URL:", initialData.url);
+      console.log("Populating form with data:", { type: validType, url: urlValue, port: portValue });
     }
   }, [initialData, isEdit, form]);
 
@@ -74,17 +97,28 @@ export function ServiceForm({
     try {
       console.log("Form data being submitted:", data); // Debug log for submitted data
       
+      // Prepare service data with proper field mapping
+      const serviceData = {
+        name: data.name,
+        type: data.type,
+        interval: parseInt(data.interval),
+        retries: parseInt(data.retries),
+        notificationChannel: data.notificationChannel === "none" ? "" : data.notificationChannel,
+        alertTemplate: data.alertTemplate === "default" ? "" : data.alertTemplate,
+        // Map the URL field to appropriate database field based on service type
+        ...(data.type === "dns" 
+          ? { domain: data.url, url: "", host: "", port: undefined }  // DNS: store in domain field
+          : data.type === "ping"
+          ? { host: data.url, url: "", domain: "", port: undefined }  // PING: store in host field  
+          : data.type === "tcp"
+          ? { host: data.url, port: parseInt(data.port || "80"), url: "", domain: "" }  // TCP: store in host and port fields
+          : { url: data.url, domain: "", host: "", port: undefined }  // HTTP: store in url field
+        )
+      };
+      
       if (isEdit && initialData) {
         // Update existing service
-        await serviceService.updateService(initialData.id, {
-          name: data.name,
-          type: data.type,
-          url: data.url,
-          interval: parseInt(data.interval),
-          retries: parseInt(data.retries),
-          notificationChannel: data.notificationChannel === "none" ? "" : data.notificationChannel,
-          alertTemplate: data.alertTemplate === "default" ? "" : data.alertTemplate,
-        });
+        await serviceService.updateService(initialData.id, serviceData);
         
         toast({
           title: "Service updated",
@@ -92,15 +126,7 @@ export function ServiceForm({
         });
       } else {
         // Create new service
-        await serviceService.createService({
-          name: data.name,
-          type: data.type,
-          url: data.url,
-          interval: parseInt(data.interval),
-          retries: parseInt(data.retries),
-          notificationChannel: data.notificationChannel === "none" ? undefined : data.notificationChannel,
-          alertTemplate: data.alertTemplate === "default" ? undefined : data.alertTemplate,
-        });
+        await serviceService.createService(serviceData);
         
         toast({
           title: "Service created",
@@ -127,10 +153,24 @@ export function ServiceForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 pb-6">
-        <ServiceBasicFields form={form} />
-        <ServiceTypeField form={form} />
-        <ServiceConfigFields form={form} />
-        <ServiceNotificationFields form={form} />
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Basic Information</h3>
+            <ServiceBasicFields form={form} />
+            <ServiceTypeField form={form} />
+          </div>
+          
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Configuration</h3>
+            <ServiceConfigFields form={form} />
+          </div>
+          
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Notifications</h3>
+            <ServiceNotificationFields form={form} />
+          </div>
+        </div>
+        
         <ServiceFormActions 
           isSubmitting={isSubmitting} 
           onCancel={onCancel} 
