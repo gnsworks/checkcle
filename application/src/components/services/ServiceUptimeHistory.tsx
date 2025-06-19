@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { UptimeData } from "@/types/service.types"; 
+import { UptimeData, Service } from "@/types/service.types"; 
 import { uptimeService } from "@/services/uptimeService";
 import { format, parseISO } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,20 +10,25 @@ import { Check, X, AlertTriangle, Pause } from "lucide-react";
 
 interface ServiceUptimeHistoryProps {
   serviceId: string;
+  serviceType: string; // Add service type to determine collection
   startDate?: Date;
   endDate?: Date;
 }
 
 export function ServiceUptimeHistory({ 
   serviceId, 
+  serviceType,
   startDate = new Date(Date.now() - 24 * 60 * 60 * 1000), 
   endDate = new Date() 
 }: ServiceUptimeHistoryProps) {
   const { theme } = useTheme();
   const { data: uptimeHistory, isLoading, error } = useQuery({
-    queryKey: ['uptimeHistory', serviceId, startDate?.toISOString(), endDate?.toISOString()],
-    queryFn: () => uptimeService.getUptimeHistory(serviceId, 200, startDate, endDate),
-    enabled: !!serviceId,
+    queryKey: ['uptimeHistory', serviceId, serviceType, startDate?.toISOString(), endDate?.toISOString()],
+    queryFn: () => {
+      console.log(`ServiceUptimeHistory: Fetching for service ${serviceId} of type ${serviceType}`);
+      return uptimeService.getUptimeHistory(serviceId, 200, startDate, endDate, serviceType);
+    },
+    enabled: !!serviceId && !!serviceType,
     refetchInterval: 5000, // Refresh UI every 5 seconds
   });
 

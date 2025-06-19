@@ -64,6 +64,11 @@ export const uptimeService = {
     serviceType?: string
   ): Promise<UptimeData[]> {
     try {
+      if (!serviceId) {
+        console.log('No serviceId provided to getUptimeHistory');
+        return [];
+      }
+
       const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}_${serviceType || 'default'}`;
       
       // Check cache
@@ -77,6 +82,7 @@ export const uptimeService = {
       const collection = serviceType ? getCollectionForServiceType(serviceType) : 'uptime_data';
       console.log(`Fetching uptime history for service ${serviceId} from collection ${collection}, limit: ${limit}`);
       
+      // Build filter to get records for specific service_id
       let filter = `service_id='${serviceId}'`;
       
       // Add date range filtering if provided
@@ -90,7 +96,7 @@ export const uptimeService = {
       
       const options = {
         filter: filter,
-        sort: '-timestamp',
+        sort: '-timestamp', // Sort by timestamp descending (newest first)
         $autoCancel: false,
         $cancelKey: `uptime_history_${serviceId}_${Date.now()}`
       };
@@ -104,27 +110,15 @@ export const uptimeService = {
       if (response.items.length > 0) {
         console.log(`Date range in results: ${response.items[response.items.length - 1].timestamp} to ${response.items[0].timestamp}`);
       } else {
-        console.log(`No records found for filter: ${filter} in collection: ${collection}`);
-        
-        // Try a fallback query without date filter to see if there's any data at all
-        const fallbackResponse = await pb.collection(collection).getList(1, 10, {
-          filter: `service_id='${serviceId}'`,
-          sort: '-timestamp',
-          $autoCancel: false
-        });
-        
-        console.log(`Fallback query found ${fallbackResponse.items.length} total records for service in ${collection}`);
-        if (fallbackResponse.items.length > 0) {
-          console.log(`Latest record timestamp: ${fallbackResponse.items[0].timestamp}`);
-          console.log(`Oldest record timestamp: ${fallbackResponse.items[fallbackResponse.items.length - 1].timestamp}`);
-        }
+        console.log(`No records found for service_id '${serviceId}' in collection: ${collection}`);
       }
       
+      // Transform the response items to UptimeData format
       const uptimeData = response.items.map(item => ({
         id: item.id,
         serviceId: item.service_id,
         timestamp: item.timestamp,
-        status: item.status,
+        status: item.status as "up" | "down" | "warning" | "paused",
         responseTime: item.response_time || 0,
         date: item.timestamp,
         uptime: 100
@@ -139,7 +133,7 @@ export const uptimeService = {
       
       return uptimeData;
     } catch (error) {
-      console.error("Error fetching uptime history:", error);
+      console.error(`Error fetching uptime history for service ${serviceId}:`, error);
       
       // Try to return cached data as fallback
       const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}_${serviceType || 'default'}`;
@@ -149,7 +143,9 @@ export const uptimeService = {
         return cached.data;
       }
       
-      throw new Error('Failed to load uptime history.');
+      // Return empty array instead of throwing to prevent UI crashes
+      console.log(`Returning empty array for service ${serviceId} due to fetch error`);
+      return [];
     }
   }
 };
