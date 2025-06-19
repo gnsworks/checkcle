@@ -8,45 +8,56 @@ interface ServiceRowHeaderProps {
 }
 
 export const ServiceRowHeader = ({ service }: ServiceRowHeaderProps) => {
-  // Display URL for HTTP services, hostname for others
-  const shouldDisplayFullUrl = service.type.toLowerCase() === "http";
-  let serviceSubtitle = "";
-  
   // Check alerts status - check both fields for backward compatibility
   const alertsMuted = service.alerts === "muted" || service.muteAlerts === true;
   
-  if (service.url) {
-    try {
-      const url = service.url;
-      // If the URL doesn't start with http:// or https://, add https:// prefix
-      const formattedUrl = (!url.startsWith('http://') && !url.startsWith('https://')) 
-        ? `https://${url}` 
-        : url;
-
-      try {
-        // Now try to parse it as a URL
-        const urlObj = new URL(formattedUrl);
-        if (shouldDisplayFullUrl) {
-          serviceSubtitle = formattedUrl;
-        } else {
-          serviceSubtitle = urlObj.hostname;
-        }
-      } catch (urlError) {
-        // If URL parsing still fails, just show the original URL
-        serviceSubtitle = url;
-      }
-    } catch (e) {
-      // If any other error occurs, just show the original URL
-      serviceSubtitle = service.url;
-      console.log("Error processing URL:", e);
+  // Determine what to display based on service type
+  const getServiceSubtitle = () => {
+    const serviceType = service.type.toLowerCase();
+    
+    if (serviceType === "dns" && service.domain) {
+      return service.domain;
     }
-  }
+    
+    if ((serviceType === "ping" || serviceType === "tcp") && service.host) {
+      if (serviceType === "tcp" && service.port) {
+        return `${service.host}:${service.port}`;
+      }
+      return service.host;
+    }
+    
+    if (service.url) {
+      try {
+        // If the URL doesn't start with http:// or https://, add https:// prefix
+        const formattedUrl = (!service.url.startsWith('http://') && !service.url.startsWith('https://')) 
+          ? `https://${service.url}` 
+          : service.url;
+
+        try {
+          // Try to parse it as a URL
+          const urlObj = new URL(formattedUrl);
+          // For HTTP services, show full URL; for others show hostname
+          return serviceType === "http" ? formattedUrl : urlObj.hostname;
+        } catch (urlError) {
+          // If URL parsing fails, just show the original URL
+          return service.url;
+        }
+      } catch (e) {
+        // If any other error occurs, just show the original URL
+        return service.url;
+      }
+    }
+    
+    return "";
+  };
+
+  const serviceSubtitle = getServiceSubtitle();
 
   return (
     <div className="flex items-center gap-2">
       <div>
         <div className="text-base font-medium">{service.name}</div>
-        {service.url && (
+        {serviceSubtitle && (
           <div className="text-sm text-gray-500 mt-1">{serviceSubtitle}</div>
         )}
       </div>

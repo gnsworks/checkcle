@@ -10,6 +10,24 @@ const uptimeCache = new Map<string, {
 
 const CACHE_TTL = 3000; // 3 seconds for faster updates
 
+// Map service types to their corresponding collections
+const getCollectionForServiceType = (serviceType: string): string => {
+  const type = serviceType.toLowerCase();
+  switch (type) {
+    case 'ping':
+    case 'icmp':
+      return 'ping_data';
+    case 'dns':
+      return 'dns_data';
+    case 'tcp':
+      return 'tcp_data';
+    case 'http':
+    case 'https':
+    default:
+      return 'uptime_data';
+  }
+};
+
 export const uptimeService = {
   async recordUptimeData(data: UptimeData): Promise<void> {
     try {
@@ -42,10 +60,11 @@ export const uptimeService = {
     serviceId: string, 
     limit: number = 200, 
     startDate?: Date, 
-    endDate?: Date
+    endDate?: Date,
+    serviceType?: string
   ): Promise<UptimeData[]> {
     try {
-      const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}`;
+      const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}_${serviceType || 'default'}`;
       
       // Check cache
       const cached = uptimeCache.get(cacheKey);
@@ -54,19 +73,18 @@ export const uptimeService = {
         return cached.data;
       }
       
-      console.log(`Fetching uptime history for service ${serviceId}, limit: ${limit}`);
+      // Determine the correct collection based on service type
+      const collection = serviceType ? getCollectionForServiceType(serviceType) : 'uptime_data';
+      console.log(`Fetching uptime history for service ${serviceId} from collection ${collection}, limit: ${limit}`);
       
       let filter = `service_id='${serviceId}'`;
       
       // Add date range filtering if provided
       if (startDate && endDate) {
-        // Convert dates to UTC strings in the format PocketBase expects
         const startUTC = startDate.toISOString();
         const endUTC = endDate.toISOString();
         
         console.log(`Date filter: ${startUTC} to ${endUTC}`);
-        
-        // Use proper PocketBase date filtering syntax
         filter += ` && timestamp >= "${startUTC}" && timestamp <= "${endUTC}"`;
       }
       
@@ -77,25 +95,25 @@ export const uptimeService = {
         $cancelKey: `uptime_history_${serviceId}_${Date.now()}`
       };
       
-      console.log(`Filter query: ${filter}`);
+      console.log(`Filter query: ${filter} on collection: ${collection}`);
       
-      const response = await pb.collection('uptime_data').getList(1, limit, options);
+      const response = await pb.collection(collection).getList(1, limit, options);
       
-      console.log(`Fetched ${response.items.length} uptime records for service ${serviceId}`);
+      console.log(`Fetched ${response.items.length} uptime records for service ${serviceId} from ${collection}`);
       
       if (response.items.length > 0) {
         console.log(`Date range in results: ${response.items[response.items.length - 1].timestamp} to ${response.items[0].timestamp}`);
       } else {
-        console.log(`No records found for filter: ${filter}`);
+        console.log(`No records found for filter: ${filter} in collection: ${collection}`);
         
         // Try a fallback query without date filter to see if there's any data at all
-        const fallbackResponse = await pb.collection('uptime_data').getList(1, 10, {
+        const fallbackResponse = await pb.collection(collection).getList(1, 10, {
           filter: `service_id='${serviceId}'`,
           sort: '-timestamp',
           $autoCancel: false
         });
         
-        console.log(`Fallback query found ${fallbackResponse.items.length} total records for service`);
+        console.log(`Fallback query found ${fallbackResponse.items.length} total records for service in ${collection}`);
         if (fallbackResponse.items.length > 0) {
           console.log(`Latest record timestamp: ${fallbackResponse.items[0].timestamp}`);
           console.log(`Oldest record timestamp: ${fallbackResponse.items[fallbackResponse.items.length - 1].timestamp}`);
@@ -124,7 +142,7 @@ export const uptimeService = {
       console.error("Error fetching uptime history:", error);
       
       // Try to return cached data as fallback
-      const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}`;
+      const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}_${serviceType || 'default'}`;
       const cached = uptimeCache.get(cacheKey);
       if (cached) {
         console.log(`Using expired cached data for service ${serviceId} due to fetch error`);
