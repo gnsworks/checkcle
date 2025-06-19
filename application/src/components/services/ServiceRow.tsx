@@ -61,6 +61,7 @@ export const ServiceRow = ({
           status={service.status} 
           serviceId={service.id} 
           interval={service.interval}
+          serviceType={service.type}
         />
       </TableCell>
       <TableCell className="py-4">
