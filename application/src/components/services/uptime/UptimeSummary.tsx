@@ -13,7 +13,7 @@ export const UptimeSummary = ({ uptime, interval }: UptimeSummaryProps) => {
         {Math.round(uptime)}% uptime
       </span>
       <span className="text-xs text-muted-foreground">
-        Last 20 checks ({interval}s interval)
+        Last 20 checks 
       </span>
     </div>
   );
