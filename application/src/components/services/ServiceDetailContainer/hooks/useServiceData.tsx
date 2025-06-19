@@ -42,7 +42,12 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
 
   const fetchUptimeData = async (serviceId: string, start: Date, end: Date, selectedRange?: DateRangeOption | string) => {
     try {
-      console.log(`Fetching uptime data: ${start.toISOString()} to ${end.toISOString()} for range: ${selectedRange}`);
+      if (!service) {
+        console.log('No service data available for uptime fetch');
+        return [];
+      }
+
+      console.log(`Fetching uptime data: ${start.toISOString()} to ${end.toISOString()} for range: ${selectedRange}, service type: ${service.type}`);
       
       let limit = 500; // Default limit
       
@@ -54,8 +59,9 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
       
       console.log(`Using limit ${limit} for range ${selectedRange}`);
       
-      const history = await uptimeService.getUptimeHistory(serviceId, limit, start, end);
-      console.log(`Retrieved ${history.length} uptime records`);
+      // Use the service type to fetch from the correct collection
+      const history = await uptimeService.getUptimeHistory(serviceId, limit, start, end, service.type);
+      console.log(`Retrieved ${history.length} uptime records from collection for ${service.type} service`);
       
       // Sort by timestamp (newest first)
       const filteredHistory = [...history].sort((a, b) => 
@@ -97,6 +103,9 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
           id: serviceData.id,
           name: serviceData.name,
           url: serviceData.url || "",
+          host: serviceData.host || "",
+          port: serviceData.port || undefined,
+          domain: serviceData.domain || "",
           type: serviceData.service_type || serviceData.type || "HTTP",
           status: serviceData.status || "paused",
           responseTime: serviceData.response_time || serviceData.responseTime || 0,
@@ -109,10 +118,11 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
           alerts: serviceData.alerts || "unmuted"
         };
         
+        console.log(`Loaded service: ${formattedService.name} (${formattedService.type})`);
         setService(formattedService);
         
-        // Fetch initial uptime history with 24h default
-        await fetchUptimeData(serviceId, startDate, endDate, '24h');
+        // Fetch initial uptime history with 24h default - wait for service to be set
+        await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to ensure state is updated
       } catch (error) {
         console.error("Error fetching service:", error);
         toast({
@@ -129,11 +139,11 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
     fetchServiceData();
   }, [serviceId, navigate, toast]);
 
-  // Update data when date range changes
+  // Update data when date range changes or when service is loaded
   useEffect(() => {
     if (serviceId && !isLoading && service) {
-      console.log(`Date range changed, refetching data for ${serviceId}: ${startDate.toISOString()} to ${endDate.toISOString()}`);
-      fetchUptimeData(serviceId, startDate, endDate);
+      console.log(`Date range changed or service loaded, refetching data for ${serviceId}: ${startDate.toISOString()} to ${endDate.toISOString()}`);
+      fetchUptimeData(serviceId, startDate, endDate, '24h');
     }
   }, [startDate, endDate, serviceId, isLoading, service]);
 

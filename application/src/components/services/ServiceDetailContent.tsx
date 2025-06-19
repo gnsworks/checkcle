@@ -33,10 +33,17 @@ export const ServiceDetailContent = ({
       
       <div className="mb-4 md:mb-6 mt-6 md:mt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <h2 className="text-lg md:text-xl font-medium">Response Time History</h2>
-        <DateRangeFilter 
-          onRangeChange={onDateRangeChange} 
-          selectedOption={selectedDateOption} 
-        />
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
+          <span className="text-sm text-muted-foreground">
+            Collection: {service.type.toLowerCase() === 'ping' || service.type.toLowerCase() === 'icmp' ? 'ping_data' : 
+                        service.type.toLowerCase() === 'dns' ? 'dns_data' : 
+                        service.type.toLowerCase() === 'tcp' ? 'tcp_data' : 'uptime_data'}
+          </span>
+          <DateRangeFilter 
+            onRangeChange={onDateRangeChange} 
+            selectedOption={selectedDateOption} 
+          />
+        </div>
       </div>
       
       {!hasUptimeData && (
