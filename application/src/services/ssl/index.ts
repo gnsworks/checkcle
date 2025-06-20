@@ -13,7 +13,8 @@ export {
   addSSLCertificate,
   checkAndUpdateCertificate,
   deleteSSLCertificate,
-  refreshAllCertificates
+  refreshAllCertificates,
+  triggerImmediateCheck
 } from './sslCertificateOperations';
 
 // SSL-specific notification service

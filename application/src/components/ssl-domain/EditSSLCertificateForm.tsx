@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,6 +18,7 @@ const formSchema = z.object({
   warning_threshold: z.coerce.number().min(1, "Warning threshold must be at least 1 day"),
   expiry_threshold: z.coerce.number().min(1, "Expiry threshold must be at least 1 day"),
   notification_channel: z.string().min(1, "Notification channel is required"),
+  check_interval: z.coerce.number().int().min(1).max(30).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -40,6 +42,7 @@ export const EditSSLCertificateForm = ({ certificate, onSubmit, onCancel, isPend
       warning_threshold: certificate.warning_threshold,
       expiry_threshold: certificate.expiry_threshold,
       notification_channel: certificate.notification_channel,
+      check_interval: certificate.check_interval || 1,
     },
   });
 
@@ -78,7 +81,8 @@ export const EditSSLCertificateForm = ({ certificate, onSubmit, onCancel, isPend
       ...data,
       // Ensure values are correctly typed as numbers
       warning_threshold: Number(data.warning_threshold),
-      expiry_threshold: Number(data.expiry_threshold)
+      expiry_threshold: Number(data.expiry_threshold),
+      check_interval: data.check_interval ? Number(data.check_interval) : undefined
     };
     
     console.log("Submitting updated certificate:", updatedCertificate);
@@ -113,7 +117,7 @@ export const EditSSLCertificateForm = ({ certificate, onSubmit, onCancel, isPend
           )}
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="warning_threshold"
@@ -152,6 +156,29 @@ export const EditSSLCertificateForm = ({ certificate, onSubmit, onCancel, isPend
                 </FormControl>
                 <FormDescription>
                   {t('daysBeforeCritical')}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="check_interval"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Check Interval (Days)</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field}
+                    type="number"
+                    min="1"
+                    max="30"
+                    placeholder="1" 
+                  />
+                </FormControl>
+                <FormDescription>
+                  How often to check
                 </FormDescription>
                 <FormMessage />
               </FormItem>

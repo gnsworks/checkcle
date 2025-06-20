@@ -30,6 +30,7 @@ export const addSSLCertificate = async (
       warning_threshold: Number(certificateData.warning_threshold) || 30,
       expiry_threshold: Number(certificateData.expiry_threshold) || 7,
       notification_channel: certificateData.notification_channel || "",
+      check_interval: Number(certificateData.check_interval) || 1, // New field
     };
 
     // Save to database
@@ -67,6 +68,27 @@ export const checkAndUpdateCertificate = async (
     return typedCertificate;
   } catch (error) {
     console.error("Error updating SSL certificate:", error);
+    throw error;
+  }
+};
+
+/**
+ * Trigger immediate SSL check by setting check_at to current time
+ */
+export const triggerImmediateCheck = async (certificateId: string): Promise<void> => {
+  try {
+    const currentTime = new Date().toISOString();
+    
+    // Update the check_at field to current time to trigger immediate check by Go service
+    await pb.collection("ssl_certificates").update(certificateId, {
+      check_at: currentTime
+    });
+    
+    console.log(`Triggered immediate check for certificate ${certificateId} at ${currentTime}`);
+    toast.success("SSL check scheduled - certificate will be checked shortly");
+  } catch (error) {
+    console.error("Error triggering immediate SSL check:", error);
+    toast.error("Failed to schedule SSL check");
     throw error;
   }
 };

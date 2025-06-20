@@ -3,7 +3,9 @@
 import { 
   fetchSSLCertificates,
   addSSLCertificate,
-  checkAndUpdateCertificate
+  checkAndUpdateCertificate,
+  triggerImmediateCheck,
+  deleteSSLCertificate
 } from './ssl';
 
 import { determineSSLStatus } from './ssl/sslStatusUtils';
@@ -20,6 +22,8 @@ export {
   fetchSSLCertificates,
   addSSLCertificate,
   checkAndUpdateCertificate,
+  triggerImmediateCheck,
+  deleteSSLCertificate,
   checkAllCertificatesAndNotify,
   checkCertificateAndNotify,
   shouldRunDailyCheck
