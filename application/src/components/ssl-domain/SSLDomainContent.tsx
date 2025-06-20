@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -242,13 +243,7 @@ export const SSLDomainContent = () => {
         <SSLCertificateStatusCards certificates={certificates} />
         
         <div className="mt-6 flex-1 flex flex-col pb-6">
-          <SSLCertificatesTable 
-            certificates={certificates} 
-            onRefresh={handleRefreshCertificate}
-            refreshingId={refreshingId}
-            onEdit={handleEditCertificate}
-            onDelete={handleDeleteCertificate}
-          />
+          <SSLCertificatesTable />
         </div>
       </div>
 

@@ -68,7 +68,8 @@ export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseU
         
       const placeholderHistory: UptimeData[] = Array(20).fill(null).map((_, index) => ({
         id: `placeholder-${serviceId}-${index}`,
-        serviceId: serviceId || "",
+        service_id: serviceId || "", // Include service_id
+        serviceId: serviceId || "", // Keep for backward compatibility
         timestamp: new Date(Date.now() - (index * interval * 1000)).toISOString(),
         status: statusValue as "up" | "down" | "warning" | "paused",
         responseTime: 0
@@ -96,7 +97,8 @@ export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseU
         
         return {
           id: `padding-${serviceId}-${index}`,
-          serviceId: serviceId || "",
+          service_id: serviceId || "", // Include service_id
+          serviceId: serviceId || "", // Keep for backward compatibility
           timestamp: new Date(baseTime - timeOffset).toISOString(),
           status: lastStatus,
           responseTime: 0

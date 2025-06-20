@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +19,8 @@ const formSchema = z.object({
   domain: z.string().min(1, "Domain is required"),
   warning_threshold: z.coerce.number().int().min(1).max(365),
   expiry_threshold: z.coerce.number().int().min(1).max(30),
-  notification_channel: z.string().min(1, "Notification channel is required")
+  notification_channel: z.string().min(1, "Notification channel is required"),
+  check_interval: z.coerce.number().int().min(1).max(30).optional()
 });
 
 interface AddSSLCertificateFormProps {
@@ -42,7 +44,8 @@ export const AddSSLCertificateForm = ({
       domain: "",
       warning_threshold: 30,
       expiry_threshold: 7,
-      notification_channel: ""
+      notification_channel: "",
+      check_interval: 1
     }
   });
 
@@ -89,7 +92,8 @@ export const AddSSLCertificateForm = ({
         domain: values.domain,
         warning_threshold: values.warning_threshold,
         expiry_threshold: values.expiry_threshold,
-        notification_channel: values.notification_channel
+        notification_channel: values.notification_channel,
+        check_interval: values.check_interval
       };
       
       await onSubmit(certData);
@@ -117,34 +121,53 @@ export const AddSSLCertificateForm = ({
           )}
         />
         
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="warning_threshold"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('warningThreshold')}</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormDescription>
+                  {t('getNotifiedExpiration')}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="expiry_threshold"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('expiryThreshold')}</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormDescription>
+                  {t('getNotifiedCritical')}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
-          name="warning_threshold"
+          name="check_interval"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('warningThreshold')}</FormLabel>
+              <FormLabel>Check Interval (Days)</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input type="number" min="1" max="30" {...field} />
               </FormControl>
               <FormDescription>
-                {t('getNotifiedExpiration')}
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="expiry_threshold"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('expiryThreshold')}</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormDescription>
-                {t('getNotifiedCritical')}
+                How often to check the SSL certificate (in days)
               </FormDescription>
               <FormMessage />
             </FormItem>

@@ -1,4 +1,3 @@
-
 export interface SSLCertificate {
   id: string;
   domain: string;
@@ -19,7 +18,10 @@ export interface SSLCertificate {
   last_notified?: string;
   created?: string;
   updated?: string;
-  // New fields based on the provided structure
+  // New fields
+  check_interval?: number; // Check interval in days
+  check_at?: string; // Next check time
+  // Existing fields based on the provided structure
   collectionId?: string;
   collectionName?: string;
   resolved_ip?: string;
@@ -31,4 +33,5 @@ export interface AddSSLCertificateDto {
   warning_threshold: number;
   expiry_threshold: number;
   notification_channel: string;
+  check_interval?: number; // New field for check interval in days
 }

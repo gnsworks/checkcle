@@ -1,7 +1,6 @@
 
 import { pb } from "@/lib/pocketbase";
 import { SSLCertificate } from "../types";
-import { checkSSLCertificate } from "../sslCheckerService";
 import { determineSSLStatus } from "../sslStatusUtils";
 import { sendSSLNotification } from "./sslNotificationSender";
 import { toast } from "sonner";
@@ -35,20 +34,14 @@ export async function checkAllCertificatesAndNotify(): Promise<void> {
 /**
  * Checks a specific SSL certificate and sends notification if needed
  * This respects the Warning and Expiry Thresholds set on the certificate
+ * Note: SSL checking is now handled by the Go service, this function focuses on notifications
  */
 export async function checkCertificateAndNotify(certificate: SSLCertificate): Promise<boolean> {
   console.log(`Checking certificate for ${certificate.domain}...`);
   
   try {
-    // Get fresh SSL data
-    const sslData = await checkSSLCertificate(certificate.domain);
-    if (!sslData || !sslData.result) {
-      console.error(`Failed to check SSL for ${certificate.domain}`);
-      return false;
-    }
-    
-    // Extract days left from the check result
-    const daysLeft = sslData.result.days_left || 0;
+    // Use the current certificate data (updated by Go service)
+    const daysLeft = certificate.days_left || 0;
     
     // Get threshold values (ensure they are numbers)
     const warningThreshold = Number(certificate.warning_threshold) || 30;
@@ -76,21 +69,10 @@ export async function checkCertificateAndNotify(certificate: SSLCertificate): Pr
     
     console.log(`${certificate.domain}: ${daysLeft} days left, status: ${status}, should notify: ${shouldNotify}, critical: ${isCritical}`);
     
-    // Update certificate data in database
-    const updateData: Partial<SSLCertificate> = {
-      days_left: daysLeft,
-      status: status,
-      // Other fields from the SSL check that should be updated
-      issuer_o: sslData.result.issuer_o || certificate.issuer_o,
-      valid_from: sslData.result.valid_from || certificate.valid_from,
-      valid_till: sslData.result.valid_till || certificate.valid_till,
-      validity_days: sslData.result.validity_days || certificate.validity_days,
-      cert_sans: sslData.result.cert_sans,
-      cert_alg: sslData.result.cert_alg,
-      serial_number: sslData.result.cert_sn
-    };
-    
-    await pb.collection('ssl_certificates').update(certificate.id, updateData);
+    // Update certificate status in database
+    await pb.collection('ssl_certificates').update(certificate.id, {
+      status: status
+    });
     
     // Send notification if needed
     if (shouldNotify && certificate.notification_channel) {
@@ -133,36 +115,6 @@ export async function checkCertificateAndNotify(certificate: SSLCertificate): Pr
   } catch (error) {
     console.error(`Error checking certificate for ${certificate.domain}:`, error);
     toast.error(`Error checking certificate: ${error instanceof Error ? error.message : "Unknown error"}`);
-    return false;
-  }
-}
-
-/**
- * Manual trigger for certificate notification test
- * Useful for testing notification channels
- */
-export async function testCertificateNotification(certificate: SSLCertificate): Promise<boolean> {
-  try {
-    console.log(`Testing notification for ${certificate.domain}...`);
-    
-    // Create test message
-    const message = `🧪 TEST: SSL Certificate notification for ${certificate.domain}.`;
-    
-    // We set isCritical to false for test notifications
-    const notificationSent = await sendSSLNotification(certificate, message, false);
-    
-    if (notificationSent) {
-      console.log(`Test notification sent for ${certificate.domain}`);
-      toast.success(`Test notification sent for ${certificate.domain}`);
-      return true;
-    } else {
-      console.error(`Failed to send test notification for ${certificate.domain}`);
-      toast.error(`Failed to send test notification for ${certificate.domain}`);
-      return false;
-    }
-  } catch (error) {
-    console.error(`Error sending test notification for ${certificate.domain}:`, error);
-    toast.error(`Error sending test notification: ${error instanceof Error ? error.message : "Unknown error"}`);
     return false;
   }
 }

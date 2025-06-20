@@ -37,9 +37,30 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
         date: format(timestamp, 'MMM dd, yyyy'),
         value: data.status === "paused" ? null : data.responseTime,
         status: data.status,
+        // Separate values for different statuses with proper positioning
+        upValue: data.status === "up" ? data.responseTime : null,
+        downValue: data.status === "down" ? data.responseTime : null,
+        warningValue: data.status === "warning" ? data.responseTime : null,
       };
     });
   }, [uptimeData]);
+  
+  // Calculate Y-axis domain for better positioning
+  const yAxisDomain = useMemo(() => {
+    if (!chartData.length) return ['dataMin - 10', 'dataMax + 10'];
+    
+    const allValues = chartData
+      .filter(d => d.value !== null && d.status !== 'paused')
+      .map(d => d.value);
+    
+    if (allValues.length === 0) return [0, 100];
+    
+    const minValue = Math.min(...allValues);
+    const maxValue = Math.max(...allValues);
+    const padding = (maxValue - minValue) * 0.1 || 10;
+    
+    return [Math.max(0, minValue - padding), maxValue + padding];
+  }, [chartData]);
   
   // Create a custom tooltip for the chart
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -79,31 +100,6 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
     return null;
   };
 
-  // Compute status segments for different areas
-  const getStatusSegments = () => {
-    const segments = {
-      up: [] as any[],
-      down: [] as any[],
-      warning: [] as any[]
-    };
-    
-    chartData.forEach(point => {
-      if (point.status === "paused") return;
-      
-      if (point.status === "up") {
-        segments.up.push(point);
-      } else if (point.status === "down") {
-        segments.down.push(point);
-      } else if (point.status === "warning") {
-        segments.warning.push(point);
-      }
-    });
-    
-    return segments;
-  };
-  
-  const segments = getStatusSegments();
-  
   // Check if we have any data to display - be more lenient by checking raw uptimeData
   const hasData = uptimeData.length > 0;
   
@@ -172,46 +168,40 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
                 <YAxis 
                   stroke={theme === 'dark' ? '#666' : '#9ca3af'} 
                   allowDecimals={false}
-                  domain={['dataMin - 10', 'dataMax + 10']}
+                  domain={yAxisDomain}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Area charts for different statuses */}
-                {segments.up.length > 0 && (
-                  <Area 
-                    type="monotone" 
-                    dataKey="value" 
-                    data={segments.up}
-                    stroke="#10b981" 
-                    fillOpacity={1}
-                    fill="url(#colorUp)" 
-                    connectNulls
-                  />
-                )}
+                {/* Separate area charts for each status - positioned closer together */}
+                <Area 
+                  type="monotone" 
+                  dataKey="upValue"
+                  stroke="#10b981" 
+                  strokeWidth={2}
+                  fillOpacity={0.4}
+                  fill="url(#colorUp)" 
+                  connectNulls={false}
+                />
                 
-                {segments.down.length > 0 && (
-                  <Area 
-                    type="monotone" 
-                    dataKey="value" 
-                    data={segments.down}
-                    stroke="#ef4444" 
-                    fillOpacity={1}
-                    fill="url(#colorDown)" 
-                    connectNulls
-                  />
-                )}
+                <Area 
+                  type="monotone" 
+                  dataKey="downValue"
+                  stroke="#ef4444" 
+                  strokeWidth={2}
+                  fillOpacity={0.4}
+                  fill="url(#colorDown)" 
+                  connectNulls={false}
+                />
                 
-                {segments.warning.length > 0 && (
-                  <Area 
-                    type="monotone" 
-                    dataKey="value" 
-                    data={segments.warning}
-                    stroke="#f59e0b" 
-                    fillOpacity={1}
-                    fill="url(#colorWarning)" 
-                    connectNulls
-                  />
-                )}
+                <Area 
+                  type="monotone" 
+                  dataKey="warningValue"
+                  stroke="#f59e0b" 
+                  strokeWidth={2}
+                  fillOpacity={0.4}
+                  fill="url(#colorWarning)" 
+                  connectNulls={false}
+                />
                 
                 {/* Add reference lines for paused periods */}
                 {chartData.map((entry, index) => 

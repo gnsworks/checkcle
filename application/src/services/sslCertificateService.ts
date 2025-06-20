@@ -1,10 +1,11 @@
 
 // This file re-exports all SSL certificate related services for backward compatibility
 import { 
-  checkSSLCertificate,
   fetchSSLCertificates,
   addSSLCertificate,
-  checkAndUpdateCertificate
+  checkAndUpdateCertificate,
+  triggerImmediateCheck,
+  deleteSSLCertificate
 } from './ssl';
 
 import { determineSSLStatus } from './ssl/sslStatusUtils';
@@ -17,11 +18,12 @@ import {
 } from './ssl/notification';
 
 export {
-  checkSSLCertificate,
   determineSSLStatus,
   fetchSSLCertificates,
   addSSLCertificate,
   checkAndUpdateCertificate,
+  triggerImmediateCheck,
+  deleteSSLCertificate,
   checkAllCertificatesAndNotify,
   checkCertificateAndNotify,
   shouldRunDailyCheck

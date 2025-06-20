@@ -8,10 +8,10 @@ A Go-based microservice for service operations including ICMP ping, DNS resoluti
 - **ICMP Ping**: Full ping functionality with packet statistics
 - **DNS Resolution**: A, AAAA, MX, and TXT record lookups
 - **TCP Connectivity**: Port connectivity testing
+- **SSL Certificate**: SSL Certificate Check
 - REST API endpoints
 - Health check endpoint
 - Configurable via environment variables
-- Docker support
 - Comprehensive operation statistics
 
 ## API Endpoints
