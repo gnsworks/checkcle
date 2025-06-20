@@ -1,42 +1,32 @@
 
 import { pb } from "@/lib/pocketbase";
 import type { AddSSLCertificateDto, SSLCertificate } from "./types";
-import { checkSSLCertificate } from "./sslCheckerService";
 import { determineSSLStatus } from "./sslStatusUtils";
 import { checkCertificateAndNotify } from "./notification"; // Import notification service
 import { toast } from "sonner";
 
 /**
  * Add a new SSL certificate to monitor
+ * Note: SSL checking is now handled by the Go service
  */
 export const addSSLCertificate = async (
   certificateData: AddSSLCertificateDto
 ): Promise<SSLCertificate> => {
   try {
-    // First check if the SSL certificate is valid and can be fetched
-    const sslData = await checkSSLCertificate(certificateData.domain);
-
-    if (!sslData || !sslData.result) {
-      throw new Error(`Could not fetch SSL certificate for ${certificateData.domain}`);
-    }
-
     // Prepare the data for saving to database
+    // The Go service will handle the actual SSL checking
     const data = {
       domain: certificateData.domain,
-      issued_to: sslData.result.issued_to || certificateData.domain,
-      issuer_o: sslData.result.issuer_o || "",
-      status: determineSSLStatus(
-        sslData.result.days_left || 0, 
-        certificateData.warning_threshold,
-        certificateData.expiry_threshold
-      ),
-      cert_sans: sslData.result.cert_sans || "",
-      cert_alg: sslData.result.cert_alg || "",
-      serial_number: sslData.result.cert_sn || "",
-      valid_from: sslData.result.valid_from || new Date().toISOString(),
-      valid_till: sslData.result.valid_till || new Date().toISOString(),
-      validity_days: sslData.result.validity_days || 0,
-      days_left: sslData.result.days_left || 0,
+      issued_to: certificateData.domain, // Will be updated by Go service
+      issuer_o: "", // Will be updated by Go service
+      status: "pending", // Initial status
+      cert_sans: "",
+      cert_alg: "",
+      serial_number: "",
+      valid_from: new Date().toISOString(), // Will be updated by Go service
+      valid_till: new Date().toISOString(), // Will be updated by Go service
+      validity_days: 0, // Will be updated by Go service
+      days_left: 0, // Will be updated by Go service
       warning_threshold: Number(certificateData.warning_threshold) || 30,
       expiry_threshold: Number(certificateData.expiry_threshold) || 7,
       notification_channel: certificateData.notification_channel || "",
@@ -54,6 +44,7 @@ export const addSSLCertificate = async (
 
 /**
  * Check and update a specific SSL certificate
+ * Note: This now relies on the Go service for SSL data fetching
  */
 export const checkAndUpdateCertificate = async (
   certificateId: string
@@ -67,45 +58,13 @@ export const checkAndUpdateCertificate = async (
     }
 
     const typedCertificate = certificate as unknown as SSLCertificate;
-    const domain = typedCertificate.domain;
-
-    // Check SSL certificate
-    const sslData = await checkSSLCertificate(domain);
-
-    if (!sslData || !sslData.result) {
-      throw new Error(`Could not fetch SSL certificate for ${domain}`);
-    }
-
-    // Update certificate data
-    const updateData = {
-      issued_to: sslData.result.issued_to || domain,
-      issuer_o: sslData.result.issuer_o || typedCertificate.issuer_o,
-      status: determineSSLStatus(
-        sslData.result.days_left || 0, 
-        typedCertificate.warning_threshold,
-        typedCertificate.expiry_threshold
-      ),
-      cert_sans: sslData.result.cert_sans || typedCertificate.cert_sans,
-      cert_alg: sslData.result.cert_alg || typedCertificate.cert_alg,
-      serial_number: sslData.result.cert_sn || typedCertificate.serial_number,
-      valid_from: sslData.result.valid_from || typedCertificate.valid_from,
-      valid_till: sslData.result.valid_till || typedCertificate.valid_till,
-      validity_days: sslData.result.validity_days || typedCertificate.validity_days,
-      days_left: sslData.result.days_left || 0,
-    };
-
-    // Update in database
-    const updatedCert = await pb
-      .collection("ssl_certificates")
-      .update(certificateId, updateData);
     
-    const updatedCertificate = updatedCert as unknown as SSLCertificate;
+    // The Go service will handle the actual SSL checking and updating
+    // For now, we'll just trigger notifications based on current data
+    await checkCertificateAndNotify(typedCertificate);
     
-    // After updating, check if notification should be sent
-    // This will respect the Warning and Expiry Thresholds
-    await checkCertificateAndNotify(updatedCertificate);
-    
-    return updatedCertificate;
+    // Return the current certificate data
+    return typedCertificate;
   } catch (error) {
     console.error("Error updating SSL certificate:", error);
     throw error;
@@ -127,6 +86,7 @@ export const deleteSSLCertificate = async (id: string): Promise<boolean> => {
 
 /**
  * Refresh all SSL certificates
+ * Note: The Go service handles the actual SSL checking
  */
 export const refreshAllCertificates = async (): Promise<{ success: number; failed: number }> => {
   try {
@@ -140,7 +100,7 @@ export const refreshAllCertificates = async (): Promise<{ success: number; faile
 
     for (const cert of certificates) {
       try {
-        await checkAndUpdateCertificate(cert.id);
+        await checkCertificateAndNotify(cert);
         success++;
       } catch (error) {
         console.error(`Failed to refresh certificate ${cert.domain}:`, error);

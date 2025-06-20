@@ -1,7 +1,6 @@
 
 // This file re-exports all SSL certificate related services for backward compatibility
 import { 
-  checkSSLCertificate,
   fetchSSLCertificates,
   addSSLCertificate,
   checkAndUpdateCertificate
@@ -17,7 +16,6 @@ import {
 } from './ssl/notification';
 
 export {
-  checkSSLCertificate,
   determineSSLStatus,
   fetchSSLCertificates,
   addSSLCertificate,
