@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -33,6 +32,7 @@ import { SSLStatusBadge } from "./SSLStatusBadge";
 import { AddSSLCertificateForm } from "./AddSSLCertificateForm";
 import { EditSSLCertificateForm } from "./EditSSLCertificateForm";
 import { SSLCertificateActions } from "./SSLCertificateActions";
+import { SSLCertificateDetailDialog } from "./SSLCertificateDetailDialog";
 import { fetchSSLCertificates, addSSLCertificate, deleteSSLCertificate } from "@/services/sslCertificateService";
 import { pb } from "@/lib/pocketbase";
 import { SSLCertificate } from "@/types/ssl.types";
@@ -45,6 +45,7 @@ export const SSLCertificatesTable = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<SSLCertificate | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -111,6 +112,11 @@ export const SSLCertificatesTable = () => {
     }
   };
 
+  const openViewDialog = (certificate: SSLCertificate) => {
+    setSelectedCertificate(certificate);
+    setShowViewDialog(true);
+  };
+
   const openEditDialog = (certificate: SSLCertificate) => {
     setSelectedCertificate(certificate);
     setShowEditDialog(true);
@@ -168,6 +174,7 @@ export const SSLCertificatesTable = () => {
                   <TableCell>
                     <SSLCertificateActions
                       certificate={certificate}
+                      onView={openViewDialog}
                       onEdit={openEditDialog}
                       onDelete={openDeleteDialog}
                     />
@@ -184,6 +191,13 @@ export const SSLCertificatesTable = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* View Certificate Dialog */}
+      <SSLCertificateDetailDialog
+        certificate={selectedCertificate}
+        open={showViewDialog}
+        onOpenChange={setShowViewDialog}
+      />
 
       {/* Add Certificate Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>

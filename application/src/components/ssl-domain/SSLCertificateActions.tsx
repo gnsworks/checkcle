@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, RefreshCw, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, RefreshCw, Edit, Trash2, Eye } from "lucide-react";
 import { SSLCertificate } from "@/types/ssl.types";
 import { triggerImmediateCheck } from "@/services/sslCertificateService";
 import { toast } from "sonner";
@@ -15,12 +15,14 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SSLCertificateActionsProps {
   certificate: SSLCertificate;
+  onView: (certificate: SSLCertificate) => void;
   onEdit: (certificate: SSLCertificate) => void;
   onDelete: (certificate: SSLCertificate) => void;
 }
 
 export const SSLCertificateActions = ({ 
   certificate, 
+  onView,
   onEdit, 
   onDelete 
 }: SSLCertificateActionsProps) => {
@@ -43,6 +45,10 @@ export const SSLCertificateActions = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => onView(certificate)}>
+          <Eye className="mr-2 h-4 w-4" />
+          {t('view')}
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCheck}>
           <RefreshCw className="mr-2 h-4 w-4" />
           Check
