@@ -37,13 +37,30 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
         date: format(timestamp, 'MMM dd, yyyy'),
         value: data.status === "paused" ? null : data.responseTime,
         status: data.status,
-        // Separate values for different statuses with proper spacing
+        // Separate values for different statuses with proper positioning
         upValue: data.status === "up" ? data.responseTime : null,
         downValue: data.status === "down" ? data.responseTime : null,
         warningValue: data.status === "warning" ? data.responseTime : null,
       };
     });
   }, [uptimeData]);
+  
+  // Calculate Y-axis domain for better positioning
+  const yAxisDomain = useMemo(() => {
+    if (!chartData.length) return ['dataMin - 10', 'dataMax + 10'];
+    
+    const allValues = chartData
+      .filter(d => d.value !== null && d.status !== 'paused')
+      .map(d => d.value);
+    
+    if (allValues.length === 0) return [0, 100];
+    
+    const minValue = Math.min(...allValues);
+    const maxValue = Math.max(...allValues);
+    const padding = (maxValue - minValue) * 0.1 || 10;
+    
+    return [Math.max(0, minValue - padding), maxValue + padding];
+  }, [chartData]);
   
   // Create a custom tooltip for the chart
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -151,17 +168,27 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
                 <YAxis 
                   stroke={theme === 'dark' ? '#666' : '#9ca3af'} 
                   allowDecimals={false}
-                  domain={['dataMin - 10', 'dataMax + 10']}
+                  domain={yAxisDomain}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Separate area charts for each status - rendered in order so they don't overlap */}
+                {/* Separate area charts for each status - positioned closer together */}
+                <Area 
+                  type="monotone" 
+                  dataKey="upValue"
+                  stroke="#10b981" 
+                  strokeWidth={2}
+                  fillOpacity={0.4}
+                  fill="url(#colorUp)" 
+                  connectNulls={false}
+                />
+                
                 <Area 
                   type="monotone" 
                   dataKey="downValue"
                   stroke="#ef4444" 
                   strokeWidth={2}
-                  fillOpacity={0.3}
+                  fillOpacity={0.4}
                   fill="url(#colorDown)" 
                   connectNulls={false}
                 />
@@ -171,18 +198,8 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
                   dataKey="warningValue"
                   stroke="#f59e0b" 
                   strokeWidth={2}
-                  fillOpacity={0.3}
+                  fillOpacity={0.4}
                   fill="url(#colorWarning)" 
-                  connectNulls={false}
-                />
-                
-                <Area 
-                  type="monotone" 
-                  dataKey="upValue"
-                  stroke="#10b981" 
-                  strokeWidth={2}
-                  fillOpacity={0.3}
-                  fill="url(#colorUp)" 
                   connectNulls={false}
                 />
                 
