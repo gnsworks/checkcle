@@ -1,4 +1,3 @@
-
 package types
 
 import "time"
@@ -10,6 +9,7 @@ const (
 	OperationDNS  OperationType = "dns"
 	OperationTCP  OperationType = "tcp"
 	OperationHTTP OperationType = "http"
+	OperationSSL  OperationType = "ssl"
 )
 
 type OperationRequest struct {
@@ -55,6 +55,17 @@ type OperationResult struct {
 	HTTPHeaders    map[string]string `json:"http_headers,omitempty"`
 	ContentLength  int64        `json:"content_length,omitempty"`
 	ResponseBody   string       `json:"response_body,omitempty"`
+	
+	// SSL specific fields
+	SSLValidFrom     time.Time   `json:"ssl_valid_from,omitempty"`
+	SSLValidTill     time.Time   `json:"ssl_valid_till,omitempty"`
+	SSLDaysLeft      int         `json:"ssl_days_left,omitempty"`
+	SSLIssuer        string      `json:"ssl_issuer,omitempty"`
+	SSLSubject       string      `json:"ssl_subject,omitempty"`
+	SSLSerialNumber  string      `json:"ssl_serial_number,omitempty"`
+	SSLAlgorithm     string      `json:"ssl_algorithm,omitempty"`
+	SSLSANs          string      `json:"ssl_sans,omitempty"`
+	SSLResolvedIP    string      `json:"ssl_resolved_ip,omitempty"`
 	
 	StartTime   time.Time       `json:"start_time"`
 	EndTime     time.Time       `json:"end_time"`

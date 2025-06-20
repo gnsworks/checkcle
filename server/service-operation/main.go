@@ -21,6 +21,7 @@ func main() {
 	// Initialize PocketBase client (no credentials required)
 	var pbClient *pocketbase.PocketBaseClient
 	var monitoringService *monitoring.MonitoringService
+	var sslMonitoringService *monitoring.SSLMonitoringService
 	
 	if cfg.PocketBaseEnabled {
 		var err error
@@ -35,6 +36,11 @@ func main() {
 				monitoringService = monitoring.NewMonitoringService(pbClient)
 				go monitoringService.Start()
 				log.Println("Monitoring service started (public access mode)")
+				
+				// Initialize and start SSL monitoring service
+				sslMonitoringService = monitoring.NewSSLMonitoringService(pbClient)
+				go sslMonitoringService.Start()
+				log.Println("SSL monitoring service started")
 			}
 		}
 	}
@@ -63,13 +69,16 @@ func main() {
 	if monitoringService != nil {
 		log.Printf("Automatic service monitoring enabled")
 	}
+	if sslMonitoringService != nil {
+		log.Printf("SSL certificate monitoring enabled")
+	}
 	log.Printf("Endpoints:")
-	log.Printf("  POST /operation - Full operation test (ping, dns, tcp, http)")
+	log.Printf("  POST /operation - Full operation test (ping, dns, tcp, http, ssl)")
 	log.Printf("  GET  /operation/quick?type=<type>&host=<host> - Quick operation test")
 	log.Printf("  POST /ping - Legacy ping endpoint")
 	log.Printf("  GET  /ping/quick?host=<host> - Legacy quick ping test")
 	log.Printf("  GET  /health - Health check")
-	log.Printf("Supported operations: ping, dns, tcp, http")
+	log.Printf("Supported operations: ping, dns, tcp, http, ssl")
 
 	// Setup graceful shutdown
 	c := make(chan os.Signal, 1)
@@ -77,9 +86,12 @@ func main() {
 	
 	go func() {
 		<-c
-		log.Println("Shutting down monitoring service...")
+		log.Println("Shutting down monitoring services...")
 		if monitoringService != nil {
 			monitoringService.Stop()
+		}
+		if sslMonitoringService != nil {
+			sslMonitoringService.Stop()
 		}
 		log.Println("Service stopped")
 		os.Exit(0)

@@ -21,7 +21,7 @@ type Config struct {
 
 func Load() *Config {
 	cfg := &Config{
-		Port:           getEnv("PORT", "8091"),
+		Port:           getEnv("PORT", "8092"),
 		DefaultCount:   getEnvInt("DEFAULT_COUNT", 4),
 		DefaultTimeout: getEnvDuration("DEFAULT_TIMEOUT", 3*time.Second),
 		MaxCount:       getEnvInt("MAX_COUNT", 20),

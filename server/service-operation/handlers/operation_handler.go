@@ -79,6 +79,10 @@ func (h *OperationHandler) HandleOperation(w http.ResponseWriter, r *http.Reques
 		}
 		result, err = httpOp.Execute(url, method)
 		
+	case types.OperationSSL:
+		sslOp := operations.NewSSLOperation(timeout)
+		result, err = sslOp.Execute(req.Host)
+		
 	default:
 		http.Error(w, "Invalid operation type", http.StatusBadRequest)
 		return
