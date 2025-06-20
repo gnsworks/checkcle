@@ -37,6 +37,7 @@ export async function resumeMonitoring(serviceId: string): Promise<void> {
       id: service.id,
       name: service.name,
       url: service.url || "",
+      host: service.host || "", // Include host property
       type: service.service_type || service.type || "HTTP",
       status: "up",
       responseTime: service.response_time || 0,

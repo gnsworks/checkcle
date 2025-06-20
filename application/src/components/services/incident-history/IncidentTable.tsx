@@ -25,6 +25,8 @@ export function IncidentTable({ incidents }: IncidentTableProps) {
           <TableHead className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>{t("time")}</TableHead>
           <TableHead className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>{t("status")}</TableHead>
           <TableHead className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>{t("responseTime")}</TableHead>
+          <TableHead className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>Error Message</TableHead>
+          <TableHead className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>Details</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -51,6 +53,24 @@ export function IncidentTable({ incidents }: IncidentTableProps) {
                 {check.status !== "paused" && check.responseTime > 0 
                   ? `${check.responseTime}ms` 
                   : "N/A"}
+              </TableCell>
+              <TableCell className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} max-w-[200px]`}>
+                {check.error_message ? (
+                  <div className="truncate" title={check.error_message}>
+                    {check.error_message}
+                  </div>
+                ) : (
+                  <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>-</span>
+                )}
+              </TableCell>
+              <TableCell className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} max-w-[250px]`}>
+                {check.details ? (
+                  <div className="truncate" title={check.details}>
+                    {check.details}
+                  </div>
+                ) : (
+                  <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>-</span>
+                )}
               </TableCell>
             </TableRow>
           );

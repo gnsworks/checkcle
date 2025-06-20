@@ -55,7 +55,8 @@ export const useRealTimeUpdates = ({
             setUptimeData(prev => {
               const newData: UptimeData = {
                 id: e.record.id,
-                serviceId: e.record.service_id,
+                service_id: e.record.service_id, // Include service_id
+                serviceId: e.record.service_id, // Keep for backward compatibility
                 timestamp: e.record.timestamp,
                 status: e.record.status,
                 responseTime: e.record.response_time || 0,

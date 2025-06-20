@@ -31,22 +31,23 @@ const getCollectionForServiceType = (serviceType: string): string => {
 export const uptimeService = {
   async recordUptimeData(data: UptimeData): Promise<void> {
     try {
-      console.log(`Recording uptime data for service ${data.serviceId}: Status ${data.status}, Response time: ${data.responseTime}ms`);
+      console.log(`Recording uptime data for service ${data.serviceId || data.service_id}: Status ${data.status}, Response time: ${data.responseTime}ms`);
       
       const options = {
         $autoCancel: false,
-        $cancelKey: `uptime_record_${data.serviceId}_${Date.now()}`
+        $cancelKey: `uptime_record_${data.serviceId || data.service_id}_${Date.now()}`
       };
       
       const record = await pb.collection('uptime_data').create({
-        service_id: data.serviceId,
+        service_id: data.service_id || data.serviceId,
         timestamp: data.timestamp,
         status: data.status,
         response_time: data.responseTime
       }, options);
       
       // Invalidate cache for this service
-      const keysToDelete = Array.from(uptimeCache.keys()).filter(key => key.includes(`uptime_${data.serviceId}`));
+      const serviceId = data.service_id || data.serviceId;
+      const keysToDelete = Array.from(uptimeCache.keys()).filter(key => key.includes(`uptime_${serviceId}`));
       keysToDelete.forEach(key => uptimeCache.delete(key));
       
       console.log(`Uptime data recorded successfully with ID: ${record.id}`);
@@ -116,12 +117,15 @@ export const uptimeService = {
       // Transform the response items to UptimeData format
       const uptimeData = response.items.map(item => ({
         id: item.id,
-        serviceId: item.service_id,
+        service_id: item.service_id, // Include service_id
+        serviceId: item.service_id, // Keep for backward compatibility
         timestamp: item.timestamp,
         status: item.status as "up" | "down" | "warning" | "paused",
         responseTime: item.response_time || 0,
         date: item.timestamp,
-        uptime: 100
+        uptime: 100,
+        error_message: item.error_message,
+        details: item.details
       }));
       
       // Cache the result

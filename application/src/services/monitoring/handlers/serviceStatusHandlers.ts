@@ -13,7 +13,8 @@ export async function handleServiceUp(service: any, responseTime: number, format
   
   // Create a history record of this check with a more accurate timestamp
   const uptimeData: UptimeData = {
-    serviceId: service.id,
+    service_id: service.id, // Include service_id
+    serviceId: service.id, // Keep for backward compatibility
     timestamp: new Date().toISOString(),
     status: "up",
     responseTime: responseTime,
@@ -92,7 +93,8 @@ export async function handleServiceDown(service: any, formattedTime: string): Pr
   
   // Create a history record of this check
   const uptimeData: UptimeData = {
-    serviceId: service.id,
+    service_id: service.id, // Include service_id
+    serviceId: service.id, // Keep for backward compatibility
     timestamp: new Date().toISOString(),
     status: "down",
     responseTime: 0,

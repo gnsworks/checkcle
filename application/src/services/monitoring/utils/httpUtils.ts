@@ -19,6 +19,7 @@ export function prepareServiceForNotification(pbRecord: any, status: string, res
     id: pbRecord.id,
     name: pbRecord.name,
     url: pbRecord.url,
+    host: pbRecord.host || "", // Include host property with fallback
     type: pbRecord.type || pbRecord.service_type || "HTTP",
     status: status as any,
     responseTime: responseTime,
