@@ -6,7 +6,7 @@ export interface MenuTranslations {
   scheduleIncident: string;
   operationalPage: string;
   reports: string;
-  apiDocumentation: string;
+  regionalMonitoring: string;
   settingPanel: string;
   generalSettings: string;
   userManagement: string;

@@ -1,5 +1,4 @@
-
-import { Globe, Boxes, Radar, Calendar, BarChart2, LineChart, FileText, Settings, User, Bell, Database, Info, BookOpen } from "lucide-react";
+import { Globe, Boxes, Radar, Calendar, BarChart2, LineChart, MapPin, Settings, User, Bell, Database, Info, BookOpen } from "lucide-react";
 
 export const mainMenuItems = [
   {
@@ -51,12 +50,12 @@ export const mainMenuItems = [
     hasNavigation: false
   },
   {
-    id: 'api-documentation',
-    path: null,
-    icon: FileText,
-    translationKey: 'apiDocumentation',
+    id: 'regional-monitoring',
+    path: '/regional-monitoring',
+    icon: MapPin,
+    translationKey: 'regionalMonitoring',
     color: 'text-indigo-400',
-    hasNavigation: false
+    hasNavigation: true
   }
 ];
 
