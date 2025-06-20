@@ -130,13 +130,6 @@ export const SSLCertificatesTable = () => {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle>{t('sslCertificates')}</CardTitle>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t('addCertificate')}
-          </Button>
-        </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
