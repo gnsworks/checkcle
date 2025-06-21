@@ -17,6 +17,9 @@ interface RegionalAgentCardProps {
 export const RegionalAgentCard: React.FC<RegionalAgentCardProps> = ({ agent, onDelete }) => {
   const { toast } = useToast();
 
+  // Check if this is the default agent that cannot be removed
+  const isDefaultAgent = agent.agent_id === "1" || agent.region_name === "Default";
+
   const copyAgentId = async () => {
     try {
       await navigator.clipboard.writeText(agent.agent_id);
@@ -60,7 +63,14 @@ export const RegionalAgentCard: React.FC<RegionalAgentCardProps> = ({ agent, onD
           <div className="flex items-center space-x-2">
             <MapPin className="h-5 w-5 text-blue-600" />
             <div>
-              <CardTitle className="text-lg">{agent.region_name}</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                {agent.region_name}
+                {isDefaultAgent && (
+                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                    Default
+                  </Badge>
+                )}
+              </CardTitle>
               <CardDescription className="flex items-center gap-1 text-sm">
                 {agent.agent_ip_address}
               </CardDescription>
@@ -78,10 +88,12 @@ export const RegionalAgentCard: React.FC<RegionalAgentCardProps> = ({ agent, onD
                 <Copy className="mr-2 h-4 w-4" />
                 Copy Agent ID
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDelete} className="text-red-600">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Remove Agent
-              </DropdownMenuItem>
+              {!isDefaultAgent && (
+                <DropdownMenuItem onClick={onDelete} className="text-red-600">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Remove Agent
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
