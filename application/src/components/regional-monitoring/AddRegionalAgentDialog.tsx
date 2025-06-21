@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -54,19 +53,69 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
     }
   };
 
-  const copyToClipboard = async (text: string) => {
+  const copyToClipboard = async (text: string, description: string = "Content") => {
     try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        title: "Copied!",
-        description: "Installation script copied to clipboard.",
-      });
+      // Try the modern clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        toast({
+          title: "Copied!",
+          description: `${description} copied to clipboard.`,
+        });
+        return;
+      }
+      
+      // Fallback for older browsers or non-secure contexts (like localhost)
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        toast({
+          title: "Copied!",
+          description: `${description} copied to clipboard.`,
+        });
+      } else {
+        throw new Error('execCommand failed');
+      }
     } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      
+      // Show the text in a modal or alert as final fallback
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      
+      let errorMessage = "Failed to copy to clipboard.";
+      if (isLocalhost) {
+        errorMessage += " This is common in local development. Please manually copy the text.";
+      } else if (userAgent.includes('chrome')) {
+        errorMessage += " Try using HTTPS or enable clipboard permissions.";
+      }
+      
       toast({
         title: "Copy failed",
-        description: "Failed to copy to clipboard.",
+        description: errorMessage,
         variant: "destructive",
       });
+      
+      // As a last resort, select the text for manual copying
+      try {
+        const textarea = document.querySelector('textarea[readonly]') as HTMLTextAreaElement;
+        if (textarea) {
+          textarea.select();
+          textarea.setSelectionRange(0, 99999); // For mobile devices
+        }
+      } catch (selectError) {
+        console.error('Failed to select text:', selectError);
+      }
     }
   };
 
@@ -87,16 +136,6 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
       title: "Downloaded!",
       description: "Installation script downloaded successfully.",
     });
-  };
-
-  const copyOneClickCommand = () => {
-    if (!installCommand) return;
-    
-    const oneClickCommand = `curl -fsSL -H "User-Agent: CheckCle-Installer" \\
-  "data:text/plain;base64,$(echo '${installCommand.bash_script}' | base64 -w 0)" \\
-  | sudo bash`;
-    
-    copyToClipboard(oneClickCommand);
   };
 
   const handleComplete = () => {
@@ -211,7 +250,7 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
                         <Textarea
                           readOnly
                           value={`# One-click installation command:
-curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent.sh | sudo bash -s -- \\
+curl -fsSL https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/scripts/install-regional-agent.sh | sudo bash -s -- \\
   --region-name="${regionName}" \\
   --agent-id="${installCommand.agent_id}" \\
   --agent-ip="${agentIp}" \\
@@ -223,7 +262,7 @@ curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent
                           size="sm"
                           variant="outline"
                           className="absolute top-2 right-2"
-                          onClick={() => copyToClipboard(`curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent.sh | sudo bash -s -- --region-name="${regionName}" --agent-id="${installCommand.agent_id}" --agent-ip="${agentIp}" --token="${installCommand.token}" --pocketbase-url="${installCommand.api_endpoint}"`)}
+                          onClick={() => copyToClipboard(`curl -fsSL https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/scripts/install-regional-agent.sh | sudo bash -s -- --region-name="${regionName}" --agent-id="${installCommand.agent_id}" --agent-ip="${agentIp}" --token="${installCommand.token}" --pocketbase-url="${installCommand.api_endpoint}"`, "Installation command")}
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -236,7 +275,7 @@ curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent
                         Download Complete Script
                       </Button>
                       <Button 
-                        onClick={() => copyToClipboard(installCommand.bash_script)} 
+                        onClick={() => copyToClipboard(installCommand.bash_script, "Installation script")} 
                         variant="outline" 
                         className="flex-1"
                       >
@@ -244,6 +283,16 @@ curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent
                         Copy Full Script
                       </Button>
                     </div>
+
+                    {/* Local development notice */}
+                    {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <p className="text-sm text-yellow-800">
+                          <strong>Local Development Notice:</strong> If clipboard copying fails, this is normal in local development. 
+                          You can use the "Download Complete Script" button instead or manually copy the text.
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -270,7 +319,7 @@ curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent
                             size="sm"
                             variant="ghost"
                             className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
-                            onClick={() => copyToClipboard(installCommand.agent_id)}
+                            onClick={() => copyToClipboard(installCommand.agent_id, "Agent ID")}
                           >
                             <Copy className="h-3 w-3" />
                           </Button>
@@ -314,7 +363,7 @@ curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent
                           size="sm"
                           variant="ghost"
                           className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
-                          onClick={() => copyToClipboard(installCommand.token)}
+                          onClick={() => copyToClipboard(installCommand.token, "Authentication token")}
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -346,7 +395,7 @@ curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent
                       <div className="border-l-4 border-blue-500 pl-4">
                         <p className="font-medium">Step 1: Download Package</p>
                         <code className="text-xs bg-muted p-2 rounded block mt-1">
-                          wget https://github.com/checkcle/distributed-regional-monitoring/releases/latest/download/distributed-regional-check-agent_1.0.0_amd64.deb
+                          wget https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/V1.0.0/distributed-regional-check-agent_1.0.0_amd64.deb
                         </code>
                       </div>
                       

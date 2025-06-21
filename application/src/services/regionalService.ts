@@ -105,7 +105,7 @@ AGENT_TOKEN="${token}"
 POCKETBASE_URL="${apiEndpoint}"
 
 # Base package information
-BASE_PACKAGE_URL="https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/v1.0.0"
+BASE_PACKAGE_URL="https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/V1.0.0"
 PACKAGE_VERSION="1.0.0"
 SERVICE_NAME="regional-check-agent"
 

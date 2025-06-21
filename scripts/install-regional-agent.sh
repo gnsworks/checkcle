@@ -179,22 +179,22 @@ echo ""
 echo "📥 Downloading Regional Monitoring Agent package for $PKG_ARCH..."
 cd "$TEMP_DIR"
 
-# Test if package exists first
+# Test if package exists first - Accept both 200 and 302 (redirect) as success
 echo "🔍 Checking package availability..."
 if command -v curl >/dev/null 2>&1; then
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -I "$PACKAGE_URL")
-    if [ "$HTTP_STATUS" != "200" ]; then
+    if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "302" ]; then
         echo "❌ Package not found at $PACKAGE_URL (HTTP $HTTP_STATUS)"
         echo "   Available packages should be:"
         echo "   - distributed-regional-check-agent_${PACKAGE_VERSION}_amd64.deb"
         echo "   - distributed-regional-check-agent_${PACKAGE_VERSION}_arm64.deb"
         echo ""
         echo "   Please check the GitHub releases page:"
-        echo "   https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/V1.0.0"
+        echo "   https://github.com/operacle/Distributed-Regional-Monitoring/releases"
         rm -rf "$TEMP_DIR"
         exit 1
     fi
-    echo "✅ Package found, proceeding with download..."
+    echo "✅ Package found (HTTP $HTTP_STATUS), proceeding with download..."
 fi
 
 # Try wget first, then curl as fallback
