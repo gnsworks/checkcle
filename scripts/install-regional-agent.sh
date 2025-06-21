@@ -13,7 +13,7 @@ AGENT_ID=""
 AGENT_IP_ADDRESS=""
 AGENT_TOKEN=""
 POCKETBASE_URL=""
-BASE_PACKAGE_URL="https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/v1.0.0"
+BASE_PACKAGE_URL="https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/V1.0.0"
 PACKAGE_VERSION="1.0.0"
 SERVICE_NAME="regional-check-agent"
 
@@ -190,7 +190,7 @@ if command -v curl >/dev/null 2>&1; then
         echo "   - distributed-regional-check-agent_${PACKAGE_VERSION}_arm64.deb"
         echo ""
         echo "   Please check the GitHub releases page:"
-        echo "   https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/v1.0.0"
+        echo "   https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/V1.0.0"
         rm -rf "$TEMP_DIR"
         exit 1
     fi
