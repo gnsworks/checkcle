@@ -68,7 +68,7 @@ export const regionalService = {
         token: token,
         agent_id: agentId,
         api_endpoint: pb.baseUrl,
-        bash_script: this.generateBashScript(token, agentId, pb.baseUrl, params.agent_ip_address)
+        bash_script: this.generateAutomaticInstallScript(token, agentId, pb.baseUrl, params.agent_ip_address, params.region_name)
       };
 
       return { service, installCommand };
@@ -87,112 +87,180 @@ export const regionalService = {
     }
   },
 
-  generateBashScript(token: string, agentId: string, apiEndpoint: string, agentIp: string): string {
+  generateAutomaticInstallScript(token: string, agentId: string, apiEndpoint: string, agentIp: string, regionName: string): string {
     return `#!/bin/bash
 
-# CheckCle - Regional Monitoring Agent Installation Script
+# CheckCle Regional Monitoring Agent - Automatic Installation Script
 # Generated on: $(date)
+# This script will automatically download, install, configure and start the regional monitoring agent
 
-echo "🚀 Installing CheckCle Regional Monitoring Agent..."
-echo "======================================================"
+echo "🚀 CheckCle Regional Monitoring Agent - Automatic Installation"
+echo "=============================================================="
+echo ""
 
-# Configuration
+# Configuration variables
+REGION_NAME="${regionName}"
 AGENT_ID="${agentId}"
-TOKEN="${token}"
-API_ENDPOINT="${apiEndpoint}"
-AGENT_IP="${agentIp}"
-INSTALL_DIR="/opt/checkcle-regional-agent"
-SERVICE_NAME="checkcle-regional-agent"
+AGENT_IP_ADDRESS="${agentIp}"
+AGENT_TOKEN="${token}"
+POCKETBASE_URL="${apiEndpoint}"
+
+# Package information
+PACKAGE_URL="https://github.com/operacle/distributed-regional-monitoring/releases/latest/download/distributed-regional-check-agent_1.0.0_amd64.deb"
+PACKAGE_NAME="distributed-regional-check-agent_1.0.0_amd64.deb"
+SERVICE_NAME="regional-check-agent"
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
    echo "❌ This script must be run as root (use sudo)" 
+   echo "   Usage: sudo bash install-regional-agent.sh"
    exit 1
 fi
 
-# Create installation directory
-echo "📁 Creating installation directory..."
-mkdir -p $INSTALL_DIR
-cd $INSTALL_DIR
+echo "📋 Installation Configuration:"
+echo "   Region Name: $REGION_NAME"
+echo "   Agent ID: $AGENT_ID"
+echo "   Agent IP: $AGENT_IP_ADDRESS"
+echo "   PocketBase URL: $POCKETBASE_URL"
+echo ""
 
-# Download the agent binary
-echo "📥 Downloading Regional Monitoring Agent..."
-wget -O regional-check-agent https://github.com/operacle/distributed-regional-monitoring/releases/latest/download/distributed-regional-check-agent-linux-amd64
+# Create temporary directory
+TEMP_DIR=$(mktemp -d)
+echo "📁 Created temporary directory: $TEMP_DIR"
 
-# Make it executable
-chmod +x regional-check-agent
+# Download the .deb package
+echo "📥 Downloading Regional Monitoring Agent package..."
+cd "$TEMP_DIR"
+if wget -q --show-progress "$PACKAGE_URL" -O "$PACKAGE_NAME"; then
+    echo "✅ Package downloaded successfully"
+else
+    echo "❌ Failed to download package from $PACKAGE_URL"
+    echo "   Please check your internet connection and try again"
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
 
-# Create configuration file
-echo "⚙️ Creating configuration file..."
-cat > config.yaml << EOF
-# CheckCle Regional Monitoring Agent Configuration
-agent:
-  id: "$AGENT_ID"
-  region: "$(curl -s ipinfo.io/region 2>/dev/null || echo 'Unknown')"
-  ip_address: "$AGENT_IP"
+# Install the package
+echo ""
+echo "📦 Installing Regional Monitoring Agent package..."
+if dpkg -i "$PACKAGE_NAME"; then
+    echo "✅ Package installed successfully"
+else
+    echo "⚠️  Package installation had issues, attempting to fix dependencies..."
+    if apt-get install -f -y; then
+        echo "✅ Dependencies fixed and package installed successfully"
+    else
+        echo "❌ Failed to install package and fix dependencies"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+fi
 
-api:
-  endpoint: "$API_ENDPOINT"
-  token: "$TOKEN"
-  collection: "regional_service"
+# Configure the agent
+echo ""
+echo "⚙️  Configuring Regional Monitoring Agent..."
 
-monitoring:
-  interval: 30s
-  timeout: 10s
-  max_retries: 3
+# Create the environment configuration file
+cat > /etc/regional-check-agent/regional-check-agent.env << EOF
+# Distributed Regional Check Agent Configuration
+# Auto-generated on $(date)
 
-logging:
-  level: "info"
-  file: "/var/log/checkcle-regional-agent.log"
+# Server Configuration
+PORT=8091
+
+# Operation defaults
+DEFAULT_COUNT=4
+DEFAULT_TIMEOUT=3s
+MAX_COUNT=20
+MAX_TIMEOUT=30s
+
+# Logging
+ENABLE_LOGGING=true
+
+# PocketBase integration
+POCKETBASE_ENABLED=true
+POCKETBASE_URL=$POCKETBASE_URL
+
+# Regional Agent Configuration - Auto-configured
+REGION_NAME=$REGION_NAME
+AGENT_ID=$AGENT_ID
+AGENT_IP_ADDRESS=$AGENT_IP_ADDRESS
+AGENT_TOKEN=$AGENT_TOKEN
+
+# Monitoring configuration
+CHECK_INTERVAL=30s
+MAX_RETRIES=3
+REQUEST_TIMEOUT=10s
 EOF
 
-# Create systemd service
-echo "🔧 Creating systemd service..."
-cat > /etc/systemd/system/$SERVICE_NAME.service << EOF
-[Unit]
-Description=CheckCle Regional Monitoring Agent
-After=network.target
-Wants=network.target
+echo "✅ Configuration file created at /etc/regional-check-agent/regional-check-agent.env"
 
-[Service]
-Type=simple
-User=root
-WorkingDirectory=$INSTALL_DIR
-ExecStart=$INSTALL_DIR/regional-check-agent --config=$INSTALL_DIR/config.yaml
-Restart=always
-RestartSec=10
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
+# Set proper permissions
+chown root:regional-check-agent /etc/regional-check-agent/regional-check-agent.env
+chmod 640 /etc/regional-check-agent/regional-check-agent.env
 
 # Enable and start the service
-echo "🎯 Enabling and starting the service..."
-systemctl daemon-reload
-systemctl enable $SERVICE_NAME
-systemctl start $SERVICE_NAME
+echo ""
+echo "🔧 Starting Regional Monitoring Agent service..."
 
-# Check status
-echo "✅ Installation completed!"
+# Reload systemd daemon
+systemctl daemon-reload
+
+# Enable the service for auto-start
+if systemctl enable $SERVICE_NAME; then
+    echo "✅ Service enabled for auto-start"
+else
+    echo "❌ Failed to enable service"
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
+# Start the service
+if systemctl start $SERVICE_NAME; then
+    echo "✅ Service started successfully"
+else
+    echo "❌ Failed to start service"
+    echo "   Check the configuration and try: sudo systemctl start $SERVICE_NAME"
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
+# Wait a moment for service to initialize
+sleep 3
+
+# Check service status
 echo ""
 echo "📊 Service Status:"
 systemctl status $SERVICE_NAME --no-pager -l
 
+# Test health endpoint
 echo ""
-echo "🔍 Quick Status Check:"
+echo "🩺 Testing agent health endpoint..."
+if curl -s -f http://localhost:8091/health > /dev/null; then
+    echo "✅ Agent health endpoint is responding"
+else
+    echo "⚠️  Agent health endpoint not responding yet (this is normal, may take a few moments)"
+fi
+
+# Cleanup
+rm -rf "$TEMP_DIR"
+echo ""
+echo "🎉 Regional Monitoring Agent Installation Complete!"
+echo ""
+echo "📋 Installation Summary:"
 echo "   Agent ID: $AGENT_ID"
-echo "   API Endpoint: $API_ENDPOINT"
-echo "   Log file: /var/log/checkcle-regional-agent.log"
+echo "   Region: $REGION_NAME"
+echo "   Status: $(systemctl is-active $SERVICE_NAME)"
+echo "   Health URL: http://localhost:8091/health"
+echo "   Service endpoint: http://localhost:8091/operation"
 echo ""
 echo "📝 Useful commands:"
-echo "   - Check status: systemctl status $SERVICE_NAME"
-echo "   - View logs: journalctl -u $SERVICE_NAME -f"
-echo "   - Restart: systemctl restart $SERVICE_NAME"
-echo "   - Stop: systemctl stop $SERVICE_NAME"
+echo "   Check status: sudo systemctl status $SERVICE_NAME"
+echo "   View logs: sudo journalctl -u $SERVICE_NAME -f"
+echo "   Restart: sudo systemctl restart $SERVICE_NAME"
+echo "   Stop: sudo systemctl stop $SERVICE_NAME"
 echo ""
-echo "🎉 Regional Monitoring Agent is now running!"
+echo "✨ The agent is now monitoring and reporting to your CheckCle dashboard!"
 `;
   }
 };

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Download, Terminal, CheckCircle } from "lucide-react";
+import { Copy, Download, Terminal, CheckCircle, Zap, Play } from "lucide-react";
 import { regionalService } from "@/services/regionalService";
 import { InstallCommand } from "@/types/regional.types";
 import { useToast } from "@/hooks/use-toast";
@@ -59,7 +59,7 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
       await navigator.clipboard.writeText(text);
       toast({
         title: "Copied!",
-        description: "Installation command copied to clipboard.",
+        description: "Installation script copied to clipboard.",
       });
     } catch (error) {
       toast({
@@ -89,6 +89,16 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
     });
   };
 
+  const copyOneClickCommand = () => {
+    if (!installCommand) return;
+    
+    const oneClickCommand = `curl -fsSL -H "User-Agent: CheckCle-Installer" \\
+  "data:text/plain;base64,$(echo '${installCommand.bash_script}' | base64 -w 0)" \\
+  | sudo bash`;
+    
+    copyToClipboard(oneClickCommand);
+  };
+
   const handleComplete = () => {
     onAgentAdded();
     setStep(1);
@@ -107,11 +117,11 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-auto">
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-auto">
         <DialogHeader>
           <DialogTitle>Add Regional Monitoring Agent</DialogTitle>
           <DialogDescription>
-            Configure a new regional monitoring agent to extend your monitoring coverage.
+            Deploy a regional monitoring agent with automatic one-click installation.
           </DialogDescription>
         </DialogHeader>
 
@@ -122,7 +132,7 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
                 <Label htmlFor="regionName">Region Name</Label>
                 <Input
                   id="regionName"
-                  placeholder="e.g., US East, Europe West, Asia Pacific"
+                  placeholder="e.g., us-east-1, europe-west-1, asia-pacific-1"
                   value={regionName}
                   onChange={(e) => setRegionName(e.target.value)}
                   required
@@ -133,7 +143,7 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
                 <Label htmlFor="agentIp">Agent Server IP Address</Label>
                 <Input
                   id="agentIp"
-                  placeholder="e.g., 192.168.1.100 or your-server.com"
+                  placeholder="e.g., 192.168.1.100 or your-server.example.com"
                   value={agentIp}
                   onChange={(e) => setAgentIp(e.target.value)}
                   required
@@ -146,7 +156,7 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Generate Installation"}
+                {isSubmitting ? "Generating..." : "Generate Installation"}
               </Button>
             </div>
           </form>
@@ -156,24 +166,94 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
           <div className="space-y-6">
             <div className="text-center space-y-2">
               <CheckCircle className="h-12 w-12 text-green-600 mx-auto" />
-              <h3 className="text-lg font-semibold">Agent Configuration Created!</h3>
+              <h3 className="text-lg font-semibold">Agent Configuration Ready!</h3>
               <p className="text-muted-foreground">
-                Use the installation script below to set up your regional monitoring agent.
+                One-click installation script generated with automatic configuration.
               </p>
             </div>
 
-            <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+            <Tabs defaultValue="oneclicK" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="oneclicK">One-Click Install</TabsTrigger>
                 <TabsTrigger value="details">Agent Details</TabsTrigger>
-                <TabsTrigger value="install">Installation</TabsTrigger>
+                <TabsTrigger value="manual">Manual Install</TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="oneclicK" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-yellow-500" />
+                      One-Click Automatic Installation
+                    </CardTitle>
+                    <CardDescription>
+                      Complete installation, configuration, and service startup in one command
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-green-800 font-medium mb-2">
+                        <Play className="h-4 w-4" />
+                        What this script does automatically:
+                      </div>
+                      <ul className="text-sm text-green-700 space-y-1 ml-6">
+                        <li>• Downloads the latest .deb package</li>
+                        <li>• Installs the regional monitoring agent</li>
+                        <li>• Creates configuration file with your settings</li>
+                        <li>• Starts and enables the service</li>
+                        <li>• Runs health checks</li>
+                      </ul>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Run this command on your target server:</Label>
+                      <div className="relative">
+                        <Textarea
+                          readOnly
+                          value={`# One-click installation command:
+curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent.sh | sudo bash -s -- \\
+  --region-name="${regionName}" \\
+  --agent-id="${installCommand.agent_id}" \\
+  --agent-ip="${agentIp}" \\
+  --token="${installCommand.token}" \\
+  --pocketbase-url="${installCommand.api_endpoint}"`}
+                          className="font-mono text-sm min-h-[120px] pr-12"
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="absolute top-2 right-2"
+                          onClick={() => copyToClipboard(`curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/regional-agent.sh | sudo bash -s -- --region-name="${regionName}" --agent-id="${installCommand.agent_id}" --agent-ip="${agentIp}" --token="${installCommand.token}" --pocketbase-url="${installCommand.api_endpoint}"`)}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button onClick={downloadScript} variant="outline" className="flex-1">
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Complete Script
+                      </Button>
+                      <Button 
+                        onClick={() => copyToClipboard(installCommand.bash_script)} 
+                        variant="outline" 
+                        className="flex-1"
+                      >
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copy Full Script
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
               
               <TabsContent value="details" className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Agent Information</CardTitle>
+                    <CardTitle>Generated Agent Configuration</CardTitle>
                     <CardDescription>
-                      Configuration details for your regional monitoring agent
+                      These values will be automatically configured during installation
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -197,7 +277,7 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
                         </div>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-foreground">Region</Label>
+                        <Label className="text-sm font-medium text-foreground">Region Name</Label>
                         <Input
                           value={regionName}
                           readOnly
@@ -240,65 +320,67 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
                         </Button>
                       </div>
                     </div>
+
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        <strong>Configuration file location:</strong> /etc/regional-check-agent/regional-check-agent.env
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
-              
-              <TabsContent value="install" className="space-y-4">
+
+              <TabsContent value="manual" className="space-y-4">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Terminal className="h-5 w-5" />
-                      One-Click Installation
+                      Manual Installation Steps
                     </CardTitle>
                     <CardDescription>
-                      Run this command on your target server to automatically install and configure the agent
+                      Step-by-step manual installation process
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Installation Command</Label>
-                      <div className="relative">
-                        <Textarea
-                          readOnly
-                          value={`curl -fsSL | sudo bash -s -- <<'EOF'\n${installCommand.bash_script}\nEOF`}
-                          className="font-mono text-sm min-h-[100px]"
-                        />
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="absolute top-2 right-2"
-                          onClick={() => copyToClipboard(`curl -fsSL | sudo bash -s -- <<'EOF'\n${installCommand.bash_script}\nEOF`)}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
+                    <div className="text-sm space-y-4">
+                      <div className="border-l-4 border-blue-500 pl-4">
+                        <p className="font-medium">Step 1: Download Package</p>
+                        <code className="text-xs bg-muted p-2 rounded block mt-1">
+                          wget https://github.com/checkcle/distributed-regional-monitoring/releases/latest/download/distributed-regional-check-agent_1.0.0_amd64.deb
+                        </code>
                       </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button onClick={downloadScript} variant="outline" className="flex-1">
-                        <Download className="mr-2 h-4 w-4" />
-                        Download Script
-                      </Button>
-                      <Button 
-                        onClick={() => copyToClipboard(installCommand.bash_script)} 
-                        variant="outline" 
-                        className="flex-1"
-                      >
-                        <Copy className="mr-2 h-4 w-4" />
-                        Copy Script
-                      </Button>
-                    </div>
-                    
-                    <div className="text-sm text-muted-foreground space-y-2">
-                      <p className="font-medium">Installation Steps:</p>
-                      <ol className="list-decimal list-inside space-y-1">
-                        <li>Copy the installation command above</li>
-                        <li>SSH into your target server</li>
-                        <li>Run the command as root (with sudo)</li>
-                        <li>The agent will be automatically installed and started</li>
-                        <li>Check the agent status in the Regional Monitoring dashboard</li>
-                      </ol>
+                      
+                      <div className="border-l-4 border-blue-500 pl-4">
+                        <p className="font-medium">Step 2: Install Package</p>
+                        <code className="text-xs bg-muted p-2 rounded block mt-1">
+                          sudo dpkg -i distributed-regional-check-agent_1.0.0_amd64.deb<br/>
+                          sudo apt-get install -f
+                        </code>
+                      </div>
+                      
+                      <div className="border-l-4 border-blue-500 pl-4">
+                        <p className="font-medium">Step 3: Configure Agent</p>
+                        <code className="text-xs bg-muted p-2 rounded block mt-1">
+                          sudo nano /etc/regional-check-agent/regional-check-agent.env
+                        </code>
+                        <p className="text-xs text-muted-foreground mt-1">Add the configuration values shown in the Agent Details tab</p>
+                      </div>
+                      
+                      <div className="border-l-4 border-blue-500 pl-4">
+                        <p className="font-medium">Step 4: Start Service</p>
+                        <code className="text-xs bg-muted p-2 rounded block mt-1">
+                          sudo systemctl enable regional-check-agent<br/>
+                          sudo systemctl start regional-check-agent
+                        </code>
+                      </div>
+                      
+                      <div className="border-l-4 border-green-500 pl-4">
+                        <p className="font-medium">Step 5: Verify Installation</p>
+                        <code className="text-xs bg-muted p-2 rounded block mt-1">
+                          sudo systemctl status regional-check-agent<br/>
+                          curl http://localhost:8091/health
+                        </code>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -307,7 +389,7 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={resetDialog}>
-                Add Another
+                Add Another Agent
               </Button>
               <Button onClick={handleComplete}>
                 Complete Setup
