@@ -114,9 +114,10 @@ func (ms *MonitoringService) performCheck(service pocketbase.Service) {
 		log.Printf("Failed to update service status for %s: %v", latestService.Name, err)
 	}
 
-	// Save metrics data in ONE place to prevent duplicates
+	// Save metrics data with regional information
 	if result != nil {
-		metricsSaver := savers.NewMetricsSaver(ms.pbClient)
+		regionName, agentID := ms.GetRegionalInfo()
+		metricsSaver := savers.NewMetricsSaverWithRegion(ms.pbClient, regionName, agentID)
 		metricsSaver.SaveMetricsForService(*latestService, result)
 	}
 }

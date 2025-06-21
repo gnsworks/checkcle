@@ -8,7 +8,7 @@ export const menuTranslations: MenuTranslations = {
   scheduleIncident: "កាលវិភាគនិងឧបទ្ទវហេតុ",
   operationalPage: "ទំព័រប្រតិបត្តិការ",
   reports: "របាយការណ៍",
-  apiDocumentation: "ឯកសារ API",
+  regionalMonitoring: "ការត្រួតពិនិត្យតំបន់",
   settingPanel: "ផ្ទាំងការកំណត់",
   generalSettings: "ការកំណត់ទូទៅ",
   userManagement: "ការគ្រប់គ្រងអ្នកប្រើប្រាស់",

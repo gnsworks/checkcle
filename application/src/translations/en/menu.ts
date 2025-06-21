@@ -8,7 +8,7 @@ export const menuTranslations: MenuTranslations = {
   scheduleIncident: "Schedule & Incident",
   operationalPage: "Operational Page",
   reports: "Reports",
-  apiDocumentation: "API Documentation",
+  regionalMonitoring: "Regional Monitoring",
   settingPanel: "Setting Panel",
   generalSettings: "General Settings",
   userManagement: "User Management",

@@ -1,7 +1,7 @@
-
 package savers
 
 import (
+	"fmt"
 	"time"
 
 	"service-operation/pocketbase"
@@ -9,12 +9,24 @@ import (
 )
 
 type MetricsSaver struct {
-	pbClient *pocketbase.PocketBaseClient
+	pbClient    *pocketbase.PocketBaseClient
+	regionName  string
+	agentID     string
 }
 
 func NewMetricsSaver(pbClient *pocketbase.PocketBaseClient) *MetricsSaver {
 	return &MetricsSaver{
-		pbClient: pbClient,
+		pbClient:   pbClient,
+		regionName: "Default", // Default fallback
+		agentID:    "1",       // Default fallback
+	}
+}
+
+func NewMetricsSaverWithRegion(pbClient *pocketbase.PocketBaseClient, regionName, agentID string) *MetricsSaver {
+	return &MetricsSaver{
+		pbClient:   pbClient,
+		regionName: regionName,
+		agentID:    agentID,
 	}
 }
 
@@ -50,6 +62,8 @@ func (ms *MetricsSaver) SaveMetricsToPocketBase(result *types.OperationResult, s
 			ms.SaveDNSDataToPocketBase(result, serviceID)
 		case types.OperationTCP:
 			ms.SaveTCPDataToPocketBase(result, serviceID)
+		case types.OperationSSL:
+			ms.SaveSSLDataToPocketBase(result, serviceID)
 		}
 	}
 }
@@ -86,5 +100,46 @@ func (ms *MetricsSaver) SaveMetricsForService(service pocketbase.Service, result
 		ms.SaveUptimeDataToPocketBase(result, service.ID)
 	case "tcp":
 		ms.SaveTCPDataToPocketBase(result, service.ID)
+	case "ssl":
+		ms.SaveSSLDataToPocketBase(result, service.ID)
+	}
+}
+
+// SSL Data saver - remains unchanged (no regional fields)
+func (ms *MetricsSaver) SaveSSLDataToPocketBase(result *types.OperationResult, serviceID string) {
+	// Create SSL data record without regional fields
+	var details string
+	
+	if result.Success {
+		details = fmt.Sprintf("✅ SSL Certificate Valid - Expires in %d days", result.SSLDaysLeft)
+		details += fmt.Sprintf(" | Valid until: %s", result.SSLValidTill.Format("2006-01-02"))
+		
+		if result.SSLIssuer != "" {
+			details += fmt.Sprintf(" | Issuer: %s", result.SSLIssuer)
+		}
+	} else {
+		details = fmt.Sprintf("❌ SSL Certificate Issue - %s", GetShortErrorMessage(result.Error))
+	}
+
+	sslData := pocketbase.SSLDataRecord{
+		ServiceID:     serviceID,
+		Timestamp:     time.Now(),
+		ResponseTime:  result.ResponseTime.Milliseconds(),
+		Status:        GetStatusString(result.Success),
+		ValidFrom:     result.SSLValidFrom.Format(time.RFC3339),
+		ValidTill:     result.SSLValidTill.Format(time.RFC3339),
+		DaysLeft:      result.SSLDaysLeft,
+		Issuer:        result.SSLIssuer,
+		Subject:       result.SSLSubject,
+		SerialNumber:  result.SSLSerialNumber,
+		Algorithm:     result.SSLAlgorithm,
+		SANs:          result.SSLSANs,
+		ResolvedIP:    result.SSLResolvedIP,
+		ErrorMessage:  result.Error,
+		Details:       details,
+	}
+
+	if err := ms.pbClient.SaveSSLData(sslData); err != nil {
+		println("Failed to save SSL data to PocketBase:", err.Error())
 	}
 }

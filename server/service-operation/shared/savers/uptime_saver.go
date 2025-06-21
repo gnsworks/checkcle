@@ -57,8 +57,10 @@ func (ms *MetricsSaver) SaveUptimeDataToPocketBase(result *types.OperationResult
 		Keyword:      "", // Can be populated later if needed
 		ErrorMessage: result.Error,
 		Details:      details, // Short, clean message
-		Region:       "default", // You can make this configurable
-		RegionID:     "1",       // You can make this configurable
+		Region:       ms.regionName, // Legacy field
+		RegionID:     ms.agentID,    // Legacy field
+		RegionName:   ms.regionName, // Add regional fields
+		AgentID:      ms.agentID,
 	}
 
 	if err := ms.pbClient.SaveUptimeData(uptimeData); err != nil {

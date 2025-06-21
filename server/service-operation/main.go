@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -32,15 +31,15 @@ func main() {
 			if err := pbClient.TestConnection(); err != nil {
 				log.Printf("Warning: PocketBase connection test failed: %v", err)
 			} else {
-				// Initialize and start monitoring service
+				// Initialize and start monitoring service with regional support
 				monitoringService = monitoring.NewMonitoringService(pbClient)
 				go monitoringService.Start()
-				log.Println("Monitoring service started (public access mode)")
+				log.Println("Monitoring service started with regional agent support")
 				
-				// Initialize and start SSL monitoring service
+				// Initialize and start SSL monitoring service (unchanged - no regional support)
 				sslMonitoringService = monitoring.NewSSLMonitoringService(pbClient)
 				go sslMonitoringService.Start()
-				log.Println("SSL monitoring service started")
+				log.Println("SSL monitoring service started (independent of regional agents)")
 			}
 		}
 	}
@@ -67,10 +66,10 @@ func main() {
 		log.Printf("PocketBase integration enabled at %s (public access)", pbClient.GetBaseURL())
 	}
 	if monitoringService != nil {
-		log.Printf("Automatic service monitoring enabled")
+		log.Printf("Automatic service monitoring enabled with regional agent support")
 	}
 	if sslMonitoringService != nil {
-		log.Printf("SSL certificate monitoring enabled")
+		log.Printf("SSL certificate monitoring enabled (independent)")
 	}
 	log.Printf("Endpoints:")
 	log.Printf("  POST /operation - Full operation test (ping, dns, tcp, http, ssl)")
@@ -79,6 +78,7 @@ func main() {
 	log.Printf("  GET  /ping/quick?host=<host> - Legacy quick ping test")
 	log.Printf("  GET  /health - Health check")
 	log.Printf("Supported operations: ping, dns, tcp, http, ssl")
+	log.Printf("Regional monitoring: Tracks 'Default' region connection status")
 
 	// Setup graceful shutdown
 	c := make(chan os.Signal, 1)

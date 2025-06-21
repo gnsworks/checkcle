@@ -9,7 +9,7 @@ export const menuTranslations: MenuTranslations = {
   scheduleIncident: "Zeitplan & Vorfall",
   operationalPage: "Betriebsstatus-Seite",
   reports: "Berichte",
-  apiDocumentation: "API-Dokumentation",
+  regionalMonitoring: "Regional Monitoring",
   // Einstellungen-Panel
   settingPanel: "Einstellungsbereich",
   generalSettings: "Allgemeine Einstellungen",
