@@ -92,7 +92,7 @@ export const regionalService = {
 
 # CheckCle Regional Monitoring Agent - Automatic Installation Script
 # Generated on: $(date)
-# This script will automatically download, install, configure and start the regional monitoring agent
+# This script will automatically detect architecture, download, install, configure and start the regional monitoring agent
 
 echo "🚀 CheckCle Regional Monitoring Agent - Automatic Installation"
 echo "=============================================================="
@@ -105,9 +105,9 @@ AGENT_IP_ADDRESS="${agentIp}"
 AGENT_TOKEN="${token}"
 POCKETBASE_URL="${apiEndpoint}"
 
-# Package information
-PACKAGE_URL="https://github.com/operacle/distributed-regional-monitoring/releases/latest/download/distributed-regional-check-agent_1.0.0_amd64.deb"
-PACKAGE_NAME="distributed-regional-check-agent_1.0.0_amd64.deb"
+# Base package information
+BASE_PACKAGE_URL="https://github.com/operacle/Distributed-Regional-Monitoring/releases"
+PACKAGE_VERSION="1.0.0"
 SERVICE_NAME="regional-check-agent"
 
 # Check if running as root
@@ -117,11 +117,55 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# Detect operating system
+echo "🔍 Detecting system information..."
+OS_TYPE=$(uname -s | tr '[:upper:]' '[:lower:]')
+echo "   Operating System: $OS_TYPE"
+
+# Check if it's a supported OS
+if [[ "$OS_TYPE" != "linux" ]]; then
+    echo "❌ Unsupported operating system: $OS_TYPE"
+    echo "   This installer only supports Linux systems"
+    exit 1
+fi
+
+# Detect architecture
+ARCH=$(uname -m)
+echo "   Hardware Architecture: $ARCH"
+
+# Map architecture to package architecture
+case $ARCH in
+    x86_64|amd64)
+        PKG_ARCH="amd64"
+        ;;
+    aarch64|arm64)
+        PKG_ARCH="arm64"
+        ;;
+    armv7l|armv6l)
+        PKG_ARCH="arm64"
+        echo "⚠️  ARM 32-bit detected, using ARM64 package (may require compatibility layer)"
+        ;;
+    *)
+        echo "❌ Unsupported architecture: $ARCH"
+        echo "   Supported architectures: x86_64 (amd64), aarch64 (arm64)"
+        echo "   Please contact support for your architecture: $ARCH"
+        exit 1
+        ;;
+esac
+
+echo "   Package Architecture: $PKG_ARCH"
+
+# Construct package URLs and names
+PACKAGE_URL="$BASE_PACKAGE_URL/distributed-regional-check-agent_\${PACKAGE_VERSION}_\${PKG_ARCH}.deb"
+PACKAGE_NAME="distributed-regional-check-agent_\${PACKAGE_VERSION}_\${PKG_ARCH}.deb"
+
+echo ""
 echo "📋 Installation Configuration:"
 echo "   Region Name: $REGION_NAME"
 echo "   Agent ID: $AGENT_ID"
 echo "   Agent IP: $AGENT_IP_ADDRESS"
 echo "   PocketBase URL: $POCKETBASE_URL"
+echo "   Package URL: $PACKAGE_URL"
 echo ""
 
 # Create temporary directory
@@ -129,13 +173,27 @@ TEMP_DIR=$(mktemp -d)
 echo "📁 Created temporary directory: $TEMP_DIR"
 
 # Download the .deb package
-echo "📥 Downloading Regional Monitoring Agent package..."
+echo "📥 Downloading Regional Monitoring Agent package for $PKG_ARCH..."
 cd "$TEMP_DIR"
 if wget -q --show-progress "$PACKAGE_URL" -O "$PACKAGE_NAME"; then
     echo "✅ Package downloaded successfully"
 else
     echo "❌ Failed to download package from $PACKAGE_URL"
-    echo "   Please check your internet connection and try again"
+    echo "   Please check:"
+    echo "   - Internet connection"
+    echo "   - Package availability for $PKG_ARCH architecture"
+    echo "   - GitHub repository access"
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
+# Verify package integrity
+echo ""
+echo "🔍 Verifying package..."
+if dpkg-deb --info "$PACKAGE_NAME" > /dev/null 2>&1; then
+    echo "✅ Package verification successful"
+else
+    echo "❌ Package verification failed - corrupted download"
     rm -rf "$TEMP_DIR"
     exit 1
 fi
@@ -151,6 +209,10 @@ else
         echo "✅ Dependencies fixed and package installed successfully"
     else
         echo "❌ Failed to install package and fix dependencies"
+        echo "   This might be due to:"
+        echo "   - Missing system dependencies"
+        echo "   - Architecture compatibility issues"
+        echo "   - Insufficient disk space"
         rm -rf "$TEMP_DIR"
         exit 1
     fi
@@ -221,6 +283,7 @@ if systemctl start $SERVICE_NAME; then
 else
     echo "❌ Failed to start service"
     echo "   Check the configuration and try: sudo systemctl start $SERVICE_NAME"
+    echo "   View logs with: sudo journalctl -u $SERVICE_NAME -f"
     rm -rf "$TEMP_DIR"
     exit 1
 fi
@@ -250,6 +313,7 @@ echo ""
 echo "📋 Installation Summary:"
 echo "   Agent ID: $AGENT_ID"
 echo "   Region: $REGION_NAME"
+echo "   Architecture: $PKG_ARCH"
 echo "   Status: $(systemctl is-active $SERVICE_NAME)"
 echo "   Health URL: http://localhost:8091/health"
 echo "   Service endpoint: http://localhost:8091/operation"
