@@ -190,7 +190,7 @@ if command -v curl >/dev/null 2>&1; then
         echo "   - distributed-regional-check-agent_${PACKAGE_VERSION}_arm64.deb"
         echo ""
         echo "   Please check the GitHub releases page:"
-        echo "   https://github.com/operacle/Distributed-Regional-Monitoring/releases"
+        echo "   https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/v1.0.0"
         rm -rf "$TEMP_DIR"
         exit 1
     fi
