@@ -1,4 +1,3 @@
-
 import { pb } from '@/lib/pocketbase';
 import { RegionalService, CreateRegionalServiceParams, InstallCommand } from '@/types/regional.types';
 
@@ -106,7 +105,7 @@ AGENT_TOKEN="${token}"
 POCKETBASE_URL="${apiEndpoint}"
 
 # Base package information
-BASE_PACKAGE_URL="https://github.com/operacle/Distributed-Regional-Monitoring/releases"
+BASE_PACKAGE_URL="https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/v1.0.0"
 PACKAGE_VERSION="1.0.0"
 SERVICE_NAME="regional-check-agent"
 
@@ -175,14 +174,44 @@ echo "📁 Created temporary directory: $TEMP_DIR"
 # Download the .deb package
 echo "📥 Downloading Regional Monitoring Agent package for $PKG_ARCH..."
 cd "$TEMP_DIR"
-if wget -q --show-progress "$PACKAGE_URL" -O "$PACKAGE_NAME"; then
-    echo "✅ Package downloaded successfully"
-else
+
+# Test if package exists first
+echo "🔍 Checking package availability..."
+if command -v curl >/dev/null 2>&1; then
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -I "$PACKAGE_URL")
+    if [ "$HTTP_STATUS" != "200" ]; then
+        echo "❌ Package not found at $PACKAGE_URL (HTTP $HTTP_STATUS)"
+        echo "   Available packages should be:"
+        echo "   - distributed-regional-check-agent_\${PACKAGE_VERSION}_amd64.deb"
+        echo "   - distributed-regional-check-agent_\${PACKAGE_VERSION}_arm64.deb"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+    echo "✅ Package found, proceeding with download..."
+fi
+
+# Try wget first, then curl as fallback
+DOWNLOAD_SUCCESS=false
+
+if command -v wget >/dev/null 2>&1; then
+    if wget -q --show-progress --timeout=30 --tries=3 "$PACKAGE_URL" -O "$PACKAGE_NAME"; then
+        DOWNLOAD_SUCCESS=true
+        echo "✅ Package downloaded successfully using wget"
+    fi
+elif command -v curl >/dev/null 2>&1; then
+    if curl -L --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 2 -o "$PACKAGE_NAME" "$PACKAGE_URL"; then
+        DOWNLOAD_SUCCESS=true
+        echo "✅ Package downloaded successfully using curl"
+    fi
+fi
+
+if [ "$DOWNLOAD_SUCCESS" = false ]; then
     echo "❌ Failed to download package from $PACKAGE_URL"
     echo "   Please check:"
     echo "   - Internet connection"
     echo "   - Package availability for $PKG_ARCH architecture"
-    echo "   - GitHub repository access"
+    echo "   - GitHub repository access: https://github.com/operacle/Distributed-Regional-Monitoring/releases"
+    echo "   - Firewall/proxy settings"
     rm -rf "$TEMP_DIR"
     exit 1
 fi
@@ -222,6 +251,9 @@ fi
 echo ""
 echo "⚙️  Configuring Regional Monitoring Agent..."
 
+# Ensure configuration directory exists
+mkdir -p /etc/regional-check-agent
+
 # Create the environment configuration file
 cat > /etc/regional-check-agent/regional-check-agent.env << EOF
 # Distributed Regional Check Agent Configuration
@@ -232,7 +264,7 @@ PORT=8091
 
 # Operation defaults
 DEFAULT_COUNT=4
-DEFAULT_TIMEOUT=3s
+DEFAULT_TIMEOUT=10s
 MAX_COUNT=20
 MAX_TIMEOUT=30s
 
@@ -258,8 +290,14 @@ EOF
 echo "✅ Configuration file created at /etc/regional-check-agent/regional-check-agent.env"
 
 # Set proper permissions
-chown root:regional-check-agent /etc/regional-check-agent/regional-check-agent.env
-chmod 640 /etc/regional-check-agent/regional-check-agent.env
+if id "regional-check-agent" &>/dev/null; then
+    chown root:regional-check-agent /etc/regional-check-agent/regional-check-agent.env
+    chmod 640 /etc/regional-check-agent/regional-check-agent.env
+else
+    echo "⚠️  regional-check-agent user not found, using root permissions"
+    chown root:root /etc/regional-check-agent/regional-check-agent.env
+    chmod 600 /etc/regional-check-agent/regional-check-agent.env
+fi
 
 # Enable and start the service
 echo ""

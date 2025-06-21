@@ -3,7 +3,7 @@
 
 # CheckCle Regional Monitoring Agent - Universal Installation Script
 # This script automatically detects system architecture and installs the appropriate package
-# Usage: curl -fsSL https://github.com/operacle/checkcle/blob/main/scripts/install-regional-agent.sh | sudo bash -s -- [options]
+# Usage: curl -fsSL https://raw.githubusercontent.com/operacle/checkcle/main/scripts/install-regional-agent.sh | sudo bash -s -- [options]
 
 set -e
 
@@ -13,7 +13,7 @@ AGENT_ID=""
 AGENT_IP_ADDRESS=""
 AGENT_TOKEN=""
 POCKETBASE_URL=""
-BASE_PACKAGE_URL="https://github.com/operacle/Distributed-Regional-Monitoring/releases"
+BASE_PACKAGE_URL="https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/v1.0.0"
 PACKAGE_VERSION="1.0.0"
 SERVICE_NAME="regional-check-agent"
 
@@ -149,8 +149,8 @@ echo ""
 echo "🔧 Checking system requirements..."
 MISSING_TOOLS=()
 
-if ! command -v wget >/dev/null 2>&1; then
-    MISSING_TOOLS+=("wget")
+if ! command -v wget >/dev/null 2>&1 && ! command -v curl >/dev/null 2>&1; then
+    MISSING_TOOLS+=("wget or curl")
 fi
 
 if ! command -v dpkg >/dev/null 2>&1; then
@@ -164,7 +164,7 @@ fi
 if [ ${#MISSING_TOOLS[@]} -ne 0 ]; then
     echo "❌ Missing required tools: ${MISSING_TOOLS[*]}"
     echo "   Please install missing tools and try again"
-    echo "   On Debian/Ubuntu: sudo apt-get update && sudo apt-get install wget"
+    echo "   On Debian/Ubuntu: sudo apt-get update && sudo apt-get install wget curl"
     exit 1
 fi
 
@@ -179,15 +179,62 @@ echo ""
 echo "📥 Downloading Regional Monitoring Agent package for $PKG_ARCH..."
 cd "$TEMP_DIR"
 
-if wget -q --show-progress --timeout=30 --tries=3 "$PACKAGE_URL" -O "$PACKAGE_NAME"; then
-    echo "✅ Package downloaded successfully"
-else
+# Test if package exists first
+echo "🔍 Checking package availability..."
+if command -v curl >/dev/null 2>&1; then
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -I "$PACKAGE_URL")
+    if [ "$HTTP_STATUS" != "200" ]; then
+        echo "❌ Package not found at $PACKAGE_URL (HTTP $HTTP_STATUS)"
+        echo "   Available packages should be:"
+        echo "   - distributed-regional-check-agent_${PACKAGE_VERSION}_amd64.deb"
+        echo "   - distributed-regional-check-agent_${PACKAGE_VERSION}_arm64.deb"
+        echo ""
+        echo "   Please check the GitHub releases page:"
+        echo "   https://github.com/operacle/Distributed-Regional-Monitoring/releases"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+    echo "✅ Package found, proceeding with download..."
+fi
+
+# Try wget first, then curl as fallback
+DOWNLOAD_SUCCESS=false
+
+if command -v wget >/dev/null 2>&1; then
+    echo "📥 Downloading with wget..."
+    if wget -q --show-progress --timeout=30 --tries=3 "$PACKAGE_URL" -O "$PACKAGE_NAME"; then
+        DOWNLOAD_SUCCESS=true
+        echo "✅ Package downloaded successfully using wget"
+    fi
+fi
+
+if [ "$DOWNLOAD_SUCCESS" = false ] && command -v curl >/dev/null 2>&1; then
+    echo "📥 Downloading with curl..."
+    if curl -L --connect-timeout 30 --max-time 300 --retry 3 --retry-delay 2 -o "$PACKAGE_NAME" "$PACKAGE_URL" --progress-bar; then
+        DOWNLOAD_SUCCESS=true
+        echo "✅ Package downloaded successfully using curl"
+    fi
+fi
+
+if [ "$DOWNLOAD_SUCCESS" = false ]; then
     echo "❌ Failed to download package from $PACKAGE_URL"
     echo "   Please check:"
     echo "   - Internet connection"
     echo "   - Package availability for $PKG_ARCH architecture"
-    echo "   - GitHub repository access"
+    echo "   - GitHub repository access: https://github.com/operacle/Distributed-Regional-Monitoring/releases"
     echo "   - Firewall/proxy settings"
+    echo ""
+    echo "   Available packages should be:"
+    echo "   - distributed-regional-check-agent_${PACKAGE_VERSION}_amd64.deb"
+    echo "   - distributed-regional-check-agent_${PACKAGE_VERSION}_arm64.deb"
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
+# Verify download was successful
+if [ ! -f "$PACKAGE_NAME" ] || [ ! -s "$PACKAGE_NAME" ]; then
+    echo "❌ Downloaded package is empty or missing"
+    echo "   File size: $(ls -lh "$PACKAGE_NAME" 2>/dev/null | awk '{print $5}' || echo 'file not found')"
     rm -rf "$TEMP_DIR"
     exit 1
 fi
@@ -203,6 +250,8 @@ if dpkg-deb --info "$PACKAGE_NAME" > /dev/null 2>&1; then
     dpkg-deb --field "$PACKAGE_NAME" Package Version Architecture Description | head -4
 else
     echo "❌ Package verification failed - corrupted download"
+    echo "   File size: $(ls -lh "$PACKAGE_NAME" | awk '{print $5}')"
+    echo "   Try downloading manually from: $PACKAGE_URL"
     rm -rf "$TEMP_DIR"
     exit 1
 fi
@@ -227,7 +276,7 @@ else
         echo "   Manual resolution:"
         echo "   1. Run: sudo apt-get update"
         echo "   2. Run: sudo apt-get install -f"
-        echo "   3. Retry installation"
+        echo "   3. Retry installation: sudo dpkg -i $PACKAGE_NAME"
         rm -rf "$TEMP_DIR"
         exit 1
     fi
@@ -379,7 +428,7 @@ echo "🔧 Troubleshooting:"
 echo "   If the service fails to start:"
 echo "   1. Check logs: sudo journalctl -u $SERVICE_NAME -n 50"
 echo "   2. Verify config: cat /etc/regional-check-agent/regional-check-agent.env"
-echo "   3. Test connectivity: ping $POCKETBASE_URL"
+echo "   3. Test connectivity: ping $(echo $POCKETBASE_URL | sed 's|https\?://||' | sed 's|/.*||')"
 echo "   4. Check port availability: sudo netstat -tlnp | grep 8091"
 echo ""
 echo "✨ The agent is now monitoring and reporting to your CheckCle dashboard!"
