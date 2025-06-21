@@ -1,4 +1,3 @@
-
 package pocketbase
 
 import "time"
@@ -46,6 +45,8 @@ type PingDataRecord struct {
 	RTTs          string    `json:"rtts"`
 	Details       string    `json:"details,omitempty"`
 	ErrorMessage  string    `json:"error_message,omitempty"`
+	RegionName    string    `json:"region_name,omitempty"`
+	AgentID       string    `json:"agent_id,omitempty"`
 }
 
 type UptimeDataRecord struct {
@@ -61,6 +62,8 @@ type UptimeDataRecord struct {
 	Details       string    `json:"details"`
 	Region        string    `json:"region,omitempty"`
 	RegionID      string    `json:"region_id,omitempty"`
+	RegionName    string    `json:"region_name,omitempty"`
+	AgentID       string    `json:"agent_id,omitempty"`
 }
 
 type DNSDataRecord struct {
@@ -92,6 +95,46 @@ type TCPDataRecord struct {
 	Details      string    `json:"details,omitempty"`
 	RegionName   string    `json:"region_name,omitempty"`
 	AgentID      string    `json:"agent_id,omitempty"`
+}
+
+// SSL Data Record remains unchanged - no regional agent fields
+type SSLDataRecord struct {
+	ServiceID     string    `json:"service_id"`
+	Timestamp     time.Time `json:"timestamp"`
+	ResponseTime  int64     `json:"response_time"`
+	Status        string    `json:"status"`
+	ValidFrom     string    `json:"valid_from"`
+	ValidTill     string    `json:"valid_till"`
+	DaysLeft      int       `json:"days_left"`
+	Issuer        string    `json:"issuer"`
+	Subject       string    `json:"subject"`
+	SerialNumber  string    `json:"serial_number"`
+	Algorithm     string    `json:"algorithm"`
+	SANs          string    `json:"sans"`
+	ResolvedIP    string    `json:"resolved_ip"`
+	ErrorMessage  string    `json:"error_message,omitempty"`
+	Details       string    `json:"details,omitempty"`
+}
+
+// Regional Service record structure
+type RegionalService struct {
+	ID               string `json:"id"`
+	RegionName       string `json:"region_name"`
+	Status           string `json:"status"`
+	AgentID          string `json:"agent_id"`
+	AgentIPAddress   string `json:"agent_ip_address"`
+	Connection       string `json:"connection"`
+	Token            string `json:"token"`
+	Created          string `json:"created"`
+	Updated          string `json:"updated"`
+}
+
+type RegionalServicesResponse struct {
+	Page       int               `json:"page"`
+	PerPage    int               `json:"perPage"`
+	TotalItems int               `json:"totalItems"`
+	TotalPages int               `json:"totalPages"`
+	Items      []RegionalService `json:"items"`
 }
 
 type Service struct {

@@ -117,13 +117,6 @@ Environment variables:
 ```bash
 go run main.go
 ```
-
-### Docker
-```bash
-docker build -t service-operation .
-docker run -p 8080:8080 service-operation
-```
-
 ## Requirements
 
 - Go 1.21+

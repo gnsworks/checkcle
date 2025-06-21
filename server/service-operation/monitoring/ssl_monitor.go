@@ -77,7 +77,7 @@ func (s *SSLMonitoringService) shouldCheckCertificate(cert types.SSLCertificate)
 				return true
 			} else {
 				//log.Printf("Certificate %s scheduled for later check (check_at: %s)", 
-					//cert.Domain, checkAt.Format("2006-01-02 15:04:05"))
+				//	cert.Domain, checkAt.Format("2006-01-02 15:04:05"))
 				//return false
 			}
 		} else {

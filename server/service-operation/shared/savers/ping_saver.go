@@ -59,6 +59,8 @@ func (ms *MetricsSaver) SavePingDataToPocketBase(result *types.OperationResult, 
 		Latency:      fmt.Sprintf("%.2fms", float64(result.AvgRTT.Nanoseconds())/1000000),
 		ErrorMessage: result.Error,
 		Details:      details, // Short, clean message
+		RegionName:   ms.regionName, // Add regional fields
+		AgentID:      ms.agentID,
 	}
 
 	if err := ms.pbClient.SavePingData(pingData); err != nil {

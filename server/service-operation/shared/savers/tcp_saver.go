@@ -51,8 +51,8 @@ func (ms *MetricsSaver) SaveTCPDataToPocketBase(result *types.OperationResult, s
 		Port:         strconv.Itoa(result.Port),
 		ErrorMessage: result.Error,
 		Details:      details,
-		RegionName:   "default",
-		AgentID:      "1",
+		RegionName:   ms.regionName, // Add regional fields
+		AgentID:      ms.agentID,
 	}
 
 	if err := ms.pbClient.SaveTCPData(tcpData); err != nil {

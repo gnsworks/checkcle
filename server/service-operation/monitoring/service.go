@@ -1,4 +1,3 @@
-
 package monitoring
 
 import (
@@ -10,19 +9,21 @@ import (
 )
 
 type MonitoringService struct {
-	pbClient       *pocketbase.PocketBaseClient
-	activeServices map[string]*ServiceMonitor
-	mu             sync.RWMutex
-	stopChan       chan bool
-	isRunning      bool
+	pbClient        *pocketbase.PocketBaseClient
+	activeServices  map[string]*ServiceMonitor
+	regionalMonitor *RegionalMonitor
+	mu              sync.RWMutex
+	stopChan        chan bool
+	isRunning       bool
 }
 
 func NewMonitoringService(pbClient *pocketbase.PocketBaseClient) *MonitoringService {
 	return &MonitoringService{
-		pbClient:       pbClient,
-		activeServices: make(map[string]*ServiceMonitor),
-		stopChan:       make(chan bool),
-		isRunning:      false,
+		pbClient:        pbClient,
+		activeServices:  make(map[string]*ServiceMonitor),
+		regionalMonitor: NewRegionalMonitor(pbClient),
+		stopChan:        make(chan bool),
+		isRunning:       false,
 	}
 }
 
@@ -37,6 +38,9 @@ func (ms *MonitoringService) Start() {
 
 	ms.isRunning = true
 	log.Println("Starting monitoring service...")
+
+	// Start regional monitoring
+	ms.regionalMonitor.Start()
 
 	// Start monitoring all services from PocketBase
 	go ms.monitoringLoop()
@@ -53,12 +57,19 @@ func (ms *MonitoringService) Stop() {
 	log.Println("Stopping monitoring service...")
 	ms.isRunning = false
 	
+	// Stop regional monitoring
+	ms.regionalMonitor.Stop()
+	
 	// Stop all active monitors
 	for serviceID, monitor := range ms.activeServices {
 		ms.stopMonitor(serviceID, monitor)
 	}
 
 	ms.stopChan <- true
+}
+
+func (ms *MonitoringService) GetRegionalInfo() (string, string) {
+	return ms.regionalMonitor.GetRegionalInfo()
 }
 
 func (ms *MonitoringService) monitoringLoop() {

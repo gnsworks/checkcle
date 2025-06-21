@@ -59,8 +59,8 @@ func (ms *MetricsSaver) SaveDNSDataToPocketBase(result *types.OperationResult, s
 		Authority:    "", // Not available in current implementation
 		ErrorMessage: result.Error,
 		Details:      details, // Short, clean message
-		RegionName:   "default", // You can make this configurable
-		AgentID:      "1",       // You can make this configurable
+		RegionName:   ms.regionName, // Add regional fields
+		AgentID:      ms.agentID,
 	}
 
 	if err := ms.pbClient.SaveDNSData(dnsData); err != nil {
