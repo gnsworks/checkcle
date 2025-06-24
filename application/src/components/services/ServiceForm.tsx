@@ -12,6 +12,7 @@ import { ServiceNotificationFields } from "./add-service/ServiceNotificationFiel
 import { ServiceFormActions } from "./add-service/ServiceFormActions";
 import { serviceService } from "@/services/serviceService";
 import { Service } from "@/types/service.types";
+import { ServiceRegionalFields } from "./add-service/ServiceRegionalFields";
 
 interface ServiceFormProps {
   onSuccess: () => void;
@@ -43,6 +44,8 @@ export function ServiceForm({
       retries: "3",
       notificationChannel: "",
       alertTemplate: "",
+      regionalMonitoringEnabled: false,
+      regionalAgent: "",
     },
     mode: "onBlur",
   });
@@ -71,6 +74,11 @@ export function ServiceForm({
         urlValue = initialData.url || "";
       }
 
+      // Handle regional monitoring data - ensure proper assignment display
+      const regionalAgent = initialData.region_name && initialData.agent_id 
+        ? `${initialData.region_name}|${initialData.agent_id}` 
+        : "";
+
       // Reset the form with initial data values
       form.reset({
         name: initialData.name || "",
@@ -81,10 +89,20 @@ export function ServiceForm({
         retries: String(initialData.retries || 3),
         notificationChannel: initialData.notificationChannel === "none" ? "" : initialData.notificationChannel || "",
         alertTemplate: initialData.alertTemplate === "default" ? "" : initialData.alertTemplate || "",
+        regionalMonitoringEnabled: Boolean(initialData.regional_monitoring_enabled),
+        regionalAgent: regionalAgent,
       });
 
       // Log for debugging
-      console.log("Populating form with data:", { type: validType, url: urlValue, port: portValue });
+      console.log("Populating form with data:", { 
+        type: validType, 
+        url: urlValue, 
+        port: portValue, 
+        regionalAgent,
+        regionalMonitoringEnabled: Boolean(initialData.regional_monitoring_enabled),
+        region_name: initialData.region_name,
+        agent_id: initialData.agent_id
+      });
     }
   }, [initialData, isEdit, form]);
 
@@ -97,6 +115,17 @@ export function ServiceForm({
     try {
       console.log("Form data being submitted:", data); // Debug log for submitted data
       
+      // Parse regional agent selection
+      let regionName = "";
+      let agentId = "";
+      
+      // Only set region and agent if regional monitoring is enabled AND an agent is selected (not unassign)
+      if (data.regionalMonitoringEnabled && data.regionalAgent && data.regionalAgent !== "") {
+        const [parsedRegionName, parsedAgentId] = data.regionalAgent.split("|");
+        regionName = parsedRegionName || "";
+        agentId = parsedAgentId || "";
+      }
+      
       // Prepare service data with proper field mapping
       const serviceData = {
         name: data.name,
@@ -105,6 +134,10 @@ export function ServiceForm({
         retries: parseInt(data.retries),
         notificationChannel: data.notificationChannel === "none" ? "" : data.notificationChannel,
         alertTemplate: data.alertTemplate === "default" ? "" : data.alertTemplate,
+        regionalMonitoringEnabled: data.regionalMonitoringEnabled || false,
+        // Always set region_name and agent_id - empty strings when unassigned
+        regionName: regionName,
+        agentId: agentId,
         // Map the URL field to appropriate database field based on service type
         ...(data.type === "dns" 
           ? { domain: data.url, url: "", host: "", port: undefined }  // DNS: store in domain field
@@ -115,6 +148,8 @@ export function ServiceForm({
           : { url: data.url, domain: "", host: "", port: undefined }  // HTTP: store in url field
         )
       };
+
+      console.log("Service data being sent:", serviceData);
       
       if (isEdit && initialData) {
         // Update existing service
@@ -163,6 +198,11 @@ export function ServiceForm({
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Configuration</h3>
             <ServiceConfigFields form={form} />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Regional Monitoring</h3>
+            <ServiceRegionalFields form={form} />
           </div>
           
           <div className="space-y-4">

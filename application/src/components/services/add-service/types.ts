@@ -13,6 +13,9 @@ export const serviceSchema = z.object({
   retries: z.string(),
   notificationChannel: z.string().optional(),
   alertTemplate: z.string().optional(),
+  // Regional monitoring fields
+  regionalMonitoringEnabled: z.boolean().optional(),
+  regionalAgent: z.string().optional(),
 });
 
 export type ServiceFormData = z.infer<typeof serviceSchema>;

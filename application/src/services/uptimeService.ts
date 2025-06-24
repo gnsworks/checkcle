@@ -70,7 +70,7 @@ export const uptimeService = {
         return [];
       }
 
-      const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}_${serviceType || 'default'}`;
+      const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}_${serviceType || 'default'}_default`;
       
       // Check cache
       const cached = uptimeCache.get(cacheKey);
@@ -81,7 +81,7 @@ export const uptimeService = {
       
       // Determine the correct collection based on service type
       const collection = serviceType ? getCollectionForServiceType(serviceType) : 'uptime_data';
-      console.log(`Fetching uptime history for service ${serviceId} from collection ${collection}, limit: ${limit}`);
+      console.log(`Fetching default uptime history for service ${serviceId} from collection ${collection}, limit: ${limit}`);
       
       // Build filter to get records for specific service_id
       let filter = `service_id='${serviceId}'`;
@@ -102,11 +102,11 @@ export const uptimeService = {
         $cancelKey: `uptime_history_${serviceId}_${Date.now()}`
       };
       
-      console.log(`Filter query: ${filter} on collection: ${collection}`);
+      console.log(`Filter query for default data: ${filter} on collection: ${collection}`);
       
       const response = await pb.collection(collection).getList(1, limit, options);
       
-      console.log(`Fetched ${response.items.length} uptime records for service ${serviceId} from ${collection}`);
+      console.log(`Fetched ${response.items.length} records for service ${serviceId} from ${collection}`);
       
       if (response.items.length > 0) {
         console.log(`Date range in results: ${response.items[response.items.length - 1].timestamp} to ${response.items[0].timestamp}`);
@@ -117,8 +117,8 @@ export const uptimeService = {
       // Transform the response items to UptimeData format
       const uptimeData = response.items.map(item => ({
         id: item.id,
-        service_id: item.service_id, // Include service_id
-        serviceId: item.service_id, // Keep for backward compatibility
+        service_id: item.service_id,
+        serviceId: item.service_id,
         timestamp: item.timestamp,
         status: item.status as "up" | "down" | "warning" | "paused",
         responseTime: item.response_time || 0,
@@ -140,7 +140,7 @@ export const uptimeService = {
       console.error(`Error fetching uptime history for service ${serviceId}:`, error);
       
       // Try to return cached data as fallback
-      const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}_${serviceType || 'default'}`;
+      const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}_${serviceType || 'default'}_default`;
       const cached = uptimeCache.get(cacheKey);
       if (cached) {
         console.log(`Using expired cached data for service ${serviceId} due to fetch error`);
@@ -149,6 +149,82 @@ export const uptimeService = {
       
       // Return empty array instead of throwing to prevent UI crashes
       console.log(`Returning empty array for service ${serviceId} due to fetch error`);
+      return [];
+    }
+  },
+
+  async getUptimeHistoryByRegionalAgent(
+    serviceId: string, 
+    limit: number = 50, 
+    startDate?: Date, 
+    endDate?: Date, 
+    serviceType?: string,
+    regionName?: string,
+    agentId?: string
+  ): Promise<UptimeData[]> {
+    try {
+      if (!regionName || !agentId) {
+        console.log('No region name or agent ID provided for regional query');
+        return [];
+      }
+
+      const cacheKey = `uptime_${serviceId}_${limit}_${startDate?.toISOString() || ''}_${endDate?.toISOString() || ''}_${serviceType || 'default'}_${regionName}_${agentId}`;
+      
+      // Check cache
+      const cached = uptimeCache.get(cacheKey);
+      if (cached && (Date.now() - cached.timestamp) < cached.expiresIn) {
+        console.log(`Using cached regional uptime history for service ${serviceId}`);
+        return cached.data;
+      }
+
+      // Determine the correct collection based on service type
+      const collection = serviceType ? getCollectionForServiceType(serviceType) : 'uptime_data';
+      console.log(`Fetching regional uptime history from collection: ${collection} for service: ${serviceId}, region: ${regionName}, agent: ${agentId}`);
+
+      // Build filter for regional agent data
+      let filter = `service_id="${serviceId}" && region_name="${regionName}" && agent_id="${agentId}"`;
+
+      if (startDate && endDate) {
+        const startISO = startDate.toISOString();
+        const endISO = endDate.toISOString();
+        filter += ` && timestamp>="${startISO}" && timestamp<="${endISO}"`;
+      }
+
+      console.log(`Regional filter query: ${filter} on collection: ${collection}`);
+
+      const records = await pb.collection(collection).getList(1, limit, {
+        sort: '-timestamp',
+        filter: filter,
+        $autoCancel: false,
+        $cancelKey: `regional_uptime_history_${serviceId}_${Date.now()}`
+      });
+
+      console.log(`Retrieved ${records.items.length} regional uptime records from ${collection} for region ${regionName}, agent ${agentId}`);
+
+      const uptimeData = records.items.map(item => ({
+        id: item.id,
+        service_id: item.service_id,
+        serviceId: item.service_id,
+        timestamp: item.timestamp,
+        status: item.status as "up" | "down" | "paused" | "warning",
+        responseTime: item.response_time || item.responseTime || 0,
+        error_message: item.error_message,
+        details: item.details,
+        created: item.created,
+        updated: item.updated
+      }));
+
+      // Cache the result
+      uptimeCache.set(cacheKey, {
+        data: uptimeData,
+        timestamp: Date.now(),
+        expiresIn: CACHE_TTL
+      });
+
+      return uptimeData;
+    } catch (error) {
+      const collectionForError = serviceType ? getCollectionForServiceType(serviceType) : 'uptime_data';
+      console.error(`Error fetching regional uptime history from ${collectionForError}:`, error);
       return [];
     }
   }

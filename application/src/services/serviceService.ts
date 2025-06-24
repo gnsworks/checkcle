@@ -32,6 +32,10 @@ export const serviceService = {
         muteAlerts: item.alerts === "muted",  // Convert string to boolean for compatibility
         alerts: item.alerts || "unmuted",     // Store actual database field
         muteChangedAt: item.mute_changed_at,
+        // Regional monitoring fields
+        region_name: item.region_name || "",
+        agent_id: item.agent_id || "",
+        regional_monitoring_enabled: item.regional_monitoring_enabled || false,
       }));
     } catch (error) {
       console.error("Error fetching services:", error);
@@ -58,6 +62,10 @@ export const serviceService = {
         max_retries: params.retries,
         notification_id: params.notificationChannel,
         template_id: params.alertTemplate,
+        // Regional monitoring fields
+        regional_monitoring_enabled: params.regionalMonitoringEnabled || false,
+        region_name: params.regionName || "",
+        agent_id: params.agentId || "",
         // Conditionally add fields based on service type
         ...(serviceType === "dns" 
           ? { domain: params.domain, url: "", host: "", port: null }  // DNS: store in domain field
@@ -90,6 +98,9 @@ export const serviceService = {
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
         alertTemplate: record.template_id,
+        regional_monitoring_enabled: record.regional_monitoring_enabled || false,
+        region_name: record.region_name || "",
+        agent_id: record.agent_id || "",
       } as Service;
       
       // Immediately start monitoring for the new service
@@ -117,6 +128,10 @@ export const serviceService = {
         max_retries: params.retries,
         notification_id: params.notificationChannel || null,
         template_id: params.alertTemplate || null,
+        // Regional monitoring fields
+        regional_monitoring_enabled: params.regionalMonitoringEnabled || false,
+        region_name: params.regionName || "",
+        agent_id: params.agentId || "",
         // Conditionally update fields based on service type
         ...(serviceType === "dns" 
           ? { domain: params.domain, url: "", host: "", port: null }  // DNS: update domain field
@@ -156,6 +171,9 @@ export const serviceService = {
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
         alertTemplate: record.template_id,
+        regional_monitoring_enabled: record.regional_monitoring_enabled || false,
+        region_name: record.region_name || "",
+        agent_id: record.agent_id || "",
       } as Service;
       
       return updatedService;

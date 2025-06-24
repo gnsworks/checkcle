@@ -64,6 +64,7 @@ export const ServiceHistoryDialog = ({
         {selectedService && (
           <ServiceUptimeHistory 
             serviceId={selectedService.id} 
+            serviceType={selectedService.type}
             startDate={startDate}
             endDate={endDate}
           />

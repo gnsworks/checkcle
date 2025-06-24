@@ -250,7 +250,7 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
                         <Textarea
                           readOnly
                           value={`# One-click installation command:
-curl -fsSL https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/scripts/install-regional-agent.sh | sudo bash -s -- \\
+curl -fsSL https://raw.githubusercontent.com/checkcle/scripts/main/install.sh | sudo bash -s -- \\
   --region-name="${regionName}" \\
   --agent-id="${installCommand.agent_id}" \\
   --agent-ip="${agentIp}" \\
@@ -262,7 +262,7 @@ curl -fsSL https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/s
                           size="sm"
                           variant="outline"
                           className="absolute top-2 right-2"
-                          onClick={() => copyToClipboard(`curl -fsSL https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/scripts/install-regional-agent.sh | sudo bash -s -- --region-name="${regionName}" --agent-id="${installCommand.agent_id}" --agent-ip="${agentIp}" --token="${installCommand.token}" --pocketbase-url="${installCommand.api_endpoint}"`, "Installation command")}
+                          onClick={() => copyToClipboard(`curl -fsSL https://raw.githubusercontent.com/checkcle/scripts/main/install.sh | sudo bash -s -- --region-name="${regionName}" --agent-id="${installCommand.agent_id}" --agent-ip="${agentIp}" --token="${installCommand.token}" --pocketbase-url="${installCommand.api_endpoint}"`, "Installation command")}
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -395,7 +395,7 @@ curl -fsSL https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/s
                       <div className="border-l-4 border-blue-500 pl-4">
                         <p className="font-medium">Step 1: Download Package</p>
                         <code className="text-xs bg-muted p-2 rounded block mt-1">
-                          wget https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/V1.0.0/distributed-regional-check-agent_1.0.0_amd64.deb
+                          wget https://github.com/checkcle/distributed-regional-monitoring/releases/latest/download/distributed-regional-check-agent_1.0.0_amd64.deb
                         </code>
                       </div>
                       

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { uptimeService } from '@/services/uptimeService';
@@ -14,16 +13,28 @@ interface UseUptimeDataProps {
 export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseUptimeDataProps) => {
   const [historyItems, setHistoryItems] = useState<UptimeData[]>([]);
   
-  // Fetch real uptime history data if serviceId is provided
+  // Fetch real uptime history data if serviceId is provided - filtered for default monitoring with agent_id 1
   const { data: uptimeData, isLoading, error, isFetching, refetch } = useQuery({
     queryKey: ['uptimeHistory', serviceId, serviceType],
-    queryFn: () => {
+    queryFn: async () => {
       if (!serviceId) {
         console.log('No serviceId provided, skipping fetch');
-        return Promise.resolve([]);
+        return [];
       }
-      console.log(`Fetching uptime data for service ${serviceId} of type ${serviceType}`);
-      return uptimeService.getUptimeHistory(serviceId, 50, undefined, undefined, serviceType);
+      console.log(`Fetching uptime data for service ${serviceId} of type ${serviceType} - filtering for default monitoring with agent_id 1`);
+      
+      // Get raw uptime history data
+      const rawData = await uptimeService.getUptimeHistory(serviceId, 50, undefined, undefined, serviceType);
+      
+      // Filter for default monitoring records with agent_id 1 only
+      const filteredData = rawData.filter(record => {
+        // Keep records that either have no regional info (pure default) OR have agent_id 1
+        return (!record.region_name && !record.agent_id) || 
+               (record.agent_id === '1' || record.agent_id === 1);
+      });
+      
+      console.log(`Filtered ${rawData.length} records to ${filteredData.length} records for default monitoring with agent_id 1`);
+      return filteredData;
     },
     enabled: !!serviceId,
     refetchInterval: 30000,
@@ -37,7 +48,7 @@ export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseU
   const processUptimeData = (data: UptimeData[], intervalSeconds: number): UptimeData[] => {
     if (!data || data.length === 0) return [];
     
-    console.log(`Processing ${data.length} uptime records for service ${serviceId}`);
+    console.log(`Processing ${data.length} filtered uptime records for service ${serviceId}`);
     
     // Sort data by timestamp (newest first)
     const sortedData = [...data].sort((a, b) => 
@@ -47,7 +58,7 @@ export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseU
     // Take the most recent 20 records to ensure we have enough data
     const recentData = sortedData.slice(0, 20);
     
-    console.log(`Using ${recentData.length} most recent records`);
+    console.log(`Using ${recentData.length} most recent filtered records`);
     
     return recentData;
   };
@@ -55,12 +66,12 @@ export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseU
   // Update history items when data changes
   useEffect(() => {
     if (uptimeData && uptimeData.length > 0) {
-      console.log(`Received ${uptimeData.length} uptime records for service ${serviceId}`);
+      console.log(`Received ${uptimeData.length} filtered uptime records for service ${serviceId}`);
       const processedData = processUptimeData(uptimeData, interval);
       setHistoryItems(processedData);
     } else if (!serviceId || (uptimeData && uptimeData.length === 0)) {
       // Generate placeholder data when no real data is available
-      console.log(`No uptime data available for service ${serviceId}, generating placeholder`);
+      console.log(`No filtered uptime data available for service ${serviceId}, generating placeholder`);
       
       const statusValue = (status === "up" || status === "down" || status === "warning" || status === "paused") 
         ? status 
@@ -68,8 +79,8 @@ export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseU
         
       const placeholderHistory: UptimeData[] = Array(20).fill(null).map((_, index) => ({
         id: `placeholder-${serviceId}-${index}`,
-        service_id: serviceId || "", // Include service_id
-        serviceId: serviceId || "", // Keep for backward compatibility
+        service_id: serviceId || "",
+        serviceId: serviceId || "",
         timestamp: new Date(Date.now() - (index * interval * 1000)).toISOString(),
         status: statusValue as "up" | "down" | "warning" | "paused",
         responseTime: 0
@@ -97,8 +108,8 @@ export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseU
         
         return {
           id: `padding-${serviceId}-${index}`,
-          service_id: serviceId || "", // Include service_id
-          serviceId: serviceId || "", // Keep for backward compatibility
+          service_id: serviceId || "",
+          serviceId: serviceId || "",
           timestamp: new Date(baseTime - timeOffset).toISOString(),
           status: lastStatus,
           responseTime: 0
