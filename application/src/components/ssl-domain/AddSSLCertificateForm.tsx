@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +18,7 @@ const formSchema = z.object({
   domain: z.string().min(1, "Domain is required"),
   warning_threshold: z.coerce.number().int().min(1).max(365),
   expiry_threshold: z.coerce.number().int().min(1).max(30),
-  notification_channel: z.string().min(1, "Notification channel is required"),
+  notification_channel: z.string().optional(), // Make it optional to allow empty string for "None"
   check_interval: z.coerce.number().int().min(1).max(30).optional()
 });
 
@@ -44,7 +43,7 @@ export const AddSSLCertificateForm = ({
       domain: "",
       warning_threshold: 30,
       expiry_threshold: 7,
-      notification_channel: "",
+      notification_channel: "none",
       check_interval: 1
     }
   });
@@ -66,14 +65,6 @@ export const AddSSLCertificateForm = ({
           return config.enabled === true;
         });
         setAlertConfigs(enabledConfigs);
-        
-        // Set default if available, preferring Telegram channels
-        const telegramChannel = enabledConfigs.find(c => c.notification_type === "telegram");
-        const defaultChannel = telegramChannel || enabledConfigs[0];
-        
-        if (defaultChannel?.id) {
-          form.setValue("notification_channel", defaultChannel.id);
-        }
       } catch (error) {
         console.error("Error fetching notification channels:", error);
         toast.error(t('failedToLoadCertificates'));
@@ -92,7 +83,7 @@ export const AddSSLCertificateForm = ({
         domain: values.domain,
         warning_threshold: values.warning_threshold,
         expiry_threshold: values.expiry_threshold,
-        notification_channel: values.notification_channel,
+        notification_channel: values.notification_channel === "none" ? "" : (values.notification_channel || ""), // Convert "none" to empty string
         check_interval: values.check_interval
       };
       
@@ -180,13 +171,14 @@ export const AddSSLCertificateForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t('notificationChannel')}</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || "none"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder={t('chooseChannel')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
+                  <SelectItem value="none">{t('none')}</SelectItem>
                   {alertConfigs.length > 0 ? (
                     alertConfigs.map((config) => (
                       <SelectItem key={config.id} value={config.id || ""}>
@@ -196,13 +188,13 @@ export const AddSSLCertificateForm = ({
                   ) : isLoading ? (
                     <SelectItem value="loading" disabled>{t('loadingChannels')}</SelectItem>
                   ) : (
-                    <SelectItem value="none" disabled>{t('noChannelsFound')}</SelectItem>
+                    <SelectItem value="none-disabled" disabled>{t('noChannelsFound')}</SelectItem>
                   )}
                 </SelectContent>
               </Select>
               <FormDescription className="flex items-center gap-1">
                 <Bell className="h-4 w-4" /> 
-                {t('chooseChannel')}
+                {t('whereToSend')}
               </FormDescription>
               <FormMessage />
             </FormItem>

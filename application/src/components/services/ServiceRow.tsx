@@ -55,7 +55,7 @@ export const ServiceRow = ({
       <TableCell className="py-4">
         <ServiceRowResponseTime responseTime={service.responseTime} />
       </TableCell>
-      <TableCell className="w-52 py-4">
+      <TableCell className="w-60 py-4">
         <UptimeBar 
           uptime={service.uptime} 
           status={service.status} 

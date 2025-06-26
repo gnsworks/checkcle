@@ -1,4 +1,3 @@
-
 export interface Service {
   id: string;
   name: string;
@@ -32,6 +31,10 @@ export interface Service {
   headers?: string;
   body?: string;
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
+  // Regional monitoring fields
+  region_name?: string;
+  agent_id?: string;
+  regional_monitoring_enabled?: boolean;
 }
 
 export interface CreateServiceParams {
@@ -45,6 +48,10 @@ export interface CreateServiceParams {
   retries: number;
   notificationChannel?: string;
   alertTemplate?: string;
+  // Regional monitoring params
+  regionalMonitoringEnabled?: boolean;
+  regionName?: string;
+  agentId?: string;
 }
 
 export interface UptimeData {
@@ -60,6 +67,11 @@ export interface UptimeData {
   updated?: string;
   date?: string; // Keep for backward compatibility
   uptime?: number; // Keep for backward compatibility
+  // Regional monitoring fields
+  region_name?: string;
+  agent_id?: string | number;
+  // Source identifier for multi-source display
+  source?: string;
 }
 
 export interface PingData {

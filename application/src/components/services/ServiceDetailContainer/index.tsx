@@ -80,7 +80,9 @@ export const ServiceDetailContainer = () => {
     handleStatusChange,
     fetchUptimeData,
     setService,
-    setUptimeData
+    setUptimeData,
+    selectedRegionalAgent,
+    handleRegionalAgentChange
   } = useServiceData(id, startDate, endDate);
 
   // Set up real-time updates
@@ -104,9 +106,9 @@ export const ServiceDetailContainer = () => {
     // Also explicitly fetch data with the new range to ensure immediate update
     if (id) {
       console.log(`ServiceDetailContainer: Explicitly fetching data for service ${id} with new range`);
-      fetchUptimeData(id, start, end, option);
+      fetchUptimeData(id, start, end, option, selectedRegionalAgent);
     }
-  }, [id, fetchUptimeData]);
+  }, [id, fetchUptimeData, selectedRegionalAgent]);
 
   return (
     <ServiceDetailWrapper
@@ -124,6 +126,8 @@ export const ServiceDetailContainer = () => {
           onDateRangeChange={handleDateRangeChange}
           onStatusChange={handleStatusChange}
           selectedDateOption={selectedRange}
+          selectedRegionalAgent={selectedRegionalAgent}
+          onRegionalAgentChange={handleRegionalAgentChange}
         />
       )}
     </ServiceDetailWrapper>

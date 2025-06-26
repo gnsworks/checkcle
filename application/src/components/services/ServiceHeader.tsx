@@ -1,9 +1,10 @@
 
-import { ArrowLeft, Globe, MoreVertical, FileText, Github, Twitter, MessageSquare, Bell } from "lucide-react";
+import { ArrowLeft, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/services/StatusBadge";
 import { ServiceMonitoringButton } from "@/components/services/ServiceMonitoringButton";
+import { RegionalAgentFilter } from "@/components/services/RegionalAgentFilter";
 import { Service } from "@/types/service.types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -11,9 +12,16 @@ import { cn } from "@/lib/utils";
 interface ServiceHeaderProps {
   service: Service;
   onStatusChange?: (newStatus: "up" | "down" | "paused" | "warning") => void;
+  selectedRegionalAgent?: string;
+  onRegionalAgentChange?: (agent: string) => void;
 }
 
-export function ServiceHeader({ service, onStatusChange }: ServiceHeaderProps) {
+export function ServiceHeader({ 
+  service, 
+  onStatusChange, 
+  selectedRegionalAgent, 
+  onRegionalAgentChange 
+}: ServiceHeaderProps) {
   const navigate = useNavigate();
   const { t } = useLanguage();
   
@@ -72,10 +80,12 @@ export function ServiceHeader({ service, onStatusChange }: ServiceHeaderProps) {
         <div className="flex items-center space-x-4">
           <StatusBadge status={service.status} size="lg" />
           <ServiceMonitoringButton service={service} onStatusChange={onStatusChange} />
-          <Button variant="outline" size="icon" className="rounded-full w-8 h-8 border-border">
-            <span className="sr-only">More options</span>
-            <MoreVertical className="w-4 h-4" />
-          </Button>
+          {selectedRegionalAgent !== undefined && onRegionalAgentChange && (
+            <RegionalAgentFilter 
+              selectedAgent={selectedRegionalAgent}
+              onAgentChange={onRegionalAgentChange}
+            />
+          )}
         </div>
       </div>
     </div>
