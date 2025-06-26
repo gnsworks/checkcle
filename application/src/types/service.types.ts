@@ -70,6 +70,8 @@ export interface UptimeData {
   // Regional monitoring fields
   region_name?: string;
   agent_id?: string | number;
+  // Source identifier for multi-source display
+  source?: string;
 }
 
 export interface PingData {
