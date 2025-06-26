@@ -2,7 +2,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { regionalService } from "@/services/regionalService";
-import { MapPin, Loader2, Globe } from "lucide-react";
+import { MapPin, Loader2, BarChart3 } from "lucide-react";
 
 interface RegionalAgentFilterProps {
   selectedAgent: string;
@@ -19,8 +19,8 @@ export function RegionalAgentFilter({ selectedAgent, onAgentChange }: RegionalAg
   const onlineAgents = regionalAgents.filter(agent => agent.connection === 'online');
 
   const getCurrentAgentDisplay = () => {
-    if (!selectedAgent || selectedAgent === "default") {
-      return "Default Monitoring";
+    if (!selectedAgent || selectedAgent === "all") {
+      return "All Monitoring";
     }
     
     const [regionName] = selectedAgent.split("|");
@@ -32,7 +32,7 @@ export function RegionalAgentFilter({ selectedAgent, onAgentChange }: RegionalAg
       return `${agent.region_name} (${agent.agent_ip_address})`;
     }
     
-    return regionName || "Default Monitoring";
+    return regionName || "All Monitoring";
   };
 
   return (
@@ -43,7 +43,7 @@ export function RegionalAgentFilter({ selectedAgent, onAgentChange }: RegionalAg
       </label>
       <Select 
         onValueChange={onAgentChange} 
-        value={selectedAgent || "default"}
+        value={selectedAgent || "all"}
         disabled={isLoading}
       >
         <SelectTrigger>
@@ -63,10 +63,10 @@ export function RegionalAgentFilter({ selectedAgent, onAgentChange }: RegionalAg
             </SelectItem>
           ) : (
             <>
-              <SelectItem value="default">
+              <SelectItem value="all">
                 <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-blue-500" />
-                  <span className="font-medium">Default Monitoring</span>
+                  <BarChart3 className="h-4 w-4 text-purple-500" />
+                  <span className="font-medium">All Monitoring</span>
                 </div>
               </SelectItem>
               {onlineAgents.length > 0 && onlineAgents.map((agent) => (

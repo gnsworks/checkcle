@@ -1,5 +1,5 @@
 
-import { ArrowLeft, Globe, MoreVertical, FileText, Github, Twitter, MessageSquare, Bell } from "lucide-react";
+import { ArrowLeft, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/services/StatusBadge";
@@ -79,17 +79,13 @@ export function ServiceHeader({
         
         <div className="flex items-center space-x-4">
           <StatusBadge status={service.status} size="lg" />
+          <ServiceMonitoringButton service={service} onStatusChange={onStatusChange} />
           {selectedRegionalAgent !== undefined && onRegionalAgentChange && (
             <RegionalAgentFilter 
               selectedAgent={selectedRegionalAgent}
               onAgentChange={onRegionalAgentChange}
             />
           )}
-          <ServiceMonitoringButton service={service} onStatusChange={onStatusChange} />
-          <Button variant="outline" size="icon" className="rounded-full w-8 h-8 border-border">
-            <span className="sr-only">More options</span>
-            <MoreVertical className="w-4 h-4" />
-          </Button>
         </div>
       </div>
     </div>

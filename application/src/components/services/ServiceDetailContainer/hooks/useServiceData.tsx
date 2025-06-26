@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { pb } from "@/lib/pocketbase";
 import { Service, UptimeData } from "@/types/service.types";
@@ -6,14 +5,23 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { uptimeService } from "@/services/uptimeService";
 import { DateRangeOption } from "../../DateRangeFilter";
+import { useQuery } from "@tanstack/react-query";
+import { regionalService } from "@/services/regionalService";
 
 export const useServiceData = (serviceId: string | undefined, startDate: Date, endDate: Date) => {
   const [service, setService] = useState<Service | null>(null);
   const [uptimeData, setUptimeData] = useState<UptimeData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedRegionalAgent, setSelectedRegionalAgent] = useState<string>("default");
+  const [selectedRegionalAgent, setSelectedRegionalAgent] = useState<string>("all");
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Get regional agents for "all" monitoring
+  const { data: regionalAgents = [] } = useQuery({
+    queryKey: ['regional-services'],
+    queryFn: regionalService.getRegionalServices,
+    enabled: selectedRegionalAgent === "all"
+  });
 
   const handleStatusChange = async (newStatus: "up" | "down" | "paused" | "warning") => {
     if (!service || !serviceId) return;
@@ -66,11 +74,50 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
       
       let history: UptimeData[] = [];
       
-      if (currentAgent === "default") {
-        // Fetch default monitoring data - this will automatically filter out regional records
-        console.log(`Fetching default monitoring data from ${service.type} collection`);
-        history = await uptimeService.getUptimeHistory(serviceId, limit, start, end, service.type);
-        console.log(`Retrieved ${history.length} default monitoring records`);
+      if (currentAgent === "all") {
+        // Fetch data from all sources (default + all online regional agents)
+        console.log(`Fetching data from all monitoring sources`);
+        
+        // Fetch default monitoring data
+        const defaultData = await uptimeService.getUptimeHistory(serviceId, limit, start, end, service.type);
+        console.log(`Retrieved ${defaultData.length} default monitoring records`);
+        
+        // Mark default data with source identifier
+        const markedDefaultData = defaultData.map(record => ({
+          ...record,
+          source: 'default' as const,
+          region_name: undefined,
+          agent_id: undefined
+        }));
+        
+        history = [...markedDefaultData];
+        
+        // Fetch regional monitoring data from all online agents
+        const onlineAgents = regionalAgents.filter(agent => agent.connection === 'online');
+        
+        for (const agent of onlineAgents) {
+          try {
+            const regionalData = await uptimeService.getUptimeHistoryByRegionalAgent(
+              serviceId, limit, start, end, service.type, agent.region_name, agent.agent_id
+            );
+            console.log(`Retrieved ${regionalData.length} records from ${agent.region_name}`);
+            
+            // Mark regional data with source identifier
+            const markedRegionalData = regionalData.map(record => ({
+              ...record,
+              source: `${agent.region_name}|${agent.agent_id}` as const,
+              region_name: agent.region_name,
+              agent_id: agent.agent_id
+            }));
+            
+            history = [...history, ...markedRegionalData];
+          } catch (error) {
+            console.error(`Error fetching data from ${agent.region_name}:`, error);
+          }
+        }
+        
+        console.log(`Total combined records: ${history.length}`);
+        
       } else {
         // Fetch regional agent specific data
         const [regionName, agentId] = currentAgent.split("|");
@@ -84,7 +131,7 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
       
-      console.log(`Final dataset: ${filteredHistory.length} records for ${currentAgent === "default" ? "default" : "regional"} monitoring`);
+      console.log(`Final dataset: ${filteredHistory.length} records for ${currentAgent === "all" ? "all sources" : "regional"} monitoring`);
       setUptimeData(filteredHistory);
       return filteredHistory;
     } catch (error) {
@@ -176,7 +223,7 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
       console.log(`Date range changed or service loaded, refetching data for ${serviceId}: ${startDate.toISOString()} to ${endDate.toISOString()}`);
       fetchUptimeData(serviceId, startDate, endDate, '24h', selectedRegionalAgent);
     }
-  }, [startDate, endDate, serviceId, isLoading, service, selectedRegionalAgent]);
+  }, [startDate, endDate, serviceId, isLoading, service, selectedRegionalAgent, regionalAgents]);
 
   return {
     service,
