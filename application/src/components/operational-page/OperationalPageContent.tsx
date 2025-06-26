@@ -39,8 +39,8 @@ export const OperationalPageContent = () => {
     if (page.custom_domain) {
       window.open(`https://${page.custom_domain}`, '_blank');
     } else {
-      // Navigate to the public status page route
-      window.open(`/status/${page.slug}`, '_blank');
+      // Navigate to the public status page route using the correct format
+      window.open(`/public/${page.slug}`, '_blank');
     }
   };
 

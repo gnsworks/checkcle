@@ -50,7 +50,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/login" element={<Login />} />
-                  <Route path="/public/:pageId" element={<PublicStatusPage />} />
+                  <Route path="/public/:slug" element={<PublicStatusPage />} />
                   
                   {/* Protected Routes */}
                   <Route path="/dashboard" element={
