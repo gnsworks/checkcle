@@ -42,20 +42,20 @@ export const mainMenuItems = [
     hasNavigation: true
   },
   {
-    id: 'reports',
-    path: null,
-    icon: LineChart,
-    translationKey: 'reports',
-    color: 'text-rose-400',
-    hasNavigation: false
-  },
-  {
     id: 'regional-monitoring',
     path: '/regional-monitoring',
     icon: MapPin,
     translationKey: 'regionalMonitoring',
     color: 'text-indigo-400',
     hasNavigation: true
+  },
+  {
+    id: 'reports',
+    path: null,
+    icon: LineChart,
+    translationKey: 'reports',
+    color: 'text-rose-400',
+    hasNavigation: false
   }
 ];
 
