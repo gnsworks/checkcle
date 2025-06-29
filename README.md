@@ -77,7 +77,7 @@ services:
 
 ###
 ![checkcle-collapse-black](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/checkcle-black.png)
-![Service Detail Page](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/checkcle-detailpage.png)
+![Service Detail Page](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/uptime-service-detail.png)
 ![Schedule Maintenance](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/maintenance-dahboard.png)
 
 ## 📝 Development Roadmap
@@ -92,10 +92,10 @@ services:
 - ✅ SSL & Domain Monitoring
 - ✅ Schedule Maintenance 
 - ✅ Incident Management
-- [ ] Uptime monitoring (PING - Inprogress)
 - [ ] Infrastructure Server Monitoring
 - ✅ Operational Status / Public Status Pages
-- [ ] Uptime monitoring (TCP, PING, DNS)
+- ✅ Uptime monitoring (HTTP, TCP, PING, DNS) Full functionality
+- ✅ Distributed Regional Monitoring Agent [Support Operation](https://github.com/operacle/Distributed-Regional-Monitoring)
 - ✅ System Setting Panel and Mail Settings
 - ✅ User Permission Roles
 - [ ] Notifications (Email/Slack/Discord/Signal)  
