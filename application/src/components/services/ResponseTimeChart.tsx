@@ -1,4 +1,3 @@
-
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, LineChart, Line } from "recharts";
 import { UptimeData } from "@/types/service.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,16 +12,16 @@ interface ResponseTimeChartProps {
 export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
   const { theme } = useTheme();
   
-  // Modern color palette for different chart lines (only for All Monitoring)
+  // Modern color palette for different chart lines with solid colors at 90-100% opacity
   const modernColors = [
-    { stroke: '#3b82f6', fill: 'rgba(59, 130, 246, 0.1)' }, // Blue
-    { stroke: '#10b981', fill: 'rgba(16, 185, 129, 0.1)' }, // Emerald
-    { stroke: '#f59e0b', fill: 'rgba(245, 158, 11, 0.1)' }, // Amber
-    { stroke: '#ef4444', fill: 'rgba(239, 68, 68, 0.1)' }, // Red
-    { stroke: '#8b5cf6', fill: 'rgba(139, 92, 246, 0.1)' }, // Violet
-    { stroke: '#06b6d4', fill: 'rgba(6, 182, 212, 0.1)' }, // Cyan
-    { stroke: '#f97316', fill: 'rgba(249, 115, 22, 0.1)' }, // Orange
-    { stroke: '#84cc16', fill: 'rgba(132, 204, 22, 0.1)' }, // Lime
+    { stroke: '#f59e0b', fill: 'rgba(245, 158, 11, 0.95)' }, // Yellow (changed from blue)
+    { stroke: '#10b981', fill: 'rgba(16, 185, 129, 0.95)' }, // Emerald
+    { stroke: '#3b82f6', fill: 'rgba(59, 130, 246, 0.95)' }, // Blue (moved to second position)
+    { stroke: '#ef4444', fill: 'rgba(239, 68, 68, 0.95)' }, // Red
+    { stroke: '#8b5cf6', fill: 'rgba(139, 92, 246, 0.95)' }, // Violet
+    { stroke: '#06b6d4', fill: 'rgba(6, 182, 212, 0.95)' }, // Cyan
+    { stroke: '#f97316', fill: 'rgba(249, 115, 22, 0.95)' }, // Orange
+    { stroke: '#84cc16', fill: 'rgba(132, 204, 22, 0.95)' }, // Lime
   ];
   
   // Check if we have data from multiple sources
@@ -350,14 +349,6 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
             <ResponsiveContainer width="100%" height="100%">
               {hasMultipleSources ? (
                 <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 30 }}>
-                  <defs>
-                    {sources.map(source => (
-                      <linearGradient key={`gradient-${source.key}`} id={`gradient-${source.key}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={source.stroke} stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor={source.stroke} stopOpacity={0.05}/>
-                      </linearGradient>
-                    ))}
-                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#e5e7eb'} />
                   <XAxis 
                     dataKey="time" 
@@ -376,27 +367,27 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
                   />
                   <Tooltip content={<CustomTooltip />} />
                   
-                  {/* Default monitoring area with modern background - only if exists and no regional default */}
+                  {/* Default monitoring area with modern solid background */}
                   {sources.find(s => s.key === 'default') && (
                     <Area
                       type="monotone"
                       dataKey="defaultValue"
                       stroke={sources.find(s => s.key === 'default')?.stroke}
-                      fill={`url(#gradient-default)`}
+                      fill={sources.find(s => s.key === 'default')?.fill}
                       strokeWidth={2.5}
                       dot={false}
                       connectNulls={false}
                     />
                   )}
                   
-                  {/* Regional monitoring areas with modern backgrounds */}
+                  {/* Regional monitoring areas with modern solid backgrounds */}
                   {sources.filter(s => s.key !== 'default').map((source) => (
                     <Area
                       key={source.key}
                       type="monotone" 
                       dataKey={`${source.key}_value`}
                       stroke={source.stroke}
-                      fill={`url(#gradient-${source.key})`}
+                      fill={source.fill}
                       strokeWidth={2.5}
                       dot={false}
                       connectNulls={false}
@@ -404,22 +395,8 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
                   ))}
                 </AreaChart>
               ) : (
-                // For single regional agent or default monitoring only - use original AreaChart styling
+                // For single regional agent or default monitoring only - use solid background colors
                 <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 30 }}>
-                  <defs>
-                    <linearGradient id="colorUp" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
-                    </linearGradient>
-                    <linearGradient id="colorDown" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05}/>
-                    </linearGradient>
-                    <linearGradient id="colorWarning" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.05}/>
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#e5e7eb'} />
                   <XAxis 
                     dataKey="time" 
@@ -438,12 +415,12 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
                   />
                   <Tooltip content={<CustomTooltip />} />
                   
-                  {/* Original area charts for different statuses with background colors */}
+                  {/* Modern solid background areas for different statuses */}
                   <Area 
                     type="monotone" 
                     dataKey="upValue"
                     stroke="#10b981"
-                    fill="url(#colorUp)"
+                    fill="rgba(16, 185, 129, 0.9)"
                     strokeWidth={2.5}
                     dot={false}
                     connectNulls={false}
@@ -453,7 +430,7 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
                     type="monotone" 
                     dataKey="downValue"
                     stroke="#ef4444"
-                    fill="url(#colorDown)"
+                    fill="rgba(239, 68, 68, 0.9)"
                     strokeWidth={2.5}
                     dot={false}
                     connectNulls={false}
@@ -463,7 +440,7 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
                     type="monotone" 
                     dataKey="warningValue"
                     stroke="#f59e0b"
-                    fill="url(#colorWarning)"
+                    fill="rgba(245, 158, 11, 0.9)"
                     strokeWidth={2.5}
                     dot={false}
                     connectNulls={false}

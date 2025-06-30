@@ -1,0 +1,73 @@
+
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Eye, Play, Pause, Square, Trash2, BarChart3, RefreshCw } from "lucide-react";
+import { DockerContainer } from "@/types/docker.types";
+
+interface DockerRowActionsProps {
+  container: DockerContainer;
+  containerStatus: 'running' | 'stopped' | 'warning';
+  onContainerAction: (action: string, containerId: string, containerName: string) => void;
+  onViewMetrics: (container: DockerContainer) => void;
+}
+
+export const DockerRowActions = ({ container, containerStatus, onContainerAction, onViewMetrics }: DockerRowActionsProps) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-muted">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48 bg-popover border-border shadow-md">
+        <DropdownMenuItem 
+          onClick={() => onViewMetrics(container)}
+          className="cursor-pointer hover:bg-muted"
+        >
+          <BarChart3 className="mr-2 h-4 w-4" />
+          View Metrics
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => onContainerAction('view-detail', container.id, container.name)}
+          className="cursor-pointer hover:bg-muted"
+        >
+          <Eye className="mr-2 h-4 w-4" />
+          View Details
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-border" />
+        <DropdownMenuItem 
+          onClick={() => onContainerAction(containerStatus === 'running' ? 'stop' : 'start', container.id, container.name)}
+          className="cursor-pointer hover:bg-muted"
+        >
+          {containerStatus === 'running' ? (
+            <>
+              <Square className="mr-2 h-4 w-4" />
+              Stop Container
+            </>
+          ) : (
+            <>
+              <Play className="mr-2 h-4 w-4" />
+              Start Container
+            </>
+          )}
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => onContainerAction('restart', container.id, container.name)}
+          className="cursor-pointer hover:bg-muted"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Restart Container
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-border" />
+        <DropdownMenuItem 
+          onClick={() => onContainerAction('delete', container.id, container.name)}
+          className="cursor-pointer hover:bg-muted text-destructive focus:text-destructive"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Remove Container
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
