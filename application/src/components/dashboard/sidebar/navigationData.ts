@@ -1,3 +1,4 @@
+
 import { Globe, Boxes, Radar, Calendar, BarChart2, LineChart, MapPin, Settings, User, Bell, Database, Info, BookOpen } from "lucide-react";
 
 export const mainMenuItems = [
@@ -11,11 +12,11 @@ export const mainMenuItems = [
   },
   {
     id: 'instance-monitoring',
-    path: null,
+    path: '/instance-monitoring',
     icon: Boxes,
     translationKey: 'instanceMonitoring',
     color: 'text-blue-400',
-    hasNavigation: false
+    hasNavigation: true
   },
   {
     id: 'ssl-domain',
