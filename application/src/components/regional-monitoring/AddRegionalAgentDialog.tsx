@@ -395,7 +395,12 @@ curl -fsSL https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/s
                       <div className="border-l-4 border-blue-500 pl-4">
                         <p className="font-medium">Step 1: Download Package</p>
                         <code className="text-xs bg-muted p-2 rounded block mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">✅ If you’re using the amd64 architecture, please download this package. </p> <br/>
                           wget https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/V1.0.0/distributed-regional-check-agent_1.0.0_amd64.deb
+                        </code>
+                        <code className="text-xs bg-muted p-2 rounded block mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">✅ If you’re using the arm64 architecture, please download this package. </p> <br/> 
+                          wget https://github.com/operacle/Distributed-Regional-Monitoring/releases/download/V1.0.0/distributed-regional-check-agent_1.0.0_arm64.deb
                         </code>
                       </div>
                       
@@ -411,6 +416,9 @@ curl -fsSL https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/s
                         <p className="font-medium">Step 3: Configure Agent</p>
                         <code className="text-xs bg-muted p-2 rounded block mt-1">
                           sudo nano /etc/regional-check-agent/regional-check-agent.env
+                        </code>
+                        <code className="text-xs bg-muted p-2 rounded block mt-1">
+                          Copy sample configuration from  https://github.com/operacle/Distributed-Regional-Monitoring/blob/main/packaging/regional-check-agent.conf
                         </code>
                         <p className="text-xs text-muted-foreground mt-1">Add the configuration values shown in the Agent Details tab</p>
                       </div>
