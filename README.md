@@ -1,4 +1,4 @@
-![CheckCle Platform](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/checkcle-black.png)
+![CheckCle Platform](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/instance-server-monitoring.png)
 
 # 🚀 What is CheckCle?
 
@@ -13,6 +13,7 @@ CheckCle is an Open Source solution for seamless, real-time monitoring of full-s
 - Monitor HTTP, DNS, and Ping protocols
 - Monitor TCP-based, API services (e.g., FTP, SMTP, HTTP)
 - Track detail uptime, response times, and performance issues
+- Distributed Regional Monitoring
 - Incident History (UP/DOWN/WARNING/PAUSE)
 - SSL & Domain Monitoring (Domain, Issuer, Expiration Date, Days Left, Status, Last Notified)
 - Infrastructure Server Monitoring, Supports Linux (🐧 Debian, Ubuntu, CentOS, Red Hat, etc.) and Windows (Beta). And Servers metrics like CPU, RAM, disk usage, and network activity) with an one-line installation angent script.
@@ -76,9 +77,11 @@ services:
 4. Follow the Quick Start Guide at https://docs.checkcle.io
 
 ###
-![checkcle-collapse-black](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/checkcle-black.png)
+![checkcle-collapse-black](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/uptime-monitoring.png)
 ![Service Detail Page](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/uptime-service-detail.png)
-![Schedule Maintenance](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/maintenance-dahboard.png)
+![checkcle-server-instance](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/instance-server-monitoring.png)
+![Schedule Maintenance](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/checkcle-schedule-maintenance.png)
+![SSL Monitoring](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/ssl-monitoring.png)
 
 ## 📝 Development Roadmap
 
@@ -134,6 +137,10 @@ Here are some ways you can help improve CheckCle:
 CheckCle is released under the MIT License.
 
 ---
+## 👥 Contributors
+
+[![](https://contrib.rocks/image?repo=operacle/checkcle)](https://github.com/operacle/checkcle/graphs/contributors)
+
 
 ## Star History
 
