@@ -203,47 +203,6 @@ export const ServerMetricsOverview = ({ server }: ServerMetricsOverviewProps) =>
         icon={HardDrive}
         color={theme === 'dark' ? "#f59e0b" : "#d97706"}
       />
-
-      {/* System Info Card */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-card/80 via-card to-card/60 border border-border/60 shadow-lg hover:shadow-xl hover:border-border/80 transition-all duration-300 backdrop-blur-sm group xl:col-span-2">
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/[0.02] to-white/[0.05] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <CardHeader className="pb-3 relative">
-          <CardTitle className="flex items-center gap-3 text-sm font-semibold">
-            <div className="p-2.5 rounded-xl bg-purple-500/15 shadow-sm ring-1 ring-white/10 transition-all duration-300 group-hover:scale-110" style={{ boxShadow: '0 4px 12px rgba(168, 85, 247, 0.2)' }}>
-              <Info className="h-4 w-4 text-purple-500" />
-            </div>
-            <span className="text-foreground/90">System Information</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 relative">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="space-y-3">
-              <div className="bg-muted/20 rounded-lg p-3">
-                <span className="text-muted-foreground block mb-1">Operating System:</span>
-                <div className="font-semibold text-foreground">{server.os_type}</div>
-              </div>
-              <div className="bg-muted/20 rounded-lg p-3">
-                <span className="text-muted-foreground block mb-1">Hostname:</span>
-                <div className="font-mono text-xs text-foreground break-all">{server.hostname}</div>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="bg-muted/20 rounded-lg p-3">
-                <span className="text-muted-foreground block mb-1">IP Address:</span>
-                <div className="font-mono text-xs text-foreground">{server.ip_address}</div>
-              </div>
-              {server.system_info && (
-                <div className="bg-muted/20 rounded-lg p-3">
-                  <span className="text-muted-foreground block mb-1">System Details:</span>
-                  <div className="font-mono text-[10px] text-foreground/80 line-clamp-3 leading-relaxed" title={server.system_info}>
-                    {server.system_info}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

@@ -10,7 +10,7 @@ import { Header } from "@/components/dashboard/Header";
 import { serverService } from "@/services/serverService";
 import { authService } from "@/services/authService";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Server } from "lucide-react";
+import { ArrowLeft, Server, Database } from "lucide-react";
 import { ServerMetricsCharts } from "@/components/servers/ServerMetricsCharts";
 import { ServerMetricsOverview } from "@/components/servers/ServerMetricsOverview";
 import { ServerHistoryCharts } from "@/components/servers/ServerHistoryCharts";
@@ -126,7 +126,7 @@ const ServerDetail = () => {
                   </div>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center">
-                      <Server className="h-4 w-4 text-primary" />
+                      <Database className="h-4 w-4 text-primary" />
                     </div>
                     <h1 className="text-2xl font-bold text-foreground">
                       {server?.name || 'Server Detail'}
@@ -135,11 +135,14 @@ const ServerDetail = () => {
                   <p className={`text-muted-foreground mt-1 sm:mt-2 transition-all duration-300 ${sidebarCollapsed ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
                     Monitor server performance metrics and system health
                     {server && (
-                      <span className="block text-xs text-muted-foreground/70 mt-1">
-                        {server.hostname} • {server.ip_address} • {server.os_type}
+                      <span className="block text-xs text-foreground/80 mt-1">
+                        {server.hostname} • {server.ip_address} • {server.os_type} • {server.system_info} 
                       </span>
+                      
                     )}
                   </p>
+                  
+                  
                 </div>
               </div>
             </div>
