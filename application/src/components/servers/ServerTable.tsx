@@ -119,7 +119,6 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                   <TableHead>Memory</TableHead>
                   <TableHead>Disk</TableHead>
                   <TableHead>Uptime</TableHead>
-                  <TableHead>Docker</TableHead>
                   <TableHead>Last Checked</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -136,7 +135,7 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                       <TableCell>
                         <div>
                           <div className="font-medium">{server.name}</div>
-                          <div className="text-sm text-muted-foreground">{server.hostname}</div>
+                          
                         </div>
                       </TableCell>
                       <TableCell>
@@ -161,7 +160,8 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                             value={cpuUsage} 
                             className="h-2"
                             indicatorClassName={
-                              cpuUsage > 80 ? "bg-red-500" : 
+                              cpuUsage > 90 ? "bg-red-00" : 
+                              cpuUsage > 75 ? "bg-orange-500" :
                               cpuUsage > 60 ? "bg-yellow-500" : "bg-green-500"
                             }
                           />
@@ -170,8 +170,8 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                       <TableCell>
                         <div className="space-y-1 min-w-[120px]">
                           <div className="flex justify-between text-sm">
-                            <span>{serverService.formatBytes(server.ram_used)}</span>
                             <span className="text-muted-foreground">{memoryUsage.toFixed(1)}%</span>
+                            <span>{serverService.formatBytes(server.ram_total)}</span>
                           </div>
                           <Progress 
                             value={memoryUsage} 
@@ -186,8 +186,8 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                       <TableCell>
                         <div className="space-y-1 min-w-[120px]">
                           <div className="flex justify-between text-sm">
-                            <span>{serverService.formatBytes(server.disk_used)}</span>
                             <span className="text-muted-foreground">{diskUsage.toFixed(1)}%</span>
+                            <span>{serverService.formatBytes(server.disk_total)}</span>
                           </div>
                           <Progress 
                             value={diskUsage} 
@@ -202,18 +202,7 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                       <TableCell>
                         <div className="text-sm">{server.uptime}</div>
                       </TableCell>
-                      <TableCell>
-                        {server.docker === 'true' ? (
-                          <Badge variant="secondary" className="text-xs">
-                            <Activity className="h-3 w-3 mr-1" />
-                            Enabled
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-xs">
-                            Disabled
-                          </Badge>
-                        )}
-                      </TableCell>
+                      
                       <TableCell>
                         <div className="text-sm text-muted-foreground">
                           {new Date(server.last_checked).toLocaleString()}

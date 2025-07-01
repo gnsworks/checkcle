@@ -1,4 +1,3 @@
-
 import { pb } from '@/lib/pocketbase';
 import { Server, ServerStats } from '@/types/server.types';
 
@@ -23,9 +22,9 @@ export const serverService = {
     }
   },
 
-  async getServerMetrics(serverId: string): Promise<any[]> {
+  async getServerMetrics(serverId: string, timeRange?: string): Promise<any[]> {
     try {
-      console.log('serverService.getServerMetrics: Fetching metrics for serverId:', serverId);
+      console.log('serverService.getServerMetrics: Fetching metrics for serverId:', serverId, 'timeRange:', timeRange);
       
       // First, get the server to find the correct server_id for metrics
       let server;
@@ -36,48 +35,63 @@ export const serverService = {
         console.log('serverService.getServerMetrics: Could not fetch server details:', error);
       }
 
-      // Try to get metrics using the server's server_id field if available
+      // Use the server's server_id field if available, otherwise use the serverId
       let metricsServerId = serverId;
       if (server && server.server_id) {
         metricsServerId = server.server_id;
         console.log('serverService.getServerMetrics: Using server.server_id for metrics:', metricsServerId);
       }
 
-      // Try filtering by server_id first
-      let filteredRecords = await pb.collection('server_metrics').getFullList({
-        filter: `server_id = "${metricsServerId}"`,
+      // Build filter for server_id and time range
+      let filter = `server_id = "${metricsServerId}"`;
+      
+      // Add agent_id filter if available in server data
+      if (server && server.agent_id) {
+        filter += ` && agent_id = "${server.agent_id}"`;
+        console.log('serverService.getServerMetrics: Added agent_id filter:', server.agent_id);
+      }
+
+      // Add time range filter
+      if (timeRange) {
+        const now = new Date();
+        let cutoffTime;
+        
+        switch (timeRange) {
+          case '60m':
+            cutoffTime = new Date(now.getTime() - (60 * 60 * 1000));
+            break;
+          case '1d':
+            cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+            break;
+          case '7d':
+            cutoffTime = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+            break;
+          case '1m':
+            cutoffTime = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+            break;
+          case '3m':
+            cutoffTime = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
+            break;
+          default:
+            cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+        }
+        
+        const cutoffISO = cutoffTime.toISOString();
+        filter += ` && created >= "${cutoffISO}"`;
+        console.log('serverService.getServerMetrics: Using time filter:', cutoffISO);
+      }
+
+      console.log('serverService.getServerMetrics: Final filter:', filter);
+
+      // Fetch filtered records with proper sorting
+      const records = await pb.collection('server_metrics').getFullList({
+        filter: filter,
         sort: '-created',
         requestKey: null
       });
 
-      console.log('serverService.getServerMetrics: Filtered records by server_id:', filteredRecords.length);
-
-      // If no records found with server_id, try alternative approaches
-      if (filteredRecords.length === 0) {
-        console.log('serverService.getServerMetrics: No records found with server_id filter, trying alternatives...');
-        
-        // Get all records to see what's available
-        const allRecords = await pb.collection('server_metrics').getFullList({
-          sort: '-created',
-          requestKey: null
-        });
-        
-        console.log('serverService.getServerMetrics: Total server_metrics records:', allRecords.length);
-        if (allRecords.length > 0) {
-          console.log('serverService.getServerMetrics: Sample record fields:', Object.keys(allRecords[0]));
-          console.log('serverService.getServerMetrics: Sample server_id values:', allRecords.slice(0, 5).map(r => r.server_id));
-        }
-
-        // For now, return some sample data from available records if server matches pattern
-        // This is temporary until the correct server_id mapping is established
-        if (allRecords.length > 0) {
-          console.log('serverService.getServerMetrics: Using available records as fallback');
-          filteredRecords = allRecords.slice(0, 50); // Get recent 50 records
-        }
-      }
-      
-      console.log('serverService.getServerMetrics: Returning', filteredRecords.length, 'records');
-      return filteredRecords;
+      console.log('serverService.getServerMetrics: Found', records.length, 'records with filter');
+      return records;
     } catch (error) {
       console.error('Error fetching server metrics:', error);
       throw error;

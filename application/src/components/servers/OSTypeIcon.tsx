@@ -10,7 +10,7 @@ export const OSTypeIcon = ({ osType, className = "h-4 w-4" }: OSTypeIconProps) =
   const getOSIcon = (os: string) => {
     const osLower = os.toLowerCase();
     
-    if (osLower.includes('linux') || osLower.includes('ubuntu') || osLower.includes('centos')) {
+    if (osLower.includes('linux') || osLower.includes('ubuntu') || osLower.includes('centos') || osLower.includes('debian')) {
       return <Server className={className} />;
     } else if (osLower.includes('windows')) {
       return <Monitor className={className} />;

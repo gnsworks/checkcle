@@ -57,9 +57,41 @@ export const filterMetricsByTimeRange = (metrics: any[], timeRange: TimeRange): 
   const cutoffTime = new Date(now.getTime() - (selectedRange.hours * 60 * 60 * 1000));
   
   return metrics.filter(metric => {
-    const metricTime = new Date(metric.timestamp);
+    const metricTime = new Date(metric.created || metric.timestamp);
     return metricTime >= cutoffTime;
   });
+};
+
+const formatTimestamp = (timestamp: string, timeRange: TimeRange): string => {
+  const date = new Date(timestamp);
+  
+  if (timeRange === '60m') {
+    // For 60 minutes, show time with seconds
+    return date.toLocaleString('en-US', { 
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  } else if (timeRange === '1d') {
+    // For 1 day, show date and time
+    return date.toLocaleString('en-US', { 
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+  } else {
+    // For longer periods, show date and time
+    return date.toLocaleString('en-US', { 
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+  }
 };
 
 export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
@@ -85,11 +117,11 @@ export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
     const networkRxSpeed = metric.network_rx_speed || 0;
     const networkTxSpeed = metric.network_tx_speed || 0;
 
+    const timestamp = metric.created || metric.timestamp;
+
     return {
-      timestamp: new Date(metric.timestamp).toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      }),
+      timestamp: formatTimestamp(timestamp, timeRange),
+      fullTimestamp: timestamp,
       cpuUsage: Math.round(cpuUsage * 100) / 100,
       cpuCores: parseInt(metric.cpu_cores) || 0,
       cpuFree: 100 - cpuUsage,

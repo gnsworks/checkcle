@@ -26,7 +26,7 @@ export const ServerMetricsCharts = ({ serverId }: ServerMetricsChartsProps) => {
     error
   } = useQuery({
     queryKey: ['server-metrics', serverId, timeRange],
-    queryFn: () => serverService.getServerMetrics(serverId),
+    queryFn: () => serverService.getServerMetrics(serverId, timeRange),
     enabled: !!serverId,
     refetchInterval: 30000
   });
@@ -53,7 +53,7 @@ export const ServerMetricsCharts = ({ serverId }: ServerMetricsChartsProps) => {
   if (chartData.length === 0) {
     return (
       <div className="flex items-center justify-center h-96 text-muted-foreground">
-        <p>No server metrics data available</p>
+        <p>No server metrics data available for {timeRange}</p>
       </div>
     );
   }
@@ -63,7 +63,7 @@ export const ServerMetricsCharts = ({ serverId }: ServerMetricsChartsProps) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-medium">Server Metrics</h2>
-          <span className="text-xs text-muted-foreground">({chartData.length} data points)</span>
+          <span className="text-xs text-muted-foreground">({chartData.length} data points • {timeRange})</span>
         </div>
         <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
       </div>
