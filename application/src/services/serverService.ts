@@ -35,15 +35,20 @@ export const serverService = {
         console.log('serverService.getServerMetrics: Could not fetch server details:', error);
       }
 
-      // Use the server's server_id field if available, otherwise use the serverId
+      // Try multiple filter strategies to find data
+      let filter = '';
       let metricsServerId = serverId;
+      
+      // Strategy 1: Use server.server_id if available
       if (server && server.server_id) {
         metricsServerId = server.server_id;
-        console.log('serverService.getServerMetrics: Using server.server_id for metrics:', metricsServerId);
+        filter = `server_id = "${metricsServerId}"`;
+        console.log('serverService.getServerMetrics: Strategy 1 - Using server.server_id for metrics:', metricsServerId);
+      } else {
+        // Strategy 2: Use the serverId directly
+        filter = `server_id = "${serverId}"`;
+        console.log('serverService.getServerMetrics: Strategy 2 - Using serverId directly for metrics:', serverId);
       }
-
-      // Build filter for server_id and time range
-      let filter = `server_id = "${metricsServerId}"`;
       
       // Add agent_id filter if available in server data
       if (server && server.agent_id) {
@@ -78,19 +83,121 @@ export const serverService = {
         
         const cutoffISO = cutoffTime.toISOString();
         filter += ` && created >= "${cutoffISO}"`;
-        console.log('serverService.getServerMetrics: Using time filter:', cutoffISO);
+        console.log('serverService.getServerMetrics: Using time filter from:', cutoffISO, 'to now');
       }
 
       console.log('serverService.getServerMetrics: Final filter:', filter);
 
       // Fetch filtered records with proper sorting
-      const records = await pb.collection('server_metrics').getFullList({
+      let records = await pb.collection('server_metrics').getFullList({
         filter: filter,
         sort: '-created',
         requestKey: null
       });
 
-      console.log('serverService.getServerMetrics: Found', records.length, 'records with filter');
+      console.log('serverService.getServerMetrics: Found', records.length, 'records with primary filter');
+      
+      // If no records found with primary strategy, try fallback strategies
+      if (records.length === 0) {
+        console.log('serverService.getServerMetrics: No records found, trying fallback strategies...');
+        
+        // Fallback 1: Try without agent_id filter
+        let fallbackFilter = `server_id = "${metricsServerId}"`;
+        if (timeRange) {
+          const now = new Date();
+          let cutoffTime;
+          
+          switch (timeRange) {
+            case '60m':
+              cutoffTime = new Date(now.getTime() - (60 * 60 * 1000));
+              break;
+            case '1d':
+              cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+              break;
+            case '7d':
+              cutoffTime = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+              break;
+            case '1m':
+              cutoffTime = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+              break;
+            case '3m':
+              cutoffTime = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
+              break;
+            default:
+              cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+          }
+          
+          const cutoffISO = cutoffTime.toISOString();
+          fallbackFilter += ` && created >= "${cutoffISO}"`;
+        }
+        
+        console.log('serverService.getServerMetrics: Trying fallback filter without agent_id:', fallbackFilter);
+        records = await pb.collection('server_metrics').getFullList({
+          filter: fallbackFilter,
+          sort: '-created',
+          requestKey: null
+        });
+        
+        console.log('serverService.getServerMetrics: Fallback found', records.length, 'records');
+        
+        // Fallback 2: Try with different server_id strategies
+        if (records.length === 0) {
+          const alternativeIds = [serverId, server?.server_id, server?.id].filter(Boolean);
+          console.log('serverService.getServerMetrics: Trying alternative server IDs:', alternativeIds);
+          
+          for (const altId of alternativeIds) {
+            if (altId && altId !== metricsServerId) {
+              let altFilter = `server_id = "${altId}"`;
+              if (timeRange) {
+                const now = new Date();
+                let cutoffTime;
+                
+                switch (timeRange) {
+                  case '60m':
+                    cutoffTime = new Date(now.getTime() - (60 * 60 * 1000));
+                    break;
+                  case '1d':
+                    cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+                    break;
+                  case '7d':
+                    cutoffTime = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+                    break;
+                  case '1m':
+                    cutoffTime = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+                    break;
+                  case '3m':
+                    cutoffTime = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
+                    break;
+                  default:
+                    cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+                }
+                
+                const cutoffISO = cutoffTime.toISOString();
+                altFilter += ` && created >= "${cutoffISO}"`;
+              }
+              
+              console.log('serverService.getServerMetrics: Trying alternative ID filter:', altFilter);
+              const altRecords = await pb.collection('server_metrics').getFullList({
+                filter: altFilter,
+                sort: '-created',
+                requestKey: null
+              });
+              
+              if (altRecords.length > 0) {
+                console.log('serverService.getServerMetrics: Alternative ID found', altRecords.length, 'records');
+                records = altRecords;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      console.log('serverService.getServerMetrics: Final result:', records.length, 'records found');
+      if (records.length > 0) {
+        console.log('serverService.getServerMetrics: Sample record:', records[0]);
+      }
+      
       return records;
     } catch (error) {
       console.error('Error fetching server metrics:', error);

@@ -28,9 +28,10 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
   } = useQuery({
     queryKey: ['server-metrics-history', serverId, timeRange],
     queryFn: async () => {
-      console.log('ServerHistoryCharts: Fetching metrics for serverId:', serverId);
+      console.log('ServerHistoryCharts: Fetching metrics for serverId:', serverId, 'timeRange:', timeRange);
       const result = await serverService.getServerMetrics(serverId, timeRange);
-      console.log('ServerHistoryCharts: Raw metrics result:', result);
+      console.log('ServerHistoryCharts: Raw metrics result for timeRange', timeRange, ':', result?.length || 0, 'records');
+      console.log('ServerHistoryCharts: First 3 records:', result?.slice(0, 3));
       return result;
     },
     enabled: !!serverId,
@@ -47,7 +48,9 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
     timeRange
   });
 
+  console.log('ServerHistoryCharts: About to format chart data with', metrics?.length || 0, 'metrics for timeRange:', timeRange);
   const chartData = formatChartData(metrics, timeRange);
+  console.log('ServerHistoryCharts: After formatting, got', chartData?.length || 0, 'chart data points');
 
   const getGridColor = () => theme === 'dark' ? '#374151' : '#e5e7eb';
   const getAxisColor = () => theme === 'dark' ? '#9ca3af' : '#6b7280';
