@@ -7,9 +7,15 @@ if [ ! -f /mnt/pb_data/data.db ] && [ -d /app/pb_data ] && [ "$(ls -A /app/pb_da
   cp -a /app/pb_data/. /mnt/pb_data/
 fi
 
-# Start PocketBase in the background
+# Start PocketBase in the background with no admin UI and filtered logs
 echo "Starting CheckCle Application..."
-/app/pocketbase serve --http=0.0.0.0:8090 --dir /mnt/pb_data 2>&1 | grep -vE 'REST API|Dashboard' &
+(
+  /app/pocketbase serve \
+    --http=0.0.0.0:8090 \
+    --dir /mnt/pb_data \
+    --no-admin \
+    2>&1 | grep -vE 'REST API|Dashboard'
+) &
 
 # Wait for PocketBase to become available
 echo "Waiting for Backend Server to become available..."
@@ -25,5 +31,6 @@ echo "Starting Go Operational service..."
 /app/service-operation &
 
 echo "Default Access: admin@example.com/Admin123456"
+
 # Keep container alive
 wait

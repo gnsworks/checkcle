@@ -46,7 +46,6 @@ export const DockerTableRow = ({ container, onRowClick, onContainerAction, onVie
           <div className="font-semibold text-sm sm:text-base text-foreground">{container.name}</div>
           <div className="text-xs sm:text-sm text-muted-foreground">
             <div className="font-mono">{container.docker_id}</div>
-            <div className="font-mono">{container.hostname}</div>
           </div>
         </div>
       </TableCell>

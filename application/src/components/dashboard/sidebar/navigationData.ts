@@ -1,5 +1,5 @@
 
-import { Globe, Boxes, Radar, Calendar, BarChart2, LineChart, MapPin, Settings, User, Bell, Database, Info, BookOpen } from "lucide-react";
+import { Globe, Boxes, Layers, Calendar, BarChart2, LineChart, MapPin, Settings, User, Bell, Database, Info, BookOpen } from "lucide-react";
 
 export const mainMenuItems = [
   {
@@ -21,7 +21,7 @@ export const mainMenuItems = [
   {
     id: 'ssl-domain',
     path: '/ssl-domain',
-    icon: Radar,
+    icon: Layers,
     translationKey: 'sslDomain',
     color: 'text-cyan-400',
     hasNavigation: true

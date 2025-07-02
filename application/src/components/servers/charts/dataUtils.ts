@@ -55,11 +55,24 @@ export const filterMetricsByTimeRange = (metrics: any[], timeRange: TimeRange): 
   if (!selectedRange) return metrics;
 
   const cutoffTime = new Date(now.getTime() - (selectedRange.hours * 60 * 60 * 1000));
+  console.log('filterMetricsByTimeRange: timeRange:', timeRange, 'cutoffTime:', cutoffTime.toISOString(), 'now:', now.toISOString());
   
-  return metrics.filter(metric => {
+  const filtered = metrics.filter(metric => {
     const metricTime = new Date(metric.created || metric.timestamp);
-    return metricTime >= cutoffTime;
+    const isValid = metricTime >= cutoffTime;
+    if (!isValid && metrics.indexOf(metric) < 3) {
+      console.log('filterMetricsByTimeRange: Filtered out metric:', { 
+        metricTime: metricTime.toISOString(), 
+        cutoffTime: cutoffTime.toISOString(),
+        created: metric.created,
+        timestamp: metric.timestamp
+      });
+    }
+    return isValid;
   });
+  
+  console.log('filterMetricsByTimeRange: Filtered', metrics.length, 'to', filtered.length, 'metrics');
+  return filtered;
 };
 
 const formatTimestamp = (timestamp: string, timeRange: TimeRange): string => {
@@ -95,7 +108,19 @@ const formatTimestamp = (timestamp: string, timeRange: TimeRange): string => {
 };
 
 export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
+  console.log('formatChartData: Input metrics count:', metrics?.length || 0, 'timeRange:', timeRange);
+  
   const filteredMetrics = filterMetricsByTimeRange(metrics, timeRange);
+  console.log('formatChartData: After time filtering:', filteredMetrics?.length || 0, 'metrics');
+  
+  if (filteredMetrics.length > 0) {
+    console.log('formatChartData: First filtered metric:', filteredMetrics[0]);
+    console.log('formatChartData: Sample timestamps:', filteredMetrics.slice(0, 3).map(m => ({ 
+      created: m.created, 
+      timestamp: m.timestamp,
+      both: new Date(m.created || m.timestamp).toISOString()
+    })));
+  }
   
   return filteredMetrics.slice(0, 100).reverse().map((metric, index) => {
     const cpuUsage = typeof metric.cpu_usage === 'string' ? 
