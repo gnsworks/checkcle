@@ -8,21 +8,22 @@ if [ ! -f /mnt/pb_data/data.db ] && [ -d /app/pb_data ] && [ "$(ls -A /app/pb_da
 fi
 
 # Start PocketBase in the background
-echo "Starting PocketBase..."
+echo "Starting CheckCle Application..."
 /app/pocketbase serve --http=0.0.0.0:8090 --dir /mnt/pb_data 2>&1 | grep -vE 'REST API|Dashboard' &
 
 # Wait for PocketBase to become available
-echo "Waiting for PocketBase to become available..."
+echo "Waiting for Backend Server to become available..."
 until curl -s http://localhost:8090/api/health >/dev/null; do
   echo "Waiting on http://localhost:8090..."
   sleep 1
 done
 
-echo "PocketBase is up!"
+echo "Backend Server is up!"
 
 # Start Go service
-echo "Starting Go service..."
+echo "Starting Go Operational service..."
 /app/service-operation &
 
+echo "Default Access: admin@example.com/Admin123456"
 # Keep container alive
 wait
