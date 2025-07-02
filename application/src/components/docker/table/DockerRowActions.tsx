@@ -35,38 +35,6 @@ export const DockerRowActions = ({ container, containerStatus, onContainerAction
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-border" />
-        <DropdownMenuItem 
-          onClick={() => onContainerAction(containerStatus === 'running' ? 'stop' : 'start', container.id, container.name)}
-          className="cursor-pointer hover:bg-muted"
-        >
-          {containerStatus === 'running' ? (
-            <>
-              <Square className="mr-2 h-4 w-4" />
-              Stop Container
-            </>
-          ) : (
-            <>
-              <Play className="mr-2 h-4 w-4" />
-              Start Container
-            </>
-          )}
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => onContainerAction('restart', container.id, container.name)}
-          className="cursor-pointer hover:bg-muted"
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Restart Container
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-border" />
-        <DropdownMenuItem 
-          onClick={() => onContainerAction('delete', container.id, container.name)}
-          className="cursor-pointer hover:bg-muted text-destructive focus:text-destructive"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Remove Container
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
