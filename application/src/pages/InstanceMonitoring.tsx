@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -11,70 +12,83 @@ import { Server, ServerStats } from "@/types/server.types";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { authService } from "@/services/authService";
 import { useNavigate } from "react-router-dom";
+
 const InstanceMonitoring = () => {
-  const {
-    theme
-  } = useTheme();
-  const {
-    t
-  } = useLanguage();
-  const {
-    sidebarCollapsed,
-    toggleSidebar
-  } = useSidebar();
+  const { theme } = useTheme();
+  const { t } = useLanguage();
+  const { sidebarCollapsed, toggleSidebar } = useSidebar();
   const navigate = useNavigate();
+  
   const [stats, setStats] = useState<ServerStats>({
     total: 0,
     online: 0,
     offline: 0,
     warning: 0
   });
+  
   const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
-  const {
-    data: servers = [],
-    isLoading,
-    error,
-    refetch
-  } = useQuery({
+  
+  const { data: servers = [], isLoading, error, refetch } = useQuery({
     queryKey: ['servers'],
     queryFn: serverService.getServers,
     refetchInterval: 30000 // Refetch every 30 seconds
   });
+  
   useEffect(() => {
     if (servers.length > 0) {
       serverService.getServerStats(servers).then(setStats);
     }
   }, [servers]);
+  
   const handleRefresh = () => {
     refetch();
   };
+  
   const handleLogout = () => {
     authService.logout();
     navigate('/login');
   };
+  
   if (error) {
-    return <div className={`min-h-screen flex ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-gray-50 text-gray-900'}`}>
+    return (
+      <div className="flex h-screen overflow-hidden bg-background text-foreground">
         <Sidebar collapsed={sidebarCollapsed} />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header currentUser={currentUser} onLogout={handleLogout} sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+        <div className="flex flex-col flex-1">
+          <Header 
+            currentUser={currentUser} 
+            onLogout={handleLogout} 
+            sidebarCollapsed={sidebarCollapsed} 
+            toggleSidebar={toggleSidebar} 
+          />
           <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
             <div className="text-center max-w-md w-full">
               <h2 className="text-xl sm:text-2xl font-bold mb-4">Error loading servers</h2>
               <p className="text-muted-foreground mb-4 text-sm sm:text-base">
                 Unable to fetch server data. Please check your connection and try again.
               </p>
-              <button onClick={handleRefresh} className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm sm:text-base">
+              <button 
+                onClick={handleRefresh} 
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm sm:text-base"
+              >
                 Retry
               </button>
             </div>
           </main>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className={`min-h-screen flex ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-gray-50 text-gray-900'}`}>
+  
+  return (
+    <div className="flex h-screen overflow-hidden bg-background text-foreground">
       <Sidebar collapsed={sidebarCollapsed} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header currentUser={currentUser} onLogout={handleLogout} sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+      <div className="flex flex-col flex-1">
+        <Header 
+          currentUser={currentUser} 
+          onLogout={handleLogout} 
+          sidebarCollapsed={sidebarCollapsed} 
+          toggleSidebar={toggleSidebar} 
+        />
         <main className="flex-1 overflow-auto">
           <div className="mx-[20px] my-[20px]">
             {/* Header Section */}
@@ -103,6 +117,8 @@ const InstanceMonitoring = () => {
           </div>
         </main>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default InstanceMonitoring;
