@@ -5,9 +5,11 @@ services:
     container_name: checkcle
     restart: unless-stopped
     ports:
-      - "8090:8090"  # Web Application
+      - "8090:8090" # Map ports for external access, if local only "127.0.0.1:8090:8090"
     volumes:
-      - /opt/pb_data:/mnt/pb_data  # Host directory mapped to container path
+      - /opt/pb_data:/mnt/pb_data  # Mount persistent data
+
+    # Optional: set user limits
     ulimits:
       nofile:
         soft: 4096
