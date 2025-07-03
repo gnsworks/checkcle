@@ -47,9 +47,9 @@ const ServerDetail = () => {
   if (serverError) {
     console.error('Server detail error:', serverError);
     return (
-      <div className={`min-h-screen flex ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-gray-50 text-gray-900'}`}>
+      <div className="flex h-screen overflow-hidden bg-background text-foreground">
         <Sidebar collapsed={sidebarCollapsed} />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex flex-col flex-1">
           <Header 
             currentUser={currentUser} 
             onLogout={handleLogout} 
@@ -77,9 +77,9 @@ const ServerDetail = () => {
 
   if (serverLoading) {
     return (
-      <div className={`min-h-screen flex ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-gray-50 text-gray-900'}`}>
+      <div className="flex h-screen overflow-hidden bg-background text-foreground">
         <Sidebar collapsed={sidebarCollapsed} />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex flex-col flex-1">
           <Header 
             currentUser={currentUser} 
             onLogout={handleLogout} 
@@ -98,9 +98,9 @@ const ServerDetail = () => {
   }
 
   return (
-    <div className={`min-h-screen flex ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-gray-50 text-gray-900'}`}>
+    <div className="flex h-screen overflow-hidden bg-background text-foreground">
       <Sidebar collapsed={sidebarCollapsed} />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex flex-col flex-1">
         <Header 
           currentUser={currentUser} 
           onLogout={handleLogout} 
