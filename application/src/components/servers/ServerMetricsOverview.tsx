@@ -54,8 +54,8 @@ export const ServerMetricsOverview = ({ server }: ServerMetricsOverviewProps) =>
             <div 
               className="p-2.5 rounded-xl shadow-sm ring-1 ring-white/10 transition-all duration-300 group-hover:scale-110"
               style={{ 
-                backgroundColor: `${color}15`,
-                boxShadow: `0 4px 12px ${color}20`
+                backgroundColor: `${color}35`,
+               // boxShadow: `0 4px 12px ${color}20`
               }}
             >
               <Icon className="h-4 w-4" style={{ color }} />
@@ -64,7 +64,7 @@ export const ServerMetricsOverview = ({ server }: ServerMetricsOverviewProps) =>
           </div>
           <div className="text-xs font-mono font-bold px-2 py-1 rounded-md" style={{ 
             color, 
-            backgroundColor: `${color}10`,
+            backgroundColor: `${color}35`,
             border: `1px solid ${color}30`
           }}>
             {percentage.toFixed(1)}%
