@@ -42,87 +42,122 @@ export const convertToBytes = (value: string | number): number => {
 type TimeRange = '60m' | '1d' | '7d' | '1m' | '3m';
 
 export const timeRangeOptions = [
-  { value: '60m' as TimeRange, label: '60 minutes', hours: 1 },
-  { value: '1d' as TimeRange, label: '1 day', hours: 24 },
-  { value: '7d' as TimeRange, label: '7 days', hours: 24 * 7 },
-  { value: '1m' as TimeRange, label: '1 month', hours: 24 * 30 },
-  { value: '3m' as TimeRange, label: '3 months', hours: 24 * 90 },
+  { value: '60m' as TimeRange, label: 'Last 60 minutes', hours: 1 },
+  { value: '1d' as TimeRange, label: 'Last 24 hours', hours: 24 },
+  { value: '7d' as TimeRange, label: 'Last 7 days', hours: 24 * 7 },
+  { value: '1m' as TimeRange, label: 'Last 30 days', hours: 24 * 30 },
+  { value: '3m' as TimeRange, label: 'Last 90 days', hours: 24 * 90 },
 ];
 
+// Optimized time range filtering with early returns
 export const filterMetricsByTimeRange = (metrics: any[], timeRange: TimeRange): any[] => {
+  if (!metrics?.length) return [];
+  
   const now = new Date();
   const selectedRange = timeRangeOptions.find(opt => opt.value === timeRange);
   if (!selectedRange) return metrics;
 
-  const cutoffTime = new Date(now.getTime() - (selectedRange.hours * 60 * 60 * 1000));
-  console.log('filterMetricsByTimeRange: timeRange:', timeRange, 'cutoffTime:', cutoffTime.toISOString(), 'now:', now.toISOString());
+  // Add small buffer to avoid edge cases
+  const bufferMinutes = timeRange === '60m' ? 5 : timeRange === '1d' ? 30 : 60;
+  const cutoffTime = new Date(now.getTime() - (selectedRange.hours * 60 * 60 * 1000) - (bufferMinutes * 60 * 1000));
+  
+  console.log('filterMetricsByTimeRange: timeRange:', timeRange, 'cutoffTime:', cutoffTime.toISOString());
   
   const filtered = metrics.filter(metric => {
     const metricTime = new Date(metric.created || metric.timestamp);
-    const isValid = metricTime >= cutoffTime;
-    if (!isValid && metrics.indexOf(metric) < 3) {
-      console.log('filterMetricsByTimeRange: Filtered out metric:', { 
-        metricTime: metricTime.toISOString(), 
-        cutoffTime: cutoffTime.toISOString(),
-        created: metric.created,
-        timestamp: metric.timestamp
-      });
-    }
-    return isValid;
+    return metricTime >= cutoffTime && metricTime <= now;
   });
   
   console.log('filterMetricsByTimeRange: Filtered', metrics.length, 'to', filtered.length, 'metrics');
-  return filtered;
+  
+  // Sort by timestamp for proper chart display
+  return filtered.sort((a, b) => 
+    new Date(a.created || a.timestamp).getTime() - new Date(b.created || b.timestamp).getTime()
+  );
 };
 
+// Optimized timestamp formatting with caching
+const timestampCache = new Map<string, string>();
+
 const formatTimestamp = (timestamp: string, timeRange: TimeRange): string => {
+  const cacheKey = `${timestamp}-${timeRange}`;
+  if (timestampCache.has(cacheKey)) {
+    return timestampCache.get(cacheKey)!;
+  }
+  
   const date = new Date(timestamp);
+  let formatted: string;
   
   if (timeRange === '60m') {
-    // For 60 minutes, show time with seconds
-    return date.toLocaleString('en-US', { 
+    formatted = date.toLocaleString('en-US', { 
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  } else if (timeRange === '1d') {
+    formatted = date.toLocaleString('en-US', { 
       month: 'short',
       day: 'numeric',
       hour: '2-digit', 
       minute: '2-digit',
-      second: '2-digit'
+      hour12: false
     });
-  } else if (timeRange === '1d') {
-    // For 1 day, show date and time
-    return date.toLocaleString('en-US', { 
+  } else if (timeRange === '7d') {
+    formatted = date.toLocaleString('en-US', { 
       month: 'short',
       day: 'numeric',
-      hour: '2-digit', 
-      minute: '2-digit'
+      hour: '2-digit',
+      hour12: false
     });
   } else {
-    // For longer periods, show date and time
-    return date.toLocaleString('en-US', { 
+    formatted = date.toLocaleString('en-US', { 
       month: 'short',
       day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit', 
-      minute: '2-digit'
+      year: '2-digit'
     });
   }
+  
+  // Cache the result (limit cache size)
+  if (timestampCache.size > 1000) {
+    timestampCache.clear();
+  }
+  timestampCache.set(cacheKey, formatted);
+  
+  return formatted;
 };
 
+// Optimized chart data formatting with better performance
 export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
   console.log('formatChartData: Input metrics count:', metrics?.length || 0, 'timeRange:', timeRange);
+  
+  if (!metrics?.length) return [];
   
   const filteredMetrics = filterMetricsByTimeRange(metrics, timeRange);
   console.log('formatChartData: After time filtering:', filteredMetrics?.length || 0, 'metrics');
   
-  if (filteredMetrics.length > 0) {
-    console.log('formatChartData: First filtered metric:', filteredMetrics[0]);
-    console.log('formatChartData: Sample timestamps:', filteredMetrics.slice(0, 3).map(m => ({ 
-      created: m.created, 
-      timestamp: m.timestamp,
-      both: new Date(m.created || m.timestamp).toISOString()
-    })));
+  if (!filteredMetrics.length) return [];
+  
+  // Dynamic sampling based on time range and data volume
+  let maxDataPoints: number;
+  switch (timeRange) {
+    case '60m': maxDataPoints = 60; break;   // 1 point per minute max
+    case '1d': maxDataPoints = 144; break;   // 1 point per 10 minutes max
+    case '7d': maxDataPoints = 168; break;   // 1 point per hour max
+    case '1m': maxDataPoints = 120; break;   // 1 point per 6 hours max
+    case '3m': maxDataPoints = 90; break;    // 1 point per day max
+    default: maxDataPoints = 100;
   }
   
-  return filteredMetrics.slice(0, 100).reverse().map((metric, index) => {
+  // Smart sampling - only sample if we have significantly more data
+  const sampledMetrics = filteredMetrics.length > maxDataPoints * 1.2
+    ? filteredMetrics.filter((_, index) => index % Math.ceil(filteredMetrics.length / maxDataPoints) === 0)
+    : filteredMetrics;
+  
+  console.log('formatChartData: After sampling:', sampledMetrics.length, 'metrics for display');
+  
+  // Batch process the data transformation for better performance
+  return sampledMetrics.map((metric) => {
     const cpuUsage = typeof metric.cpu_usage === 'string' ? 
       parseFloat(metric.cpu_usage.replace('%', '')) : 
       parseFloat(metric.cpu_usage) || 0;
@@ -149,7 +184,7 @@ export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
       fullTimestamp: timestamp,
       cpuUsage: Math.round(cpuUsage * 100) / 100,
       cpuCores: parseInt(metric.cpu_cores) || 0,
-      cpuFree: 100 - cpuUsage,
+      cpuFree: Math.round((100 - cpuUsage) * 100) / 100,
       
       ramUsedBytes,
       ramTotalBytes,

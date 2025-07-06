@@ -6,10 +6,10 @@ import { serverService } from "@/services/serverService";
 import { Loader2, Cpu, HardDrive, Network, MemoryStick } from "lucide-react";
 import { formatChartData } from "./charts/dataUtils";
 import { TimeRangeSelector } from "./charts/TimeRangeSelector";
-import { CPUCharts } from "./charts/CPUCharts";
-import { MemoryCharts } from "./charts/MemoryCharts";
-import { DiskCharts } from "./charts/DiskCharts";
-import { NetworkCharts } from "./charts/NetworkCharts";
+import { CPUChart } from "./charts/CPUChart";
+import { MemoryChart } from "./charts/MemoryChart";
+import { DiskChart } from "./charts/DiskChart";
+import { NetworkChart } from "./charts/NetworkChart";
 
 interface ServerMetricsChartsProps {
   serverId: string;
@@ -58,6 +58,9 @@ export const ServerMetricsCharts = ({ serverId }: ServerMetricsChartsProps) => {
     );
   }
 
+  // Calculate latest data for each chart
+  const latestData = chartData[chartData.length - 1];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -89,19 +92,19 @@ export const ServerMetricsCharts = ({ serverId }: ServerMetricsChartsProps) => {
         </TabsList>
 
         <TabsContent value="cpu" className="space-y-4 mt-6">
-          <CPUCharts data={chartData} />
+          <CPUChart data={chartData} latestData={latestData} />
         </TabsContent>
 
         <TabsContent value="memory" className="space-y-4 mt-6">
-          <MemoryCharts data={chartData} />
+          <MemoryChart data={chartData} latestData={latestData} />
         </TabsContent>
 
         <TabsContent value="disk" className="space-y-4 mt-6">
-          <DiskCharts data={chartData} />
+          <DiskChart data={chartData} latestData={latestData} />
         </TabsContent>
 
         <TabsContent value="network" className="space-y-4 mt-6">
-          <NetworkCharts data={chartData} />
+          <NetworkChart data={chartData} latestData={latestData} />
         </TabsContent>
       </Tabs>
     </div>
