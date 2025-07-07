@@ -36,7 +36,7 @@ export const ServerMetricsOverview = ({ server }: ServerMetricsOverviewProps) =>
   const ramUsagePercent = server.ram_total > 0 ? (server.ram_used / server.ram_total) * 100 : 0;
   const diskUsagePercent = server.disk_total > 0 ? (server.disk_used / server.disk_total) * 100 : 0;
 
-  const MetricCard = ({ title, used, total, free, percentage, icon: Icon, color, additionalInfo }: {
+  const MetricCard = ({ title, used, total, free, percentage, icon: Icon, color, gradient, additionalInfo }: {
     title: string;
     used: string;
     total: string;
@@ -44,66 +44,69 @@ export const ServerMetricsOverview = ({ server }: ServerMetricsOverviewProps) =>
     percentage: number;
     icon: any;
     color: string;
+    gradient: string;
     additionalInfo?: string;
   }) => (
-    <Card className="relative overflow-hidden bg-gradient-to-br from-card/80 via-card to-card/60 border border-border/60 shadow-lg hover:shadow-xl hover:border-border/80 transition-all duration-300 backdrop-blur-sm group">
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/[0.02] to-white/[0.05] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <CardHeader className="pb-3 relative">
+    <Card 
+      className="border-none rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 relative"
+      style={{ background: gradient }}
+    >
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 z-0 opacity-10">
+        <div 
+          className="w-full h-full" 
+          style={{ 
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundSize: '20px 20px'
+          }}
+        />
+      </div>
+      
+      <CardHeader className="pb-3 relative z-10">
         <CardTitle className="flex items-center justify-between text-sm font-semibold">
           <div className="flex items-center gap-3">
-            <div 
-              className="p-2.5 rounded-xl shadow-sm ring-1 ring-white/10 transition-all duration-300 group-hover:scale-110"
-              style={{ 
-                backgroundColor: `${color}35`,
-               // boxShadow: `0 4px 12px ${color}20`
-              }}
-            >
-              <Icon className="h-4 w-4" style={{ color }} />
+            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:scale-110">
+              <Icon className="h-4 w-4 text-white" />
             </div>
-            <span className="text-foreground/90">{title}</span>
+            <span className="text-white">{title}</span>
           </div>
-          <div className="text-xs font-mono font-bold px-2 py-1 rounded-md" style={{ 
-            color, 
-            backgroundColor: `${color}35`,
-            border: `1px solid ${color}30`
-          }}>
+          <div className="text-xs font-mono font-bold px-2 py-1 rounded-md bg-white/20 backdrop-blur-sm text-white border border-white/30">
             {percentage.toFixed(1)}%
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 relative">
+      
+      <CardContent className="space-y-4 relative z-10">
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div className="space-y-1">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Used:</span>
-              <span className="font-mono font-semibold text-foreground">{used}</span>
+              <span className="text-white/70">Used:</span>
+              <span className="font-mono font-semibold text-white">{used}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Free:</span>
-              <span className="font-mono font-semibold text-foreground">{free}</span>
+              <span className="text-white/70">Free:</span>
+              <span className="font-mono font-semibold text-white">{free}</span>
             </div>
           </div>
           <div className="space-y-1">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Total:</span>
-              <span className="font-mono font-semibold text-foreground">{total}</span>
+              <span className="text-white/70">Total:</span>
+              <span className="font-mono font-semibold text-white">{total}</span>
             </div>
             {additionalInfo && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Cores:</span>
-                <span className="font-mono font-semibold text-foreground">{additionalInfo}</span>
+                <span className="text-white/70">Cores:</span>
+                <span className="font-mono font-semibold text-white">{additionalInfo}</span>
               </div>
             )}
           </div>
         </div>
-        <div className="w-full bg-muted/40 rounded-full h-3 overflow-hidden shadow-inner">
+        
+        <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden shadow-inner backdrop-blur-sm">
           <div 
-            className="h-3 rounded-full transition-all duration-700 ease-out relative overflow-hidden"
-            style={{ 
-              width: `${Math.min(percentage, 100)}%`,
-              backgroundColor: color,
-              boxShadow: `0 0 12px ${color}50, inset 0 1px 0 rgba(255,255,255,0.2)`
-            }}
+            className="h-3 rounded-full transition-all duration-700 ease-out relative overflow-hidden bg-white/80"
+            style={{ width: `${Math.min(percentage, 100)}%` }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-white/10" />
@@ -116,54 +119,90 @@ export const ServerMetricsOverview = ({ server }: ServerMetricsOverviewProps) =>
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
       {/* Status Card */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-card/80 via-card to-card/60 border border-border/60 shadow-lg hover:shadow-xl hover:border-border/80 transition-all duration-300 backdrop-blur-sm group">
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/[0.02] to-white/[0.05] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <CardHeader className="pb-3 relative">
+      <Card 
+        className="border-none rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 relative"
+        style={{
+          background: theme === 'dark' 
+            ? "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, rgba(59, 130, 246, 0.6) 100%)" 
+            : "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, #3b82f6 100%)"
+        }}
+      >
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 z-0 opacity-10">
+          <div 
+            className="w-full h-full" 
+            style={{ 
+              backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), 
+                                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+              backgroundSize: '20px 20px'
+            }}
+          />
+        </div>
+        
+        <CardHeader className="pb-3 relative z-10">
           <CardTitle className="flex items-center gap-3 text-sm font-semibold">
-            <div className="p-2.5 rounded-xl bg-primary/15 shadow-sm ring-1 ring-white/10 transition-all duration-300 group-hover:scale-110" style={{ boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)' }}>
-              <Activity className="h-4 w-4 text-primary" />
+            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:scale-110">
+              <Activity className="h-4 w-4 text-white" />
             </div>
-            <span className="text-foreground/90">Status</span>
+            <span className="text-white">Status</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 relative">
-          <div className={`text-lg font-bold capitalize ${getStatusColor(server.status)} flex items-center gap-3`}>
-            <div className={`w-3 h-3 rounded-full ${server.status === 'up' ? 'bg-green-500' : server.status === 'down' ? 'bg-red-500' : 'bg-yellow-500'} animate-pulse shadow-sm`} style={{ 
-              boxShadow: `0 0 8px ${server.status === 'up' ? '#10b981' : server.status === 'down' ? '#ef4444' : '#f59e0b'}` 
-            }} />
+        
+        <CardContent className="space-y-4 relative z-10">
+          <div className={`text-lg font-bold capitalize flex items-center gap-3 text-white`}>
+            <div className={`w-3 h-3 rounded-full ${server.status === 'up' ? 'bg-green-400' : server.status === 'down' ? 'bg-red-400' : 'bg-yellow-400'} animate-pulse shadow-sm`} />
             {server.status}
           </div>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between py-1">
-              <span className="text-muted-foreground">Agent:</span>
-              <span className="font-semibold text-foreground">{server.agent_status}</span>
+              <span className="text-white/70">Agent:</span>
+              <span className="font-semibold text-white">{server.agent_status}</span>
             </div>
             <div className="flex justify-between py-1">
-              <span className="text-muted-foreground">Connection:</span>
-              <span className="font-semibold text-foreground">{server.connection}</span>
+              <span className="text-white/70">Connection:</span>
+              <span className="font-semibold text-white">{server.connection}</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Uptime Card */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-card/80 via-card to-card/60 border border-border/60 shadow-lg hover:shadow-xl hover:border-border/80 transition-all duration-300 backdrop-blur-sm group">
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/[0.02] to-white/[0.05] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <CardHeader className="pb-3 relative">
+      <Card 
+        className="border-none rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 relative"
+        style={{
+          background: theme === 'dark' 
+            ? "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, rgba(34, 197, 94, 0.6) 100%)" 
+            : "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, #22c55e 100%)"
+        }}
+      >
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 z-0 opacity-10">
+          <div 
+            className="w-full h-full" 
+            style={{ 
+              backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), 
+                                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+              backgroundSize: '20px 20px'
+            }}
+          />
+        </div>
+        
+        <CardHeader className="pb-3 relative z-10">
           <CardTitle className="flex items-center gap-3 text-sm font-semibold">
-            <div className="p-2.5 rounded-xl bg-blue-500/15 shadow-sm ring-1 ring-white/10 transition-all duration-300 group-hover:scale-110" style={{ boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)' }}>
-              <Clock className="h-4 w-4 text-blue-500" />
+            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:scale-110">
+              <Clock className="h-4 w-4 text-white" />
             </div>
-            <span className="text-foreground/90">Uptime</span>
+            <span className="text-white">Uptime</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 relative">
-          <div className="text-lg font-bold text-blue-500">
+        
+        <CardContent className="space-y-4 relative z-10">
+          <div className="text-lg font-bold text-white">
             {server.uptime}
           </div>
-          <div className="text-xs text-muted-foreground space-y-1">
+          <div className="text-xs text-white/70 space-y-1">
             <div>Last Check:</div>
-            <div className="font-mono text-[10px] text-foreground/80 bg-muted/30 px-2 py-1 rounded">
+            <div className="font-mono text-[10px] text-white/90 bg-white/10 px-2 py-1 rounded backdrop-blur-sm">
               {new Date(server.last_checked).toLocaleString()}
             </div>
           </div>
@@ -179,6 +218,10 @@ export const ServerMetricsOverview = ({ server }: ServerMetricsOverviewProps) =>
         percentage={cpuUsagePercent}
         icon={Cpu}
         color={theme === 'dark' ? "#3b82f6" : "#2563eb"}
+        gradient={theme === 'dark' 
+          ? "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, rgba(59, 130, 246, 0.6) 100%)" 
+          : "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, #3b82f6 100%)"
+        }
         additionalInfo={server.cpu_cores?.toString()}
       />
 
@@ -191,6 +234,10 @@ export const ServerMetricsOverview = ({ server }: ServerMetricsOverviewProps) =>
         percentage={ramUsagePercent}
         icon={MemoryStick}
         color={theme === 'dark' ? "#10b981" : "#059669"}
+        gradient={theme === 'dark' 
+          ? "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, rgba(16, 185, 129, 0.6) 100%)" 
+          : "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, #10b981 100%)"
+        }
       />
 
       {/* Disk Metric */}
@@ -202,6 +249,10 @@ export const ServerMetricsOverview = ({ server }: ServerMetricsOverviewProps) =>
         percentage={diskUsagePercent}
         icon={HardDrive}
         color={theme === 'dark' ? "#f59e0b" : "#d97706"}
+        gradient={theme === 'dark' 
+          ? "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, rgba(245, 158, 11, 0.6) 100%)" 
+          : "linear-gradient(135deg, rgba(65, 59, 55, 0.8) 0%, #f59e0b 100%)"
+        }
       />
     </div>
   );
