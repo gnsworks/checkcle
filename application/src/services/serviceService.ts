@@ -32,10 +32,11 @@ export const serviceService = {
         muteAlerts: item.alerts === "muted",  // Convert string to boolean for compatibility
         alerts: item.alerts || "unmuted",     // Store actual database field
         muteChangedAt: item.mute_changed_at,
-        // Regional monitoring fields
+        // Regional monitoring fields - use regional_status
         region_name: item.region_name || "",
         agent_id: item.agent_id || "",
-        regional_monitoring_enabled: item.regional_monitoring_enabled || false,
+        regional_status: item.regional_status || "disabled",
+        regional_monitoring_enabled: item.regional_status === "enabled", // Backward compatibility
       }));
     } catch (error) {
       console.error("Error fetching services:", error);
@@ -62,8 +63,8 @@ export const serviceService = {
         max_retries: params.retries,
         notification_id: params.notificationChannel,
         template_id: params.alertTemplate,
-        // Regional monitoring fields
-        regional_monitoring_enabled: params.regionalMonitoringEnabled || false,
+        // Regional monitoring fields - use regional_status
+        regional_status: params.regionalStatus || "disabled",
         region_name: params.regionName || "",
         agent_id: params.agentId || "",
         // Conditionally add fields based on service type
@@ -98,7 +99,8 @@ export const serviceService = {
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
         alertTemplate: record.template_id,
-        regional_monitoring_enabled: record.regional_monitoring_enabled || false,
+        regional_status: record.regional_status || "disabled",
+        regional_monitoring_enabled: record.regional_status === "enabled",
         region_name: record.region_name || "",
         agent_id: record.agent_id || "",
       } as Service;
@@ -128,8 +130,8 @@ export const serviceService = {
         max_retries: params.retries,
         notification_id: params.notificationChannel || null,
         template_id: params.alertTemplate || null,
-        // Regional monitoring fields
-        regional_monitoring_enabled: params.regionalMonitoringEnabled || false,
+        // Regional monitoring fields - use regional_status
+        regional_status: params.regionalStatus || "disabled",
         region_name: params.regionName || "",
         agent_id: params.agentId || "",
         // Conditionally update fields based on service type
@@ -171,7 +173,8 @@ export const serviceService = {
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
         alertTemplate: record.template_id,
-        regional_monitoring_enabled: record.regional_monitoring_enabled || false,
+        regional_status: record.regional_status || "disabled",
+        regional_monitoring_enabled: record.regional_status === "enabled",
         region_name: record.region_name || "",
         agent_id: record.agent_id || "",
       } as Service;

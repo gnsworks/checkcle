@@ -14,13 +14,13 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
   
   // Modern color palette for different chart lines with solid colors at 90-100% opacity
   const modernColors = [
-    { stroke: '#f59e0b', fill: 'rgba(245, 158, 11, 0.95)' }, // Yellow (changed from blue)
-    { stroke: '#10b981', fill: 'rgba(16, 185, 129, 0.95)' }, // Emerald
+    { stroke: '#f59e0b', fill: 'rgba(111, 86, 63, 0.95)' }, // Yellow (changed from blue)
+    { stroke: '#10b981', fill: 'rgba(0, 84, 56, 0.95)' }, // Emerald
     { stroke: '#3b82f6', fill: 'rgba(59, 130, 246, 0.95)' }, // Blue (moved to second position)
     { stroke: '#ef4444', fill: 'rgba(239, 68, 68, 0.95)' }, // Red
     { stroke: '#8b5cf6', fill: 'rgba(139, 92, 246, 0.95)' }, // Violet
     { stroke: '#06b6d4', fill: 'rgba(6, 182, 212, 0.95)' }, // Cyan
-    { stroke: '#f97316', fill: 'rgba(249, 115, 22, 0.95)' }, // Orange
+    { stroke: '#f97316', fill: 'rgba(231, 148, 89, 0.95)' }, // Orange
     { stroke: '#84cc16', fill: 'rgba(132, 204, 22, 0.95)' }, // Lime
   ];
   

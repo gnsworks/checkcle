@@ -14,6 +14,7 @@ import { ArrowLeft, Server, Database } from "lucide-react";
 import { ServerMetricsCharts } from "@/components/servers/ServerMetricsCharts";
 import { ServerMetricsOverview } from "@/components/servers/ServerMetricsOverview";
 import { ServerHistoryCharts } from "@/components/servers/ServerHistoryCharts";
+import { ServerSystemInfoCard } from "@/components/servers/ServerSystemInfoCard";
 
 const ServerDetail = () => {
   const { serverId } = useParams();
@@ -136,14 +137,18 @@ const ServerDetail = () => {
                     Monitor server performance metrics and system health
                     {server && (
                       <span className="block text-xs text-foreground/80 mt-1">
-                        {server.hostname} • {server.ip_address} • {server.os_type} • {server.system_info} 
+                        {server.hostname} • {server.ip_address} • {server.os_type}
                       </span>
                       
                     )}
                   </p>
-                  
-                  
                 </div>
+                  {/* System Info Card */}
+                {server && (
+                  <div className="flex-shrink-0">
+                    <ServerSystemInfoCard server={server} />
+                  </div>
+                )}
               </div>
             </div>
 

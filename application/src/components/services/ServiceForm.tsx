@@ -74,8 +74,9 @@ export function ServiceForm({
         urlValue = initialData.url || "";
       }
 
-      // Handle regional monitoring data - ensure proper assignment display
-      const regionalAgent = initialData.region_name && initialData.agent_id 
+      // Handle regional monitoring data - check regional_status field
+      const isRegionalEnabled = initialData.regional_status === "enabled";
+      const regionalAgent = isRegionalEnabled && initialData.region_name && initialData.agent_id 
         ? `${initialData.region_name}|${initialData.agent_id}` 
         : "";
 
@@ -89,7 +90,7 @@ export function ServiceForm({
         retries: String(initialData.retries || 3),
         notificationChannel: initialData.notificationChannel === "none" ? "" : initialData.notificationChannel || "",
         alertTemplate: initialData.alertTemplate === "default" ? "" : initialData.alertTemplate || "",
-        regionalMonitoringEnabled: Boolean(initialData.regional_monitoring_enabled),
+        regionalMonitoringEnabled: isRegionalEnabled,
         regionalAgent: regionalAgent,
       });
 
@@ -99,7 +100,8 @@ export function ServiceForm({
         url: urlValue, 
         port: portValue, 
         regionalAgent,
-        regionalMonitoringEnabled: Boolean(initialData.regional_monitoring_enabled),
+        regionalMonitoringEnabled: isRegionalEnabled,
+        regional_status: initialData.regional_status,
         region_name: initialData.region_name,
         agent_id: initialData.agent_id
       });
@@ -118,12 +120,16 @@ export function ServiceForm({
       // Parse regional agent selection
       let regionName = "";
       let agentId = "";
+      let regionalStatus: "enabled" | "disabled" = "disabled";
       
-      // Only set region and agent if regional monitoring is enabled AND an agent is selected (not unassign)
-      if (data.regionalMonitoringEnabled && data.regionalAgent && data.regionalAgent !== "") {
-        const [parsedRegionName, parsedAgentId] = data.regionalAgent.split("|");
-        regionName = parsedRegionName || "";
-        agentId = parsedAgentId || "";
+      // Set regional status and agent data based on form values
+      if (data.regionalMonitoringEnabled) {
+        regionalStatus = "enabled";
+        if (data.regionalAgent && data.regionalAgent !== "") {
+          const [parsedRegionName, parsedAgentId] = data.regionalAgent.split("|");
+          regionName = parsedRegionName || "";
+          agentId = parsedAgentId || "";
+        }
       }
       
       // Prepare service data with proper field mapping
@@ -134,8 +140,8 @@ export function ServiceForm({
         retries: parseInt(data.retries),
         notificationChannel: data.notificationChannel === "none" ? "" : data.notificationChannel,
         alertTemplate: data.alertTemplate === "default" ? "" : data.alertTemplate,
-        regionalMonitoringEnabled: data.regionalMonitoringEnabled || false,
-        // Always set region_name and agent_id - empty strings when unassigned
+        // Use regional_status field instead of regionalMonitoringEnabled
+        regionalStatus: regionalStatus,
         regionName: regionName,
         agentId: agentId,
         // Map the URL field to appropriate database field based on service type

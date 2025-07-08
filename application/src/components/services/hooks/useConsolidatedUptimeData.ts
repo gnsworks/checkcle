@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { uptimeService } from '@/services/uptimeService';
@@ -167,14 +166,72 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
     if (uptimeData && uptimeData.length > 0) {
       console.log(`Processing consolidated uptime data for service ${serviceId}`);
       const processedData = processConsolidatedData(uptimeData);
-      setConsolidatedItems(processedData);
+      
+      // If service is currently paused, override ONLY the latest (first) bar with paused status
+      if (status === "paused" && processedData.length > 0) {
+        console.log(`Service ${serviceId} is paused, overriding latest bar with paused status`);
+        
+        // Create a paused entry for the latest timestamp
+        const latestTimestamp = new Date();
+        latestTimestamp.setSeconds(0, 0); // Normalize to minute precision
+        
+        const pausedSlot: ConsolidatedTimeSlot = {
+          timestamp: latestTimestamp.toISOString(),
+          items: [{
+            id: `paused-${serviceId}-latest`,
+            service_id: serviceId || "",
+            serviceId: serviceId || "",
+            timestamp: latestTimestamp.toISOString(),
+            status: "paused" as "up" | "down" | "warning" | "paused",
+            responseTime: 0,
+            source: 'Default (Agent 1)',
+            isDefault: true
+          }]
+        };
+        
+        // Replace the first item with paused status, keep the rest as historical data
+        const updatedData = [pausedSlot, ...processedData.slice(0, 19)];
+        console.log(`Updated data with paused latest bar, total bars: ${updatedData.length}`);
+        setConsolidatedItems(updatedData);
+      } else {
+        // Service is active (up/down/warning) - merge real data with any existing paused bars
+        console.log(`Service ${serviceId} is active with status: ${status}, merging with existing paused bars`);
+        
+        // Get existing paused bars from current state
+        const existingPausedBars = consolidatedItems.filter(slot => 
+          slot.items.some(item => item.status === "paused")
+        );
+        
+        // Create a map of existing paused timestamps for quick lookup
+        const pausedTimestamps = new Set(existingPausedBars.map(slot => slot.timestamp));
+        
+        // Merge processed data with existing paused bars
+        const mergedData = [...processedData];
+        
+        // Add back any paused bars that don't conflict with new data
+        existingPausedBars.forEach(pausedSlot => {
+          const hasConflict = processedData.some(slot => slot.timestamp === pausedSlot.timestamp);
+          if (!hasConflict) {
+            mergedData.push(pausedSlot);
+            console.log(`Preserved paused bar at timestamp: ${pausedSlot.timestamp}`);
+          }
+        });
+        
+        // Sort by timestamp (newest first) and limit to 20
+        const finalData = mergedData
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 20);
+        
+        console.log(`Final merged data has ${finalData.length} slots`);
+        setConsolidatedItems(finalData);
+      }
     } else if (!serviceId || (uptimeData && uptimeData.length === 0)) {
       // Generate placeholder data when no real data is available
-      console.log(`No uptime data available for service ${serviceId}, generating placeholder`);
+      console.log(`No uptime data available for service ${serviceId}, generating placeholder with status: ${status}`);
       
-      const statusValue = (status === "up" || status === "down" || status === "warning" || status === "paused") 
-        ? status 
-        : "paused";
+      // Use the actual service status for placeholder data
+      const statusValue = status === "paused" ? "paused" : 
+                         (status === "up" || status === "down" || status === "warning") ? status : "unknown";
         
       const placeholderHistory: ConsolidatedTimeSlot[] = Array(20).fill(null).map((_, index) => {
         const timestamp = new Date(Date.now() - (index * interval * 1000));
@@ -188,16 +245,17 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
             serviceId: serviceId || "",
             timestamp: timestamp.toISOString(),
             status: statusValue as "up" | "down" | "warning" | "paused",
-            responseTime: 0,
+            responseTime: statusValue === "paused" ? 0 : (statusValue === "up" ? 200 : 0),
             source: 'Default (Agent 1)',
             isDefault: true
           }]
         };
       });
       
+      console.log(`Generated ${placeholderHistory.length} placeholder slots with status: ${statusValue}`);
       setConsolidatedItems(placeholderHistory);
     }
-  }, [uptimeData, serviceId, status, interval]);
+  }, [uptimeData, serviceId, status, interval, consolidatedItems]);
 
   return {
     consolidatedItems,

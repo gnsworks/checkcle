@@ -34,6 +34,7 @@ export interface Service {
   // Regional monitoring fields
   region_name?: string;
   agent_id?: string;
+  regional_status?: "enabled" | "disabled"; // Add regional_status field
   regional_monitoring_enabled?: boolean;
 }
 
@@ -50,6 +51,7 @@ export interface CreateServiceParams {
   alertTemplate?: string;
   // Regional monitoring params
   regionalMonitoringEnabled?: boolean;
+  regionalStatus?: "enabled" | "disabled"; // Add regionalStatus field
   regionName?: string;
   agentId?: string;
 }
