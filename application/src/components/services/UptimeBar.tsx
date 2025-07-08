@@ -24,7 +24,7 @@ export const UptimeBar = ({ uptime, status, serviceId, interval, serviceType }: 
 
   const getStatusColor = (itemStatus: string, hasData: boolean = true) => {
     if (!hasData) {
-      return "bg-gray-300"; // No data color
+      return "bg-gray-400"; // No data color - grey
     }
     
     switch (itemStatus) {
@@ -35,9 +35,11 @@ export const UptimeBar = ({ uptime, status, serviceId, interval, serviceType }: 
       case "warning":
         return "bg-yellow-500";
       case "paused":
-        return "bg-gray-500"; // Distinct paused color (darker grey)
+        return "bg-gray-400"; // Paused status - grey
+      case "unknown":
+      case "NA":
       default:
-        return "bg-gray-300"; // Default fallback
+        return "bg-gray-400"; // Unknown/NA/default - grey
     }
   };
 
@@ -102,7 +104,7 @@ export const UptimeBar = ({ uptime, status, serviceId, interval, serviceType }: 
                                 item.status === 'up' ? 'bg-emerald-500' :
                                 item.status === 'down' ? 'bg-red-500' :
                                 item.status === 'warning' ? 'bg-yellow-500' : 
-                                item.status === 'paused' ? 'bg-gray-500' : 'bg-gray-300'
+                                item.status === 'paused' ? 'bg-gray-400' : 'bg-gray-400'
                               }`} />
                               <span className="text-xs font-medium truncate">{item.source}</span>
                             </div>
