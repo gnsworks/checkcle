@@ -22,8 +22,10 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
     enabled: regionalMonitoringEnabled,
   });
 
-  // Filter only online agents
-  const onlineAgents = regionalAgents.filter(agent => agent.connection === 'online');
+  // Filter only online agents and exclude the default localhost agent (ID 1)
+  const onlineAgents = regionalAgents.filter(agent => 
+    agent.connection === 'online' && agent.agent_id !== "1"
+  );
 
   // Find the current agent name for display
   const getCurrentAgentDisplay = () => {
@@ -31,7 +33,7 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
       return "Select a regional agent or unassign";
     }
     
-    const [regionName] = currentRegionalAgent.split("|");
+    const [regionName, agentId] = currentRegionalAgent.split("|");
     const agent = onlineAgents.find(agent => 
       `${agent.region_name}|${agent.agent_id}` === currentRegionalAgent
     );
@@ -41,7 +43,25 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
     }
     
     // If agent is not found in online agents, it might be offline but still assigned
-    return regionName || "Select a regional agent or unassign";
+    // Show the region name from the stored value
+    if (regionName && agentId) {
+      return `${regionName} (Agent ${agentId}) - Offline`;
+    }
+    
+    return "Select a regional agent or unassign";
+  };
+
+  // Get the proper select value - handle both assigned and unassigned cases
+  const getSelectValue = () => {
+    if (!regionalMonitoringEnabled) {
+      return "unassign";
+    }
+    
+    if (!currentRegionalAgent || currentRegionalAgent === "") {
+      return "unassign";
+    }
+    
+    return currentRegionalAgent;
   };
 
   return (
@@ -82,7 +102,7 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
                   // Handle the unassign case by setting to empty string
                   field.onChange(value === "unassign" ? "" : value);
                 }} 
-                value={field.value || "unassign"}
+                value={getSelectValue()}
                 disabled={isLoading}
               >
                 <FormControl>
@@ -135,12 +155,12 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
                   No online regional agents found. Services will use default monitoring.
                 </p>
               )}
-              {currentRegionalAgent && currentRegionalAgent !== "" && currentRegionalAgent !== "unassign" && (
+              {currentRegionalAgent && currentRegionalAgent !== "" && (
                 <p className="text-sm text-green-600">
                   Currently assigned to: {getCurrentAgentDisplay()}
                 </p>
               )}
-              {(!currentRegionalAgent || currentRegionalAgent === "" || currentRegionalAgent === "unassign") && (
+              {(!currentRegionalAgent || currentRegionalAgent === "") && regionalMonitoringEnabled && (
                 <p className="text-sm text-orange-600">
                   Service is unassigned and will use default monitoring.
                 </p>
