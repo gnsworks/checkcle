@@ -1,4 +1,4 @@
-![CheckCle Platform](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/instance-server-monitoring.png)
+![CheckCle Platform](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/server-detail-page.png)
 
 # 🚀 What is CheckCle?
 
