@@ -8,7 +8,7 @@ import { toast } from "sonner";
  */
 export const fetchSSLCertificates = async (): Promise<SSLCertificate[]> => {
   try {
-    console.log("Fetching SSL certificates from PocketBase...");
+  //  console.log("Fetching SSL certificates from PocketBase...");
     
     // Using the direct API path to fetch SSL certificates
     const endpoint = "/api/collections/ssl_certificates/records";
@@ -23,7 +23,7 @@ export const fetchSSLCertificates = async (): Promise<SSLCertificate[]> => {
     const queryString = new URLSearchParams(params as any).toString();
     const fullEndpoint = `${endpoint}?${queryString}`;
     
-    console.log("Fetching SSL certificates from:", fullEndpoint);
+  //  console.log("Fetching SSL certificates from:", fullEndpoint);
     const response = await pb.send(fullEndpoint, {
       method: "GET",
       headers: {
@@ -39,14 +39,14 @@ export const fetchSSLCertificates = async (): Promise<SSLCertificate[]> => {
       throw new Error("Invalid response format from PocketBase API");
     }
 
-    console.log("Received SSL certificates:", response.items.length);
+   // console.log("Received SSL certificates:", response.items.length);
     
     // Map items to SSLCertificate[] type with validation
     return response.items.map(item => {
       const cert = item as SSLCertificate;
       
       // Log certificate details for debugging
-      console.log(`Certificate for ${cert.domain}: Issued by ${cert.issuer_o}, Days left: ${cert.days_left}`);
+   //   console.log(`Certificate for ${cert.domain}: Issued by ${cert.issuer_o}, Days left: ${cert.days_left}`);
       
       // Ensure dates are valid
       try {
@@ -54,7 +54,7 @@ export const fetchSSLCertificates = async (): Promise<SSLCertificate[]> => {
         if (cert.valid_till) new Date(cert.valid_till).toISOString();
         if (cert.last_notified) new Date(cert.last_notified).toISOString();
       } catch (e) {
-        console.warn("Invalid date found in certificate", cert.id, e);
+    //    console.warn("Invalid date found in certificate", cert.id, e);
         // Fix invalid dates if needed
         if (cert.valid_from && isNaN(new Date(cert.valid_from).getTime())) {
           cert.valid_from = new Date().toISOString();
@@ -74,7 +74,7 @@ export const fetchSSLCertificates = async (): Promise<SSLCertificate[]> => {
           const diffTime = expirationDate.getTime() - currentDate.getTime();
           cert.days_left = Math.ceil(diffTime / (1000 * 3600 * 24));
         } catch (e) {
-          console.warn("Error calculating days_left for certificate", cert.id, e);
+     //     console.warn("Error calculating days_left for certificate", cert.id, e);
           cert.days_left = 0;
         }
       }
@@ -82,7 +82,7 @@ export const fetchSSLCertificates = async (): Promise<SSLCertificate[]> => {
       return cert;
     });
   } catch (error) {
-    console.error("Error fetching SSL certificates:", error);
+   // console.error("Error fetching SSL certificates:", error);
     toast.error("Failed to fetch SSL certificates. Please try again later.");
     throw error;
   }

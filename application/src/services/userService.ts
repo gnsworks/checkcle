@@ -58,7 +58,7 @@ const convertToUserType = (record: any, role: string = "admin"): User => {
 export const userService = {
   async getUsers(): Promise<User[] | null> {
     try {
-      console.log("Calling getUsers API");
+     // console.log("Calling getUsers API");
       
       // Get both regular users and superadmins
       const regularUsers = await pb.collection('users').getList(1, 50, {
@@ -71,9 +71,9 @@ export const userService = {
         superadminUsers = await pb.collection('_superusers').getList(1, 50, {
           sort: 'created',
         });
-        console.log("Successfully fetched superadmin users:", superadminUsers);
+       // console.log("Successfully fetched superadmin users:", superadminUsers);
       } catch (error) {
-        console.log("No superadmin collection or access rights:", error);
+       // console.log("No superadmin collection or access rights:", error);
       }
       
       // Combine both user types and mark superadmins
@@ -82,39 +82,39 @@ export const userService = {
         ...superadminUsers.items.map((user: any) => convertToUserType(user, "superadmin"))
       ];
       
-      console.log("Combined users list:", allUsers);
+    //  console.log("Combined users list:", allUsers);
       
       return allUsers;
     } catch (error) {
-      console.error("Failed to fetch users:", error);
+     // console.error("Failed to fetch users:", error);
       return null;
     }
   },
   
   async getUser(id: string): Promise<User | null> {
     try {
-      console.log(`Fetching user with ID: ${id}`);
+    //  console.log(`Fetching user with ID: ${id}`);
       
       // Try fetching from regular users first
       try {
         const user = await pb.collection('users').getOne(id);
-        console.log("User fetch result (regular user):", user);
+     //   console.log("User fetch result (regular user):", user);
         return convertToUserType(user, user.role || "admin");
       } catch (error) {
-        console.log("User not found in regular users, trying superadmin collection");
+      //  console.log("User not found in regular users, trying superadmin collection");
       }
       
       // If not found, try in superadmins
       try {
         const user = await pb.collection('_superusers').getOne(id);
-        console.log("User fetch result (superadmin):", user);
+      //  console.log("User fetch result (superadmin):", user);
         return convertToUserType(user, "superadmin");
       } catch (error) {
-        console.log("User not found in superadmin collection either");
+      //  console.log("User not found in superadmin collection either");
         return null;
       }
     } catch (error) {
-      console.error(`Failed to fetch user ${id}:`, error);
+    //  console.error(`Failed to fetch user ${id}:`, error);
       return null;
     }
   },
@@ -130,11 +130,11 @@ export const userService = {
         }
       });
       
-      console.log("Updating user with clean data:", cleanData);
+     // console.log("Updating user with clean data:", cleanData);
       
       // If there's nothing to update, return the current user
       if (Object.keys(cleanData).length === 0) {
-        console.log("No changes to update");
+     //   console.log("No changes to update");
         const currentUser = await this.getUser(id);
         return currentUser;
       }
@@ -197,16 +197,16 @@ export const userService = {
             await pb.collection('_superusers').delete(id);
             updatedUser = convertToUserType(newRegularUser, "admin");
           }
-          console.log("User transferred between collections due to role change");
+        //  console.log("User transferred between collections due to role change");
           
         } catch (error) {
-          console.error("Failed to transfer user between collections:", error);
+        //  console.error("Failed to transfer user between collections:", error);
           throw new Error("Failed to change user role: " + (error instanceof Error ? error.message : "Unknown error"));
         }
       } else {
         // Regular update without changing collections
         if (Object.keys(cleanData).length > 0) {
-          console.log("Final update payload to PocketBase:", cleanData);
+       //   console.log("Final update payload to PocketBase:", cleanData);
           
           try {
             // Use the appropriate collection
@@ -214,15 +214,15 @@ export const userService = {
             const updatedRecord = await pb.collection(collection).update(id, cleanData);
             updatedUser = convertToUserType(updatedRecord, isCurrentlySuperadmin ? "superadmin" : "admin");
             
-            console.log("PocketBase update response:", updatedUser);
+        //    console.log("PocketBase update response:", updatedUser);
             
             // If email was updated successfully, show success message
             if (hasEmailChange) {
-              console.log("Email updated successfully to:", emailToUpdate);
+         //     console.log("Email updated successfully to:", emailToUpdate);
             }
             
           } catch (error) {
-            console.error("Error updating user:", error);
+          //  console.error("Error updating user:", error);
             
             // Provide more specific error messages for email issues
             if (hasEmailChange && error instanceof Error) {
@@ -241,7 +241,7 @@ export const userService = {
       
       return updatedUser;
     } catch (error) {
-      console.error("Failed to update user:", error);
+    //  console.error("Failed to update user:", error);
       throw error; // Re-throw to handle in the component
     }
   },
@@ -253,7 +253,7 @@ export const userService = {
         await pb.collection('users').delete(id);
         return true;
       } catch (error) {
-        console.log("User not found in regular users, trying superadmin collection");
+      //  console.log("User not found in regular users, trying superadmin collection");
       }
       
       // If not found, try deleting from superadmin collection
@@ -261,11 +261,11 @@ export const userService = {
         await pb.collection('_superusers').delete(id);
         return true;
       } catch (error) {
-        console.error("Failed to delete user from either collection:", error);
+     //   console.error("Failed to delete user from either collection:", error);
         return false;
       }
     } catch (error) {
-      console.error("Failed to delete user:", error);
+   //   console.error("Failed to delete user:", error);
       return false;
     }
   },
@@ -282,7 +282,7 @@ export const userService = {
         if (cleanData.avatar.startsWith('http') || 
             cleanData.avatar.startsWith('/upload/') ||
             cleanData.avatar.includes('api.dicebear.com')) {
-          console.log("Removing avatar URL for new user creation:", cleanData.avatar);
+     //     console.log("Removing avatar URL for new user creation:", cleanData.avatar);
           delete cleanData.avatar;
         }
       }
@@ -291,18 +291,18 @@ export const userService = {
       const isSuperAdmin = cleanData.role === "superadmin";
       const collection = isSuperAdmin ? '_superusers' : 'users';
       
-      console.log(`Creating new user in ${collection} collection with data:`, {
-        ...cleanData,
-        password: "[REDACTED]",
-        passwordConfirm: "[REDACTED]"
-      });
+    ///  console.log(`Creating new user in ${collection} collection with data:`, {
+    //    ...cleanData,
+     //   password: "[REDACTED]",
+    //    passwordConfirm: "[REDACTED]"
+    //  });
       
       // Create the user in the appropriate collection
       const result = await pb.collection(collection).create(cleanData);
       
       return convertToUserType(result, isSuperAdmin ? "superadmin" : "admin");
     } catch (error) {
-      console.error("Failed to create user:", error);
+    //  console.error("Failed to create user:", error);
       throw error;
     }
   }

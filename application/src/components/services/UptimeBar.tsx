@@ -56,7 +56,7 @@ export const UptimeBar = ({ uptime, status, serviceId, interval, serviceType }: 
     );
   }
 
-  console.log('UptimeBar rendering consolidated items:', consolidatedItems.length);
+ // console.log('UptimeBar rendering consolidated items:', consolidatedItems.length);
 
   return (
     <div className="w-52">
@@ -78,9 +78,9 @@ export const UptimeBar = ({ uptime, status, serviceId, interval, serviceType }: 
                             statuses.includes('paused') ? 'paused' : 'unknown';
             }
 
-            console.log(`Bar ${index} - Timestamp: ${slot.timestamp}, Items: ${slot.items.length}, Primary Status: ${primaryStatus}, Has Valid Data: ${hasValidData}`);
+           // console.log(`Bar ${index} - Timestamp: ${slot.timestamp}, Items: ${slot.items.length}, Primary Status: ${primaryStatus}, Has Valid Data: ${hasValidData}`);
             slot.items.forEach((item, itemIndex) => {
-              console.log(`  Item ${itemIndex}: Source=${item.source}, Status=${item.status}, ResponseTime=${item.responseTime}, IsDefault=${item.isDefault}`);
+            //  console.log(`  Item ${itemIndex}: Source=${item.source}, Status=${item.status}, ResponseTime=${item.responseTime}, IsDefault=${item.isDefault}`);
             });
 
             return (

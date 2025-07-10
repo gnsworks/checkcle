@@ -184,7 +184,7 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
       if (data?.agent_id && data.agent_id !== '1') {
         label = `${regionName} (${data.agent_id})`;
       } else if (regionName === 'Default' && data?.agent_id === '1') {
-        label = `Default (Agent 1)`;
+        label = `Default System Check (Agent 1)`;
       }
       
       const colorIndex = index % modernColors.length;

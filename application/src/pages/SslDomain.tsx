@@ -26,13 +26,13 @@ const SslDomain = () => {
   const { data: certificates = [], isLoading, error, refetch } = useQuery({
     queryKey: ['ssl-certificates'],
     queryFn: async () => {
-      console.log("Fetching SSL certificates from SslDomain page...");
+     // console.log("Fetching SSL certificates from SslDomain page...");
       try {
         const result = await fetchSSLCertificates();
-        console.log("SSL certificates fetch successful, count:", result.length);
+     //  console.log("SSL certificates fetch successful, count:", result.length);
         return result;
       } catch (err) {
-        console.error("Error fetching SSL certificates from page:", err);
+     //   console.error("Error fetching SSL certificates from page:", err);
         throw err;
       }
     },
@@ -46,7 +46,7 @@ const SslDomain = () => {
     const checkCertificates = async () => {
       // Check if we should run daily check
       if (shouldRunDailyCheck()) {
-        console.log("Running daily SSL certificate check...");
+     //   console.log("Running daily SSL certificate check...");
         await checkAllCertificatesAndNotify();
         // Refresh certificate list after daily check
         refetch();

@@ -46,23 +46,23 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
     queryKey: ['consolidatedUptimeHistory', serviceId, serviceType],
     queryFn: async () => {
       if (!serviceId) {
-        console.log('No serviceId provided, skipping fetch');
+      //  console.log('No serviceId provided, skipping fetch');
         return [];
       }
-      console.log(`Fetching consolidated uptime data for service ${serviceId} of type ${serviceType}`);
+     // console.log(`Fetching consolidated uptime data for service ${serviceId} of type ${serviceType}`);
       
       // Get ALL uptime history data - this should include both default and regional data
       const rawData = await uptimeService.getUptimeHistory(serviceId, 100, undefined, undefined, serviceType);
       
-      console.log(`Retrieved ${rawData.length} total records for service ${serviceId}`);
-      console.log('Raw data sample:', rawData.slice(0, 5).map(d => ({
-        timestamp: d.timestamp,
-        region_name: d.region_name,
-        agent_id: d.agent_id,
-        status: d.status,
-        service_id: d.service_id,
-        response_time: d.responseTime
-      })));
+     // console.log(`Retrieved ${rawData.length} total records for service ${serviceId}`);
+    // console.log('Raw data sample:', rawData.slice(0, 5).map(d => ({
+    //   timestamp: d.timestamp,
+    //   region_name: d.region_name,
+    //   agent_id: d.agent_id,
+    //   status: d.status,
+    //   service_id: d.service_id,
+    //   response_time: d.responseTime
+    // })));
       
       return rawData;
     },
@@ -78,7 +78,7 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
   const processConsolidatedData = (data: UptimeData[]): ConsolidatedTimeSlot[] => {
     if (!data || data.length === 0) return [];
     
-    console.log(`Processing ${data.length} uptime records for consolidation`);
+   // console.log(`Processing ${data.length} uptime records for consolidation`);
     
     // Create a map to group records by normalized timestamp (minute precision)
     const timeSlotMap = new Map<string, Array<UptimeData & { source: string; isDefault: boolean }>>();
@@ -99,17 +99,17 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
         // Regional monitoring data
         sourceName = `${regionName} (Agent ${agentId})`;
         isDefault = false;
-        console.log(`Found regional data: ${sourceName} for normalized timestamp ${normalizedTimestamp}`);
+    //    console.log(`Found regional data: ${sourceName} for normalized timestamp ${normalizedTimestamp}`);
       } else if (agentId && !regionName) {
         // Default monitoring with specific agent
         sourceName = `Default (Agent ${agentId})`;
         isDefault = true;
-        console.log(`Found default monitoring: ${sourceName} for normalized timestamp ${normalizedTimestamp}`);
+     //   console.log(`Found default monitoring: ${sourceName} for normalized timestamp ${normalizedTimestamp}`);
       } else {
         // Default monitoring fallback
-        sourceName = 'Default (Agent 1)';
+        sourceName = 'Default System Check (Agent 1)';
         isDefault = true;
-        console.log(`Using fallback default monitoring for normalized timestamp ${normalizedTimestamp}`);
+     //   console.log(`Using fallback default monitoring for normalized timestamp ${normalizedTimestamp}`);
       }
       
       // Get or create the array for this normalized timestamp
@@ -130,9 +130,9 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
           isDefault
         });
         
-        console.log(`Added record to normalized timestamp ${normalizedTimestamp}: Source=${sourceName}, Status=${record.status}, IsDefault=${isDefault}, ResponseTime=${record.responseTime}ms`);
+       // console.log(`Added record to normalized timestamp ${normalizedTimestamp}: Source=${sourceName}, Status=${record.status}, IsDefault=${isDefault}, ResponseTime=${record.responseTime}ms`);
       } else {
-        console.log(`Skipping duplicate record for source ${sourceName} at timestamp ${normalizedTimestamp}`);
+      //  console.log(`Skipping duplicate record for source ${sourceName} at timestamp ${normalizedTimestamp}`);
       }
     });
     
@@ -150,13 +150,13 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 20); // Take the most recent 20 time slots
     
-    console.log(`Created ${consolidatedTimeline.length} consolidated time slots with normalized timestamps`);
-    consolidatedTimeline.forEach((slot, index) => {
-      console.log(`Slot ${index} - Normalized Timestamp: ${slot.timestamp}, Items: ${slot.items.length}`);
-      slot.items.forEach((item, itemIndex) => {
-        console.log(`  Item ${itemIndex}: Source=${item.source}, Status=${item.status}, ResponseTime=${item.responseTime}ms, IsDefault=${item.isDefault}`);
-      });
-    });
+    // console.log(`Created ${consolidatedTimeline.length} consolidated time slots with normalized timestamps`);
+    // consolidatedTimeline.forEach((slot, index) => {
+    //   console.log(`Slot ${index} - Normalized Timestamp: ${slot.timestamp}, Items: ${slot.items.length}`);
+    //   slot.items.forEach((item, itemIndex) => {
+    //     console.log(`  Item ${itemIndex}: Source=${item.source}, Status=${item.status}, ResponseTime=${item.responseTime}ms, IsDefault=${item.isDefault}`);
+    //   });
+    // });
     
     return consolidatedTimeline;
   };
@@ -164,12 +164,12 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
   // Update consolidated items when data changes
   useEffect(() => {
     if (uptimeData && uptimeData.length > 0) {
-      console.log(`Processing consolidated uptime data for service ${serviceId}`);
+      // console.log(`Processing consolidated uptime data for service ${serviceId}`);
       const processedData = processConsolidatedData(uptimeData);
       
       // If service is currently paused, override ONLY the latest (first) bar with paused status
       if (status === "paused" && processedData.length > 0) {
-        console.log(`Service ${serviceId} is paused, overriding latest bar with paused status`);
+       // console.log(`Service ${serviceId} is paused, overriding latest bar with paused status`);
         
         // Create a paused entry for the latest timestamp
         const latestTimestamp = new Date();
@@ -191,11 +191,11 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
         
         // Replace the first item with paused status, keep the rest as historical data
         const updatedData = [pausedSlot, ...processedData.slice(0, 19)];
-        console.log(`Updated data with paused latest bar, total bars: ${updatedData.length}`);
+       // console.log(`Updated data with paused latest bar, total bars: ${updatedData.length}`);
         setConsolidatedItems(updatedData);
       } else {
         // Service is active (up/down/warning) - merge real data with any existing paused bars
-        console.log(`Service ${serviceId} is active with status: ${status}, merging with existing paused bars`);
+      //  console.log(`Service ${serviceId} is active with status: ${status}, merging with existing paused bars`);
         
         // Get existing paused bars from current state
         const existingPausedBars = consolidatedItems.filter(slot => 
@@ -213,7 +213,7 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
           const hasConflict = processedData.some(slot => slot.timestamp === pausedSlot.timestamp);
           if (!hasConflict) {
             mergedData.push(pausedSlot);
-            console.log(`Preserved paused bar at timestamp: ${pausedSlot.timestamp}`);
+          //  console.log(`Preserved paused bar at timestamp: ${pausedSlot.timestamp}`);
           }
         });
         
@@ -222,12 +222,12 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
           .slice(0, 20);
         
-        console.log(`Final merged data has ${finalData.length} slots`);
+      //  console.log(`Final merged data has ${finalData.length} slots`);
         setConsolidatedItems(finalData);
       }
     } else if (!serviceId || (uptimeData && uptimeData.length === 0)) {
       // Generate placeholder data when no real data is available
-      console.log(`No uptime data available for service ${serviceId}, generating placeholder with status: ${status}`);
+     // console.log(`No uptime data available for service ${serviceId}, generating placeholder with status: ${status}`);
       
       // Use the actual service status for placeholder data
       const statusValue = status === "paused" ? "paused" : 
@@ -252,7 +252,7 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
         };
       });
       
-      console.log(`Generated ${placeholderHistory.length} placeholder slots with status: ${statusValue}`);
+    //  console.log(`Generated ${placeholderHistory.length} placeholder slots with status: ${statusValue}`);
       setConsolidatedItems(placeholderHistory);
     }
   }, [uptimeData, serviceId, status, interval, consolidatedItems]);

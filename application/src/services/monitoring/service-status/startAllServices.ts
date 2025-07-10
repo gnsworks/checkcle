@@ -12,13 +12,13 @@ export async function startAllActiveServices(): Promise<void> {
       filter: 'status != "paused"'
     });
     
-    console.log(`Starting monitoring for ${result.items.length} active services`);
+   // console.log(`Starting monitoring for ${result.items.length} active services`);
     
     // Start monitoring each active service
     for (const service of result.items) {
       await startMonitoringService(service.id);
     }
   } catch (error) {
-    console.error("Error starting all active services:", error);
+  //  console.error("Error starting all active services:", error);
   }
 }

@@ -52,7 +52,7 @@ export const EditSSLCertificateForm = ({ certificate, onSubmit, onCancel, isPend
       setIsLoading(true);
       try {
         const configs = await alertConfigService.getAlertConfigurations();
-        console.log("Fetched notification channels:", configs);
+      //  console.log("Fetched notification channels:", configs);
         // Only include enabled channels
         const enabledConfigs = configs.filter(config => {
           // Handle the possibility of enabled being a string
@@ -64,7 +64,7 @@ export const EditSSLCertificateForm = ({ certificate, onSubmit, onCancel, isPend
         });
         setAlertConfigs(enabledConfigs);
       } catch (error) {
-        console.error("Error fetching notification channels:", error);
+      //  console.error("Error fetching notification channels:", error);
         toast.error(t('failedToLoadCertificates'));
       } finally {
         setIsLoading(false);

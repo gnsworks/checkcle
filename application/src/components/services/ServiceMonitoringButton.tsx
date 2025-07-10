@@ -28,7 +28,7 @@ export function ServiceMonitoringButton({ service, onStatusChange }: ServiceMoni
       
       if (isMonitoring) {
         // Pause monitoring
-        console.log(`Pausing monitoring for service ${service.id} (${service.name})`);
+      //  console.log(`Pausing monitoring for service ${service.id} (${service.name})`);
         await serviceService.pauseMonitoring(service.id);
         setIsMonitoring(false);
         
@@ -36,7 +36,7 @@ export function ServiceMonitoringButton({ service, onStatusChange }: ServiceMoni
         
         // Send notification for paused status (only here, not in pauseMonitoring.ts)
         if (service.alerts !== "muted") {
-          console.log("Sending pause notification from UI component");
+         // console.log("Sending pause notification from UI component");
           // IMPORTANT: Direct call to the notification service to ensure a message is sent
           await notificationService.sendNotification({
             service: service,
@@ -51,7 +51,7 @@ export function ServiceMonitoringButton({ service, onStatusChange }: ServiceMoni
         });
       } else {
         // Start/resume monitoring
-        console.log(`Starting monitoring for service ${service.id} (${service.name})`);
+       // console.log(`Starting monitoring for service ${service.id} (${service.name})`);
         
         // First ensure we update the status in the database to not be paused anymore
         await serviceService.resumeMonitoring(service.id);
@@ -66,7 +66,7 @@ export function ServiceMonitoringButton({ service, onStatusChange }: ServiceMoni
         });
       }
     } catch (error) {
-      console.error("Error toggling monitoring:", error);
+     // console.error("Error toggling monitoring:", error);
       toast({
         variant: "destructive",
         title: "Error",

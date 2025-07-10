@@ -30,12 +30,12 @@ export const SSLDomainContent = () => {
     queryKey: ['ssl-certificates'],
     queryFn: async () => {
       try {
-        console.log("Fetching SSL certificates from SSLDomainContent...");
+       // console.log("Fetching SSL certificates from SSLDomainContent...");
         const result = await fetchSSLCertificates();
-        console.log("Received SSL certificates:", result);
+       // console.log("Received SSL certificates:", result);
         return result;
       } catch (error) {
-        console.error("Error fetching certificates:", error);
+       // console.error("Error fetching certificates:", error);
         toast.error(t('failedToLoadCertificates'));
         throw error;
       }
@@ -53,7 +53,7 @@ export const SSLDomainContent = () => {
       toast.success(t('sslCertificateAdded'));
     },
     onError: (error) => {
-      console.error("Error adding SSL certificate:", error);
+    //  console.error("Error adding SSL certificate:", error);
       toast.error(error instanceof Error ? error.message : t('failedToAddCertificate'));
     }
   });
@@ -61,7 +61,7 @@ export const SSLDomainContent = () => {
   // Edit certificate mutation - Updated to ensure thresholds are properly updated
   const editMutation = useMutation({
     mutationFn: async (certificate: SSLCertificate) => {
-      console.log("Updating certificate with data:", certificate);
+    //  console.log("Updating certificate with data:", certificate);
       
       // Create the update data object
       const updateData = {
@@ -70,12 +70,12 @@ export const SSLDomainContent = () => {
         notification_channel: certificate.notification_channel,
       };
       
-      console.log("Update data to be sent:", updateData);
+    //  console.log("Update data to be sent:", updateData);
       
       // Update certificate in the database using PocketBase directly
       const updated = await pb.collection('ssl_certificates').update(certificate.id, updateData);
       
-      console.log("PocketBase update response:", updated);
+    //  console.log("PocketBase update response:", updated);
       
       // After updating the settings, refresh the certificate to ensure it's up to date
       // This will also check if notification needs to be sent based on updated thresholds
@@ -90,7 +90,7 @@ export const SSLDomainContent = () => {
       toast.success(t('sslCertificateUpdated'));
     },
     onError: (error) => {
-      console.error("Error updating SSL certificate:", error);
+    //  console.error("Error updating SSL certificate:", error);
       toast.error(error instanceof Error ? error.message : t('failedToUpdateCertificate'));
     }
   });
@@ -103,7 +103,7 @@ export const SSLDomainContent = () => {
       toast.success(t('sslCertificateDeleted'));
     },
     onError: (error) => {
-      console.error("Error deleting SSL certificate:", error);
+    //  console.error("Error deleting SSL certificate:", error);
       toast.error(error instanceof Error ? error.message : t('failedToDeleteCertificate'));
     }
   });
@@ -117,7 +117,7 @@ export const SSLDomainContent = () => {
       toast.success(t('sslCertificateRefreshed').replace('{domain}', data.domain));
     },
     onError: (error) => {
-      console.error("Error refreshing SSL certificate:", error);
+    //  console.error("Error refreshing SSL certificate:", error);
       
       let errorMessage = t('failedToCheckCertificate');
       
@@ -149,7 +149,7 @@ export const SSLDomainContent = () => {
       }
     },
     onError: (error) => {
-      console.error("Error refreshing all certificates:", error);
+    //  console.error("Error refreshing all certificates:", error);
       toast.error(t('failedToCheckCertificate'));
       setIsRefreshingAll(false);
       
@@ -174,7 +174,7 @@ export const SSLDomainContent = () => {
   };
 
   const handleUpdateCertificate = (certificate: SSLCertificate) => {
-    console.log("Handling certificate update with data:", certificate);
+  //  console.log("Handling certificate update with data:", certificate);
     editMutation.mutate(certificate);
   };
 

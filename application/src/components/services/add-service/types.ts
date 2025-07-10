@@ -11,7 +11,8 @@ export const serviceSchema = z.object({
   port: z.string().optional(),
   interval: z.string(),
   retries: z.string(),
-  notificationChannel: z.string().optional(),
+  notificationStatus: z.enum(["enabled", "disabled"]).optional(),
+  notificationChannels: z.array(z.string()).optional(),
   alertTemplate: z.string().optional(),
   // Regional monitoring fields
   regionalMonitoringEnabled: z.boolean().optional(),

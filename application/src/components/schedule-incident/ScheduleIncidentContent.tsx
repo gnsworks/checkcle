@@ -22,12 +22,12 @@ export const ScheduleIncidentContent = () => {
 
   // Initialize maintenance notifications when the component mounts
   useEffect(() => {
-    console.log("Initializing maintenance notifications");
+   // console.log("Initializing maintenance notifications");
     initMaintenanceNotifications();
     
     // Clean up when the component unmounts
     return () => {
-      console.log("Cleaning up maintenance notifications");
+     // console.log("Cleaning up maintenance notifications");
       stopMaintenanceNotifications();
     };
   }, []);
@@ -43,7 +43,7 @@ export const ScheduleIncidentContent = () => {
   const handleMaintenanceCreated = () => {
     // Refresh data by incrementing the refresh trigger
     const newTriggerValue = refreshTrigger + 1;
-    console.log("Maintenance created, refreshing data with new trigger value:", newTriggerValue);
+   // console.log("Maintenance created, refreshing data with new trigger value:", newTriggerValue);
     setRefreshTrigger(newTriggerValue);
     
     // Show success toast
@@ -56,7 +56,7 @@ export const ScheduleIncidentContent = () => {
   const handleIncidentCreated = () => {
     // Refresh data by incrementing the refresh trigger
     const newTriggerValue = incidentRefreshTrigger + 1;
-    console.log("Incident created, refreshing data with new trigger value:", newTriggerValue);
+   // console.log("Incident created, refreshing data with new trigger value:", newTriggerValue);
     setIncidentRefreshTrigger(newTriggerValue);
     
     // Show success toast

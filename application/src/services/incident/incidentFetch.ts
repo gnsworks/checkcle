@@ -25,7 +25,7 @@ export const isCacheValid = (): boolean => {
 export const getAllIncidents = async (forceRefresh = false): Promise<IncidentItem[]> => {
   // If a request is in progress, wait for it to complete rather than making a new one
   if (isRequestInProgress) {
-    console.log('Request already in progress, waiting for completion');
+  //  console.log('Request already in progress, waiting for completion');
     try {
       if (pendingRequest) {
         await pendingRequest;
@@ -39,12 +39,12 @@ export const getAllIncidents = async (forceRefresh = false): Promise<IncidentIte
   
   // Use cache if available, not expired, and not forced refresh
   if (!forceRefresh && isCacheValid()) {
-    console.log('Using cached incidents data from', new Date(incidentsCache!.timestamp).toLocaleTimeString());
+  //  console.log('Using cached incidents data from', new Date(incidentsCache!.timestamp).toLocaleTimeString());
     return incidentsCache!.data;
   }
   
   try {
-    console.log('Fetching all incidents from API...');
+   // console.log('Fetching all incidents from API...');
     isRequestInProgress = true;
     
     // Implement timeout for the request
@@ -72,7 +72,7 @@ export const getAllIncidents = async (forceRefresh = false): Promise<IncidentIte
     isRequestInProgress = false;
     
     if (!result || !result.items) {
-      console.warn('No incidents found in API response');
+    //  console.warn('No incidents found in API response');
       return [];
     }
     
@@ -81,7 +81,7 @@ export const getAllIncidents = async (forceRefresh = false): Promise<IncidentIte
     // Update cache
     updateCache(normalizedItems);
     
-    console.log(`Fetched ${normalizedItems.length} incidents at ${new Date().toLocaleTimeString()}`);
+   // console.log(`Fetched ${normalizedItems.length} incidents at ${new Date().toLocaleTimeString()}`);
     return normalizedItems;
   } catch (error) {
     if ((error as any)?.isAbort) {
@@ -89,7 +89,7 @@ export const getAllIncidents = async (forceRefresh = false): Promise<IncidentIte
       return incidentsCache?.data || [];
     }
     
-    console.error('Error fetching incidents:', error);
+  //  console.error('Error fetching incidents:', error);
     
     // Clear states to allow retry
     pendingRequest = null;
@@ -102,7 +102,7 @@ export const getAllIncidents = async (forceRefresh = false): Promise<IncidentIte
     
     // Still return cached data even on error
     if (incidentsCache) {
-      console.log('Returning stale cached data after error');
+   //   console.log('Returning stale cached data after error');
       return incidentsCache.data;
     }
     
@@ -113,13 +113,13 @@ export const getAllIncidents = async (forceRefresh = false): Promise<IncidentIte
 // Get incident by id
 export const getIncidentById = async (id: string): Promise<IncidentItem | null> => {
   try {
-    console.log(`Fetching incident with ID: ${id}`);
+  //  console.log(`Fetching incident with ID: ${id}`);
     
     // First check if the incident exists in the cache
     if (isCacheValid() && incidentsCache) {
       const cachedIncident = incidentsCache.data.find(incident => incident.id === id);
       if (cachedIncident) {
-        console.log('Incident found in cache');
+    //    console.log('Incident found in cache');
         return cachedIncident;
       }
     }
@@ -136,7 +136,7 @@ export const getIncidentById = async (id: string): Promise<IncidentItem | null> 
     return normalizedIncident;
     
   } catch (error) {
-    console.error(`Error fetching incident with ID ${id}:`, error);
+  //  console.error(`Error fetching incident with ID ${id}:`, error);
     
     if (error instanceof Error) {
       throw new Error(`Failed to fetch incident: ${error.message}`);

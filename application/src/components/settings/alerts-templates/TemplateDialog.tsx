@@ -40,11 +40,11 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
   // For debugging purposes
   useEffect(() => {
     if (open) {
-      console.log("Template dialog opened. Edit mode:", isEditMode, "Template ID:", templateId);
+    //  console.log("Template dialog opened. Edit mode:", isEditMode, "Template ID:", templateId);
       
       // Log form values when they change
       const subscription = form.watch((value) => {
-        console.log("Current form values:", value);
+     //   console.log("Current form values:", value);
       });
       
       return () => subscription.unsubscribe();

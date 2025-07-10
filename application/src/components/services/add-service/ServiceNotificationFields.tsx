@@ -1,10 +1,12 @@
 
-import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { ServiceFormData } from "./types";
 import { useQuery } from "@tanstack/react-query";
-import { templateService } from "@/services/templateService";
 import { alertConfigService, AlertConfiguration } from "@/services/alertConfigService";
 import { useState, useEffect } from "react";
 
@@ -16,11 +18,13 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
   const [alertConfigs, setAlertConfigs] = useState<AlertConfiguration[]>([]);
   
   // Get the current form values for debugging
-  const notificationChannel = form.watch("notificationChannel");
+  const notificationStatus = form.watch("notificationStatus");
+  const notificationChannels = form.watch("notificationChannels") || [];
   const alertTemplate = form.watch("alertTemplate");
   
   console.log("Current notification values:", { 
-    notificationChannel, 
+    notificationStatus, 
+    notificationChannels,
     alertTemplate 
   });
   
@@ -28,12 +32,6 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
   const { data: alertConfigsData } = useQuery({
     queryKey: ['alertConfigs'],
     queryFn: () => alertConfigService.getAlertConfigurations(),
-  });
-  
-  // Fetch templates for template selection
-  const { data: templates } = useQuery({
-    queryKey: ['templates'],
-    queryFn: () => templateService.getTemplates(),
   });
   
   // Update alert configs when data is loaded
@@ -51,53 +49,110 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
   // Log when form values change to debug
   useEffect(() => {
     console.log("Notification values changed:", {
-      notificationChannel: form.getValues("notificationChannel"),
-      alertTemplate: form.getValues("alertTemplate")
+      notificationStatus: form.getValues("notificationStatus"),
+      notificationChannels: form.getValues("notificationChannels")
     });
-  }, [form.watch("notificationChannel"), form.watch("alertTemplate")]);
+  }, [form.watch("notificationStatus"), form.watch("notificationChannels")]);
+
+  const handleChannelAdd = (channelId: string) => {
+    const currentChannels = form.getValues("notificationChannels") || [];
+    if (!currentChannels.includes(channelId)) {
+      form.setValue("notificationChannels", [...currentChannels, channelId]);
+    }
+  };
+
+  const handleChannelRemove = (channelId: string) => {
+    const currentChannels = form.getValues("notificationChannels") || [];
+    form.setValue("notificationChannels", currentChannels.filter(id => id !== channelId));
+  };
+
+  const getSelectedChannelNames = () => {
+    return (notificationChannels || []).map(channelId => {
+      const config = alertConfigs.find(c => c.id === channelId);
+      return config ? `${config.notify_name} (${config.notification_type})` : channelId;
+    });
+  };
   
   return (
     <>
       <FormField
         control={form.control}
-        name="notificationChannel"
-        render={({ field }) => {
-          // Important: We need to preserve the actual value for notification channel
-          const fieldValue = field.value || "";
-          const displayValue = fieldValue === "" ? "none" : fieldValue;
-          
-          console.log("Rendering notification channel field with value:", {
-            fieldValue,
-            displayValue
-          });
-          
-          return (
-            <FormItem>
-              <FormLabel>Notification Channel</FormLabel>
-              <FormControl>
-                <Select 
-                  onValueChange={(value) => {
-                    console.log("Notification channel changed to:", value);
-                    field.onChange(value === "none" ? "" : value);
-                  }} 
-                  value={displayValue}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a notification channel" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {alertConfigs.map((config) => (
+        name="notificationStatus"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <FormLabel className="text-base">
+                Enable Notifications
+              </FormLabel>
+              <FormDescription>
+                Enable or disable notifications for this service
+              </FormDescription>
+            </div>
+            <FormControl>
+              <Switch
+                checked={field.value === "enabled"}
+                onCheckedChange={(checked) => {
+                  field.onChange(checked ? "enabled" : "disabled");
+                  // Clear notification channels when disabled
+                  if (!checked) {
+                    form.setValue("notificationChannels", []);
+                  }
+                }}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="notificationChannels"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Notification Channels</FormLabel>
+            <FormDescription>
+              {notificationStatus === "enabled" 
+                ? "Select notification channels for this service"
+                : "Enable notifications first to select channels"}
+            </FormDescription>
+            
+            {/* Display selected channels as badges */}
+            {notificationChannels && notificationChannels.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {getSelectedChannelNames().map((channelName, index) => (
+                  <Badge key={notificationChannels[index]} variant="secondary" className="flex items-center gap-1">
+                    {channelName}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => handleChannelRemove(notificationChannels[index])}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
+            
+            <FormControl>
+              <Select 
+                onValueChange={handleChannelAdd}
+                disabled={notificationStatus !== "enabled"}
+                value="" // Always reset to empty after selection
+              >
+                <SelectTrigger className={notificationStatus !== "enabled" ? 'opacity-50' : ''}>
+                  <SelectValue placeholder="Add a notification channel" />
+                </SelectTrigger>
+                <SelectContent>
+                  {alertConfigs
+                    .filter(config => !notificationChannels?.includes(config.id || ""))
+                    .map((config) => (
                       <SelectItem key={config.id} value={config.id || ""}>
                         {config.notify_name} ({config.notification_type})
                       </SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-            </FormItem>
-          );
-        }}
+                </SelectContent>
+              </Select>
+            </FormControl>
+          </FormItem>
+        )}
       />
             
       <FormField
@@ -118,20 +173,22 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
                     field.onChange(value === "default" ? "" : value);
                   }} 
                   value={displayValue}
+                  disabled={notificationStatus !== "enabled"}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={notificationStatus !== "enabled" ? 'opacity-50' : ''}>
                     <SelectValue placeholder="Select an alert template" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="default">Default</SelectItem>
-                    {templates?.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
+                    {/* Add templates here when available */}
                   </SelectContent>
                 </Select>
               </FormControl>
+              <FormDescription>
+                {notificationStatus === "enabled"
+                  ? "Choose a template for alert messages"
+                  : "Enable notifications first to select template"}
+              </FormDescription>
             </FormItem>
           );
         }}
