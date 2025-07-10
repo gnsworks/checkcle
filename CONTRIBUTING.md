@@ -61,16 +61,45 @@ npm install && npm run dev
 
 #Server Backend
 cd server
-./pocketbase serve --dir pb_data
+./pocketbase serve --dir pb_data 
+
+If you're not using localhost, please run with this (./pocketbase serve --http=0.0.0.0:8090 --dir pb_data)
 ```
 
+### 4. Start Service Check Operation
+
+```bash
+#Server Backend 
+Start Service Operation (Check Service for PING, HTTP, TCP, DNS)
+
+cd server/service-operation
+
+go run main.go (you do not need to change the .env while it's the localhost connection)
+```
+
+### 5. Start Distributed Regional Agent
+```bash
+#### 1. Fork the Repository
+Click "Fork" on [GitHub](https://github.com/operacle/Distributed-Regional-Monitoring) to create your own copy.
+
+#### 2. Clone Your Fork
+git clone --branch main https://github.com/operacle/Distributed-Regional-Monitoring.git
+cd Distributed-Regional-Monitoring
+
+#### 3. Install Go Service (make sure you have installed the Go Service)
+
+Copy .env.example -> .env
+Change regional agent configuration in .env file
+and Run: go run main.go
+
+```
 ---
 
 ## ✅ Pull Request Process
 
 1. Ensure your code follows the existing style and naming conventions.
 2. Write clear, concise commit messages.
-3. Push your branch and open a Pull Request (PR) on the `main` branch.
+3. Push your branch and open a Pull Request (PR) on the `develop` branch.
 4. Provide a meaningful PR description (what/why/how).
 5. Link related issues if applicable (e.g. `Closes #12`).
 6. Make sure all checks pass (e.g., linting, tests).
