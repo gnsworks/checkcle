@@ -27,7 +27,7 @@ export const MaintenanceNotificationSettingsField = () => {
       try {
         setIsLoading(true);
         const channels = await alertConfigService.getAlertConfigurations();
-        console.log("Fetched notification channels for form:", channels);
+       // console.log("Fetched notification channels for form:", channels);
         
         // Only show enabled channels
         const enabledChannels = channels.filter(channel => channel.enabled);
@@ -38,18 +38,18 @@ export const MaintenanceNotificationSettingsField = () => {
         const currentChannel = getValues('notification_channel_id');
         const shouldNotify = getValues('notify_subscribers');
         
-        console.log("Current notification values:", {
-          currentChannel,
-          shouldNotify,
-          availableChannels: enabledChannels.length
-        });
+      //  console.log("Current notification values:", {
+      //    currentChannel,
+       //   shouldNotify,
+       //   availableChannels: enabledChannels.length
+       // });
         
         if (shouldNotify && (!currentChannel || currentChannel === 'none') && enabledChannels.length > 0) {
-          console.log("Setting default notification channel:", enabledChannels[0].id);
+        //  console.log("Setting default notification channel:", enabledChannels[0].id);
           setValue('notification_channel_id', enabledChannels[0].id);
         }
       } catch (error) {
-        console.error('Error fetching notification channels:', error);
+       // console.error('Error fetching notification channels:', error);
         toast({
           title: t('error'),
           description: t('errorFetchingNotificationChannels'),
@@ -64,12 +64,12 @@ export const MaintenanceNotificationSettingsField = () => {
   }, [t, toast, setValue, getValues]);
   
   // Log value changes for debugging
-  useEffect(() => {
-    console.log("Current notification settings:", {
-      channel_id: getValues('notification_channel_id'),
-      notify: notifySubscribers
-    });
-  }, [notifySubscribers, notificationChannelId, getValues]);
+ // useEffect(() => {
+   // console.log("Current notification settings:", {
+  //    channel_id: getValues('notification_channel_id'),
+  //    notify: notifySubscribers
+  //  });
+ // }, [notifySubscribers, notificationChannelId, getValues]);
   
   return (
     <div className="space-y-6">
@@ -98,7 +98,7 @@ export const MaintenanceNotificationSettingsField = () => {
                 checked={field.value}
                 onCheckedChange={(checked) => {
                   field.onChange(checked);
-                  console.log("Notification toggle changed to:", checked);
+                 // console.log("Notification toggle changed to:", checked);
                   // If notifications are disabled, also clear the notification channel
                   if (!checked) {
                     setValue('notification_channel_id', '');
@@ -120,10 +120,10 @@ export const MaintenanceNotificationSettingsField = () => {
           // Make sure to handle both empty string and "none" as special cases
           const displayValue = field.value || "";
           
-          console.log("Rendering notification channel field with value:", {
-            fieldValue: field.value, 
-            displayValue
-          });
+        //  console.log("Rendering notification channel field with value:", {
+        //    fieldValue: field.value, 
+        //    displayValue
+       //   });
           
           return (
             <FormItem>
@@ -135,7 +135,7 @@ export const MaintenanceNotificationSettingsField = () => {
                   <Select 
                     value={displayValue} 
                     onValueChange={(value) => {
-                      console.log("Setting notification channel to:", value);
+                    //  console.log("Setting notification channel to:", value);
                       field.onChange(value === "none" ? "" : value);
                     }}
                     disabled={!notifySubscribers}

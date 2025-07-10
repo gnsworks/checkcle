@@ -53,7 +53,7 @@ export const Header = ({
   // Log avatar data for debugging
   useEffect(() => {
     if (currentUser) {
-      console.log("Avatar URL in Header:", currentUser.avatar);
+    //  console.log("Avatar URL in Header:", currentUser.avatar);
     }
   }, [currentUser]);
 
@@ -66,7 +66,7 @@ export const Header = ({
     } else {
       avatarUrl = currentUser.avatar;
     }
-    console.log("Final avatar URL:", avatarUrl);
+   // console.log("Final avatar URL:", avatarUrl);
   }
 
   return (

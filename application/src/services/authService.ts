@@ -19,7 +19,7 @@ export const authService = {
     try {
       // First try to login as a regular admin user
       try {
-        console.log("Attempting to login as admin user");
+      //  console.log("Attempting to login as admin user");
         const authData = await pb.collection('users').authWithPassword(email, password);
         
         return {
@@ -30,7 +30,7 @@ export const authService = {
           role: authData.record.role || "admin"
         };
       } catch (error) {
-        console.log("Failed to login as admin, trying as superadmin", error);
+      //  console.log("Failed to login as admin, trying as superadmin", error);
         
         // If regular user login fails, try superadmin
         const authData = await pb.collection('_superusers').authWithPassword(email, password);
@@ -44,7 +44,7 @@ export const authService = {
         };
       }
     } catch (error) {
-      console.error('Login failed:', error);
+     // console.error('Login failed:', error);
       throw new Error('Authentication failed. Please check your credentials.');
     }
   },
@@ -63,7 +63,7 @@ export const authService = {
     if (!userData) return null;
     
     // Log the full user data for debugging
-    console.log("Raw user data from authStore:", userData);
+    //console.log("Raw user data from authStore:", userData);
     
     // Determine if this is a superadmin by checking the collection name
     const isSuperAdmin = userData.collectionName === '_superusers';
@@ -90,13 +90,13 @@ export const authService = {
     try {
       // Fetch the latest user data from the server
       const userId = (pb.authStore.model as any).id;
-      console.log("Refreshing user data for ID:", userId);
+     // console.log("Refreshing user data for ID:", userId);
       
       // Use the getOne method directly to refresh the auth store
       await pb.collection('users').getOne(userId);
-      console.log("User data refreshed successfully");
+     // console.log("User data refreshed successfully");
     } catch (error) {
-      console.error('Failed to refresh user data:', error);
+    //  console.error('Failed to refresh user data:', error);
     }
   }
 };

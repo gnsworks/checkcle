@@ -39,7 +39,7 @@ export const serviceService = {
         regional_monitoring_enabled: item.regional_status === "enabled", // Backward compatibility
       }));
     } catch (error) {
-      console.error("Error fetching services:", error);
+     // console.error("Error fetching services:", error);
       throw new Error('Failed to load services data.');
     }
   },

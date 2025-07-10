@@ -54,7 +54,7 @@ export const AddSSLCertificateForm = ({
       setIsLoading(true);
       try {
         const configs = await alertConfigService.getAlertConfigurations();
-        console.log("Fetched notification channels:", configs);
+       // console.log("Fetched notification channels:", configs);
         // Only include enabled channels
         const enabledConfigs = configs.filter(config => {
           // Handle the possibility of enabled being a string
@@ -66,7 +66,7 @@ export const AddSSLCertificateForm = ({
         });
         setAlertConfigs(enabledConfigs);
       } catch (error) {
-        console.error("Error fetching notification channels:", error);
+      //  console.error("Error fetching notification channels:", error);
         toast.error(t('failedToLoadCertificates'));
       } finally {
         setIsLoading(false);
@@ -90,7 +90,7 @@ export const AddSSLCertificateForm = ({
       await onSubmit(certData);
       form.reset();
     } catch (error) {
-      console.error("Error adding SSL certificate:", error);
+     // console.error("Error adding SSL certificate:", error);
       toast.error(t('failedToAddCertificate'));
     }
   };

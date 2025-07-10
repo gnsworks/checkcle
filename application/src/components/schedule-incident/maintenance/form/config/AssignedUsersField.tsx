@@ -31,17 +31,17 @@ export const AssignedUsersField = () => {
   // Ensure assigned_users is initialized as an array
   useEffect(() => {
     const currentValue = form.getValues('assigned_users');
-    console.log("Initial assigned_users value:", currentValue);
+   // console.log("Initial assigned_users value:", currentValue);
     
     // Initialize as empty array if no value or invalid value
     if (!currentValue || !Array.isArray(currentValue)) {
-      console.log("Initializing assigned_users as empty array");
+    //  console.log("Initializing assigned_users as empty array");
       form.setValue('assigned_users', [], { shouldValidate: false, shouldDirty: true });
     }
   }, [form]);
 
-  console.log("Current form values:", form.getValues());
-  console.log("Current assigned_users:", form.getValues('assigned_users'));
+  //console.log("Current form values:", form.getValues());
+  //console.log("Current assigned_users:", form.getValues('assigned_users'));
 
   // Fetch users for the assignment dropdown
   const { data: users = [], isLoading } = useQuery({
@@ -49,10 +49,10 @@ export const AssignedUsersField = () => {
     queryFn: async () => {
       try {
         const usersList = await userService.getUsers();
-        console.log("Fetched users for assignment:", usersList);
+      //  console.log("Fetched users for assignment:", usersList);
         return Array.isArray(usersList) ? usersList : [];
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+      //  console.error("Failed to fetch users:", error);
         return [];
       }
     },
@@ -64,7 +64,7 @@ export const AssignedUsersField = () => {
     ? form.watch('assigned_users') 
     : [];
   
-  console.log("Selected user IDs:", selectedUserIds);
+ // console.log("Selected user IDs:", selectedUserIds);
 
   // Function to add a user
   const addUser = (userId: string) => {
@@ -73,7 +73,7 @@ export const AssignedUsersField = () => {
       : [];
       
     if (!currentValues.includes(userId)) {
-      console.log("Adding user:", userId);
+   //   console.log("Adding user:", userId);
       form.setValue('assigned_users', [...currentValues, userId], { shouldValidate: true, shouldDirty: true });
     }
   };
@@ -84,7 +84,7 @@ export const AssignedUsersField = () => {
       ? [...form.getValues('assigned_users')] 
       : [];
       
-    console.log("Removing user:", userId);
+  //  console.log("Removing user:", userId);
     form.setValue(
       'assigned_users', 
       currentValues.filter(id => id !== userId), 
@@ -94,7 +94,7 @@ export const AssignedUsersField = () => {
 
   // Get selected users data
   const selectedUsers = users.filter(user => selectedUserIds.includes(user.id));
-  console.log("Matched selected users:", selectedUsers);
+ // console.log("Matched selected users:", selectedUsers);
   
   // Function to get user initials from name
   const getUserInitials = (user: any): string => {

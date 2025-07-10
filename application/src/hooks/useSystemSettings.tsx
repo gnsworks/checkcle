@@ -29,7 +29,7 @@ export function useSystemSettings() {
     queryKey: ['generalSettings'],
     queryFn: async (): Promise<GeneralSettings | null> => {
       try {
-        console.log('Fetching settings from API...');
+      //  console.log('Fetching settings from API...');
         const response = await fetch('/api/settings', {
           method: 'POST',
           headers: {
@@ -38,14 +38,14 @@ export function useSystemSettings() {
           body: JSON.stringify({ action: 'getSettings' })
         });
         
-        console.log('API response status:', response.status);
+      //  console.log('API response status:', response.status);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const result: ApiResponse = await response.json();
-        console.log('API response data:', result);
+      //  console.log('API response data:', result);
         
         if (!result.success) {
           throw new Error(result.message || 'Failed to fetch settings');
@@ -53,7 +53,7 @@ export function useSystemSettings() {
         
         return result.data || null;
       } catch (error) {
-        console.error('Error fetching settings:', error);
+      //  console.error('Error fetching settings:', error);
         toast({
           title: t("errorFetchingSettings", "settings"),
           description: error instanceof Error ? error.message : String(error),
@@ -68,7 +68,7 @@ export function useSystemSettings() {
   // Update settings mutation
   const updateSettingsMutation = useMutation({
     mutationFn: async (updatedSettings: GeneralSettings): Promise<GeneralSettings> => {
-      console.log('Updating settings:', updatedSettings);
+     // console.log('Updating settings:', updatedSettings);
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: {
@@ -101,7 +101,7 @@ export function useSystemSettings() {
       });
     },
     onError: (error) => {
-      console.error('Error updating settings:', error);
+    //  console.error('Error updating settings:', error);
       toast({
         title: t("errorSavingSettings", "settings"),
         description: error instanceof Error ? error.message : String(error),
@@ -113,7 +113,7 @@ export function useSystemSettings() {
   // Test email connection
   const testEmailConnectionMutation = useMutation({
     mutationFn: async (smtpConfig: any): Promise<{success: boolean, message: string}> => {
-      console.log('Testing email connection:', smtpConfig);
+     // console.log('Testing email connection:', smtpConfig);
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: {
@@ -143,7 +143,7 @@ export function useSystemSettings() {
       });
     },
     onError: (error) => {
-      console.error('Error testing connection:', error);
+     // console.error('Error testing connection:', error);
       toast({
         title: t("connectionFailed", "settings"),
         description: error instanceof Error ? error.message : String(error),

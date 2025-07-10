@@ -16,20 +16,20 @@ export const maintenanceNotificationService = {
    */
   async sendMaintenanceNotification({ maintenance, notificationType }: NotificationParams): Promise<boolean> {
     try {
-      console.log(`Preparing to send ${notificationType} notification for maintenance: ${maintenance.title}`);
+    //  console.log(`Preparing to send ${notificationType} notification for maintenance: ${maintenance.title}`);
       
       // Get notification channel ID - try both fields
       let notificationChannelId = maintenance.notification_channel_id;
       
       // If notification_channel_id is empty, try to use notification_id
       if (!notificationChannelId && maintenance.notification_id) {
-        console.log(`No notification_channel_id found, using notification_id: ${maintenance.notification_id}`);
+     //   console.log(`No notification_channel_id found, using notification_id: ${maintenance.notification_id}`);
         notificationChannelId = maintenance.notification_id;
       }
       
       // Check if maintenance has notification channel configured
       if (!notificationChannelId) {
-        console.log("No notification channel configured for this maintenance");
+      //  console.log("No notification channel configured for this maintenance");
         return false;
       }
       
@@ -41,19 +41,19 @@ export const maintenanceNotificationService = {
         const config = await pb.collection('alert_configurations').getOne(notificationChannelId);
         notificationConfig = config as unknown as AlertConfiguration;
       } catch (error) {
-        console.error("Failed to fetch notification configuration:", error);
+      //  console.error("Failed to fetch notification configuration:", error);
         return false;
       }
       
       if (!notificationConfig.enabled) {
-        console.log("Notification channel is disabled");
+      //  console.log("Notification channel is disabled");
         return false;
       }
       
       // Create notification message based on type
       const message = this.generateMaintenanceMessage(maintenance, notificationType);
       
-      console.log(`Sending ${notificationConfig.notification_type} notification with message: ${message}`);
+    //  console.log(`Sending ${notificationConfig.notification_type} notification with message: ${message}`);
       
       // Send notification based on channel type
       if (notificationConfig.notification_type === 'telegram') {
@@ -62,10 +62,10 @@ export const maintenanceNotificationService = {
       
       // Add more notification types here as needed
       
-      console.log(`Unsupported notification type: ${notificationConfig.notification_type}`);
+     // console.log(`Unsupported notification type: ${notificationConfig.notification_type}`);
       return false;
     } catch (error) {
-      console.error("Error sending maintenance notification:", error);
+     // console.error("Error sending maintenance notification:", error);
       return false;
     }
   },
@@ -115,12 +115,12 @@ export const maintenanceNotificationService = {
 
 // Set up scheduled maintenance notifications
 export const setupMaintenanceNotificationsScheduler = () => {
-  console.log("Setting up maintenance notifications scheduler");
+ // console.log("Setting up maintenance notifications scheduler");
   
   // Check every minute for maintenance that needs notifications
   const checkInterval = setInterval(async () => {
     try {
-      console.log("Checking for maintenance notifications to send...");
+    //  console.log("Checking for maintenance notifications to send...");
       const now = new Date();
       
       // Fetch upcoming and ongoing maintenance
@@ -143,7 +143,7 @@ export const setupMaintenanceNotificationsScheduler = () => {
             startTime <= new Date(now.getTime() + 60000) && 
             startTime > new Date(now.getTime() - 60000)) {
           
-          console.log(`Maintenance ${maintenance.title} is starting now, sending notification`);
+        //  console.log(`Maintenance ${maintenance.title} is starting now, sending notification`);
           await maintenanceNotificationService.sendMaintenanceNotification({
             maintenance,
             notificationType: 'start'
@@ -160,7 +160,7 @@ export const setupMaintenanceNotificationsScheduler = () => {
             endTime <= new Date(now.getTime() + 60000) && 
             endTime > new Date(now.getTime() - 60000)) {
           
-          console.log(`Maintenance ${maintenance.title} is ending now, sending notification`);
+         // console.log(`Maintenance ${maintenance.title} is ending now, sending notification`);
           await maintenanceNotificationService.sendMaintenanceNotification({
             maintenance,
             notificationType: 'end'
@@ -173,7 +173,7 @@ export const setupMaintenanceNotificationsScheduler = () => {
         }
       }
     } catch (error) {
-      console.error("Error checking maintenance notifications:", error);
+    //  console.error("Error checking maintenance notifications:", error);
     }
   }, 60000); // Check every minute
   
@@ -186,7 +186,7 @@ let notificationScheduler: NodeJS.Timeout | null = null;
 export const initMaintenanceNotifications = () => {
   if (notificationScheduler === null) {
     notificationScheduler = setupMaintenanceNotificationsScheduler();
-    console.log("Maintenance notifications scheduler initialized");
+   // console.log("Maintenance notifications scheduler initialized");
   }
 };
 
@@ -194,6 +194,6 @@ export const stopMaintenanceNotifications = () => {
   if (notificationScheduler !== null) {
     clearInterval(notificationScheduler);
     notificationScheduler = null;
-    console.log("Maintenance notifications scheduler stopped");
+  //  console.log("Maintenance notifications scheduler stopped");
   }
 };

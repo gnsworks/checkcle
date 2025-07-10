@@ -20,7 +20,7 @@ const Dashboard = () => {
   
   // For debugging user data
   useEffect(() => {
-    console.log("Current user data:", currentUser);
+   // console.log("Current user data:", currentUser);
   }, [currentUser]);
   
   // Handle logout
@@ -40,7 +40,7 @@ const Dashboard = () => {
   useEffect(() => {
     const startActiveServices = async () => {
       await serviceService.startAllActiveServices();
-      console.log("Active services monitoring started");
+    //  console.log("Active services monitoring started");
     };
 
     startActiveServices();

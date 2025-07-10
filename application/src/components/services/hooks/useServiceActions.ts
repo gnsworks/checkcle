@@ -23,7 +23,7 @@ export function useServiceActions(initialServices: Service[]) {
   };
 
   const handleViewDetail = (service: Service) => {
-    console.log(`Navigating to service detail for service ID: ${service.id}`);
+   // console.log(`Navigating to service detail for service ID: ${service.id}`);
     navigate(`/service/${service.id}`);
   };
   
@@ -115,7 +115,7 @@ export function useServiceActions(initialServices: Service[]) {
       
       setSelectedService(null);
     } catch (error) {
-      console.error("Error deleting service:", error);
+    //  console.error("Error deleting service:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -134,7 +134,7 @@ export function useServiceActions(initialServices: Service[]) {
       // Toggle the mute alerts status for this specific service
       const newMuteStatus = !isMuted;
       
-      console.log(`${newMuteStatus ? "Muting" : "Unmuting"} alerts for service ${service.id} (${service.name})`);
+     // console.log(`${newMuteStatus ? "Muting" : "Unmuting"} alerts for service ${service.id} (${service.name})`);
       
       // First update the local state immediately for better UI responsiveness
       // Using proper type casting to ensure TypeScript knows we're creating valid Service objects
@@ -165,7 +165,7 @@ export function useServiceActions(initialServices: Service[]) {
       await queryClient.invalidateQueries({ queryKey: ["services"] });
       
     } catch (error) {
-      console.error("Error updating alert settings:", error);
+    //  console.error("Error updating alert settings:", error);
       
       // Revert the local state change if the server update failed
       const revertedServices = services.map(s => {

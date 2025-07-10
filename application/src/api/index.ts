@@ -11,19 +11,19 @@ const api = {
    * Handle API requests
    */
   async handleRequest(path, method, body) {
-    console.log(`API request: ${method} ${path}`, body);
+   // console.log(`API request: ${method} ${path}`, body);
     
     // Route to the appropriate handler
     if (path === '/api/realtime') {
-      console.log("Routing to realtime handler");
+    //  console.log("Routing to realtime handler");
       return await realtime(body);
     } else if (path === '/api/settings' || path.startsWith('/api/settings/')) {
-      console.log("Routing to settings handler");
+     // console.log("Routing to settings handler");
       return await settingsApi(body, path);
     }
     
     // Return 404 for unknown routes
-    console.error(`Endpoint not found: ${path}`);
+   // console.error(`Endpoint not found: ${path}`);
     return {
       status: 404,
       json: {
@@ -40,7 +40,7 @@ const originalFetch = window.fetch;
 window.fetch = async (url, options = {}) => {
   // Check if this is an API request to our mock endpoints
   if (typeof url === 'string' && url.startsWith('/api/')) {
-    console.log('Intercepting API request:', url, options);
+   // console.log('Intercepting API request:', url, options);
     
     try {
       let body = {};

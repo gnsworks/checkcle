@@ -22,12 +22,12 @@ export const useRealTimeUpdates = ({
   useEffect(() => {
     if (!serviceId) return;
 
-    console.log(`Setting up real-time updates for service: ${serviceId}`);
+  //  console.log(`Setting up real-time updates for service: ${serviceId}`);
     
     try {
       // Subscribe to the service record for real-time updates
       const subscription = pb.collection('services').subscribe(serviceId, function(e) {
-        console.log("Service updated:", e.record);
+     //   console.log("Service updated:", e.record);
         
         // Update our local state with the new data
         if (e.record) {
@@ -47,7 +47,7 @@ export const useRealTimeUpdates = ({
       // Subscribe to uptime data updates
       const uptimeSubscription = pb.collection('uptime_data').subscribe('*', function(e) {
         if (e.record && e.record.service_id === serviceId) {
-          console.log("New uptime data:", e.record);
+       //   console.log("New uptime data:", e.record);
           
           // Add the new uptime data to our list if it's within the selected date range
           const timestamp = new Date(e.record.timestamp);
@@ -73,16 +73,16 @@ export const useRealTimeUpdates = ({
 
       // Clean up the subscriptions
       return () => {
-        console.log(`Cleaning up subscriptions for service: ${serviceId}`);
+      //  console.log(`Cleaning up subscriptions for service: ${serviceId}`);
         try {
           pb.collection('services').unsubscribe(serviceId);
           pb.collection('uptime_data').unsubscribe('*');
         } catch (error) {
-          console.error("Error cleaning up subscriptions:", error);
+       //   console.error("Error cleaning up subscriptions:", error);
         }
       };
     } catch (error) {
-      console.error("Error setting up real-time updates:", error);
+     // console.error("Error setting up real-time updates:", error);
     }
   }, [serviceId, startDate, endDate, setService, setUptimeData]);
 };

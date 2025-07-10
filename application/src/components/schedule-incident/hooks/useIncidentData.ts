@@ -22,13 +22,13 @@ export const useIncidentData = ({ refreshTrigger = 0 }: UseIncidentDataProps) =>
   const fetchIncidentData = useCallback(async (force = false) => {
     // Skip if already fetching
     if (isFetchingRef.current) {
-      console.log('Already fetching data, skipping additional request');
+    //  console.log('Already fetching data, skipping additional request');
       return;
     }
     
     // Skip if not forced and already initialized
     if (initialized && !force) {
-      console.log('Data already initialized and no force refresh, skipping fetch');
+    //  console.log('Data already initialized and no force refresh, skipping fetch');
       return;
     }
     
@@ -46,22 +46,22 @@ export const useIncidentData = ({ refreshTrigger = 0 }: UseIncidentDataProps) =>
     setError(null);
     
     try {
-      console.log(`Fetching incident data (force=${force})`);
+    //  console.log(`Fetching incident data (force=${force})`);
       const allIncidents = await incidentService.getAllIncidents(force);
       
       if (Array.isArray(allIncidents)) {
         setIncidents(allIncidents);
-        console.log(`Successfully set ${allIncidents.length} incidents to state`);
+     //   console.log(`Successfully set ${allIncidents.length} incidents to state`);
       } else {
         setIncidents([]);
-        console.warn('No incidents returned from service');
+      //  console.warn('No incidents returned from service');
       }
       
       setInitialized(true);
       setLoading(false);
       setIsRefreshing(false);
     } catch (error) {
-      console.error('Error fetching incident data:', error);
+    //  console.error('Error fetching incident data:', error);
       setError('Failed to load incident data. Please try again later.');
       setIncidents([]);
       setInitialized(true);
@@ -79,7 +79,7 @@ export const useIncidentData = ({ refreshTrigger = 0 }: UseIncidentDataProps) =>
   useEffect(() => {
     // Skip if the refresh trigger hasn't changed (prevents duplicate effect calls)
     if (refreshTrigger === lastRefreshTriggerRef.current && initialized) {
-      console.log('Refresh trigger unchanged, skipping fetch');
+    //  console.log('Refresh trigger unchanged, skipping fetch');
       return;
     }
     
@@ -90,7 +90,7 @@ export const useIncidentData = ({ refreshTrigger = 0 }: UseIncidentDataProps) =>
     const abortController = new AbortController();
     let isMounted = true;
     
-    console.log(`useIncidentData effect running, refreshTrigger: ${refreshTrigger}`);
+   // console.log(`useIncidentData effect running, refreshTrigger: ${refreshTrigger}`);
     
     // Use a longer delay to ensure we don't trigger too many API calls
     const fetchTimer = setTimeout(() => {
@@ -101,7 +101,7 @@ export const useIncidentData = ({ refreshTrigger = 0 }: UseIncidentDataProps) =>
     
     // Cleanup function to abort any in-flight requests and clear timers
     return () => {
-      console.log('Cleaning up incident data fetch effect');
+    //  console.log('Cleaning up incident data fetch effect');
       isMounted = false;
       clearTimeout(fetchTimer);
       abortController.abort();
@@ -112,7 +112,7 @@ export const useIncidentData = ({ refreshTrigger = 0 }: UseIncidentDataProps) =>
   const incidentData = useMemo(() => {
     if (!initialized || incidents.length === 0) return [];
     
-    console.log(`Filtering incidents by: ${filter}`);
+   // console.log(`Filtering incidents by: ${filter}`);
     
     if (filter === "unresolved") {
       return incidents.filter(item => {

@@ -68,7 +68,7 @@ export const getStatusChangeEvents = (uptimeData: UptimeData[]): UptimeData[] =>
     }
   }
 
-  console.log(`Found ${statusChanges.length} status changes, including paused status changes: ${statusChanges.some(i => i.status === 'paused')}`);
+ // console.log(`Found ${statusChanges.length} status changes, including paused status changes: ${statusChanges.some(i => i.status === 'paused')}`);
   
   return statusChanges;
 };

@@ -27,8 +27,8 @@ export function LatestChecksTable({ uptimeData }: { uptimeData: UptimeData[] }) 
   // Filter incidents by status
   const incidents = useMemo(() => {
     const statusChanges = getStatusChangeEvents(uptimeData);
-    console.log(`Total status changes: ${statusChanges.length}`);
-    console.log(`Status types in incidents: ${[...new Set(statusChanges.map(i => i.status))].join(', ')}`);
+  //  console.log(`Total status changes: ${statusChanges.length}`);
+  //  console.log(`Status types in incidents: ${[...new Set(statusChanges.map(i => i.status))].join(', ')}`);
     
     if (statusFilter === "all") return statusChanges;
     
@@ -58,7 +58,7 @@ export function LatestChecksTable({ uptimeData }: { uptimeData: UptimeData[] }) 
   // Calculate items per page for pagination display
   const itemsPerPage = pageSize === "all" ? incidents.length : parseInt(pageSize, 10);
 
-  console.log(`Status Filter: ${statusFilter}, Incidents: ${incidents.length}, Includes paused: ${incidents.some(i => i.status === 'paused')}`);
+ // console.log(`Status Filter: ${statusFilter}, Incidents: ${incidents.length}, Includes paused: ${incidents.some(i => i.status === 'paused')}`);
 
   return (
     <Card className={`mb-6 transition-colors ${theme === 'dark' ? 'bg-card border-border' : 'bg-white border-gray-200'}`}>

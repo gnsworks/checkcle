@@ -8,7 +8,7 @@ import { testEmail } from './actions/testEmail';
  * Settings API handler
  */
 const settingsApi = async (body: any, path?: string) => {
-  console.log('Settings API called with path:', path, 'body:', body);
+ // console.log('Settings API called with path:', path, 'body:', body);
   
   // Handle test email endpoint specifically
   if (path === '/api/settings/test/email') {
@@ -18,7 +18,7 @@ const settingsApi = async (body: any, path?: string) => {
   
   // Handle regular settings API with action-based routing
   const action = body?.action;
-  console.log('Settings API called with action:', action, 'data:', body?.data);
+ // console.log('Settings API called with action:', action, 'data:', body?.data);
 
   switch (action) {
     case 'getSettings':
