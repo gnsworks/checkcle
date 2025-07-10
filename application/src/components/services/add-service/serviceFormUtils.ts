@@ -13,7 +13,7 @@ export const getServiceFormDefaults = (): ServiceFormData => ({
   notificationChannels: [],
   alertTemplate: "",
   regionalMonitoringEnabled: false,
-  regionalAgent: "",
+  regionalAgents: [],
 });
 
 export const mapServiceToFormData = (service: Service): ServiceFormData => {
@@ -40,9 +40,12 @@ export const mapServiceToFormData = (service: Service): ServiceFormData => {
 
   // Handle regional monitoring data - check regional_status field
   const isRegionalEnabled = service.regional_status === "enabled";
-  const regionalAgent = isRegionalEnabled && service.region_name && service.agent_id 
-    ? `${service.region_name}|${service.agent_id}` 
-    : "";
+  const regionalAgents: string[] = [];
+  
+  // For backward compatibility, if there's a single regional agent, add it to the array
+  if (isRegionalEnabled && service.region_name && service.agent_id) {
+    regionalAgents.push(`${service.region_name}|${service.agent_id}`);
+  }
 
   // Handle notification channels - convert notification_channel and notificationChannel to array
   const notificationChannels: string[] = [];
@@ -62,7 +65,8 @@ export const mapServiceToFormData = (service: Service): ServiceFormData => {
     notification_status: service.notification_status,
     notification_channel: service.notification_channel,
     notificationChannel: service.notificationChannel,
-    mappedChannels: notificationChannels
+    mappedChannels: notificationChannels,
+    regionalAgents: regionalAgents
   });
 
   return {
@@ -76,21 +80,23 @@ export const mapServiceToFormData = (service: Service): ServiceFormData => {
     notificationChannels: notificationChannels,
     alertTemplate: service.alertTemplate === "default" ? "" : service.alertTemplate || "",
     regionalMonitoringEnabled: isRegionalEnabled,
-    regionalAgent: regionalAgent,
+    regionalAgents: regionalAgents,
   };
 };
 
 export const mapFormDataToServiceData = (data: ServiceFormData) => {
-  // Parse regional agent selection
+  // Parse regional agent selection - for now, use the first agent for backward compatibility
   let regionName = "";
   let agentId = "";
   let regionalStatus: "enabled" | "disabled" = "disabled";
   
   // Set regional status and agent data based on form values
-  if (data.regionalMonitoringEnabled) {
+  if (data.regionalMonitoringEnabled && data.regionalAgents && data.regionalAgents.length > 0) {
     regionalStatus = "enabled";
-    if (data.regionalAgent && data.regionalAgent !== "") {
-      const [parsedRegionName, parsedAgentId] = data.regionalAgent.split("|");
+    // Use the first agent for backward compatibility with single-agent database schema
+    const firstAgent = data.regionalAgents[0];
+    if (firstAgent && firstAgent !== "") {
+      const [parsedRegionName, parsedAgentId] = firstAgent.split("|");
       regionName = parsedRegionName || "";
       agentId = parsedAgentId || "";
     }
@@ -109,6 +115,10 @@ export const mapFormDataToServiceData = (data: ServiceFormData) => {
     regionalStatus: regionalStatus,
     regionName: regionName,
     agentId: agentId,
+    // Store multiple agents as a comment for future use (when backend supports it)
+    regionalAgentsNote: data.regionalAgents && data.regionalAgents.length > 1 
+      ? `Multiple agents selected: ${data.regionalAgents.join(', ')}` 
+      : undefined,
     // Map the URL field to appropriate database field based on service type
     ...(data.type === "dns" 
       ? { domain: data.url, url: "", host: "", port: undefined }  // DNS: store in domain field

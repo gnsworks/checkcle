@@ -1,4 +1,3 @@
-
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,18 +46,18 @@ export function ServiceForm({
       form.reset(formData);
 
       // Log for debugging
-      console.log("Populating form with data:", { 
-        type: formData.type, 
-        url: formData.url, 
-        port: formData.port, 
-        regionalAgent: formData.regionalAgent,
-        regionalMonitoringEnabled: formData.regionalMonitoringEnabled,
-        regional_status: initialData.regional_status,
-        region_name: initialData.region_name,
-        agent_id: initialData.agent_id,
-        notification_status: initialData.notification_status,
-        notificationChannels: formData.notificationChannels
-      });
+    //  console.log("Populating form with data:", { 
+    //    type: formData.type, 
+    //    url: formData.url, 
+    //    port: formData.port, 
+    //    regionalAgents: formData.regionalAgents,
+    //    regionalMonitoringEnabled: formData.regionalMonitoringEnabled,
+    //    regional_status: initialData.regional_status,
+    //    region_name: initialData.region_name,
+    //    agent_id: initialData.agent_id,
+     //   notification_status: initialData.notification_status,
+     //   notificationChannels: formData.notificationChannels
+    //  });
     }
   }, [initialData, isEdit, form]);
 
@@ -97,7 +96,7 @@ export function ServiceForm({
         form.reset();
       }
     } catch (error) {
-      console.error(`Error ${isEdit ? 'updating' : 'creating'} service:`, error);
+     // console.error(`Error ${isEdit ? 'updating' : 'creating'} service:`, error);
       toast({
         title: `Failed to ${isEdit ? 'update' : 'create'} service`,
         description: `An error occurred while ${isEdit ? 'updating' : 'creating'} the service.`,
