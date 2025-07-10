@@ -1,4 +1,3 @@
-
 import { pb } from '@/lib/pocketbase';
 import { Service, CreateServiceParams, UptimeData } from '@/types/service.types';
 import { monitoringService } from './monitoring';
@@ -28,6 +27,7 @@ export const serviceService = {
         interval: item.heartbeat_interval || item.interval || 60,
         retries: item.max_retries || item.retries || 3,
         notificationChannel: item.notification_id,
+        notification_status: item.notification_status || "disabled",
         alertTemplate: item.template_id,
         muteAlerts: item.alerts === "muted",  // Convert string to boolean for compatibility
         alerts: item.alerts || "unmuted",     // Store actual database field
@@ -44,7 +44,7 @@ export const serviceService = {
     }
   },
 
-  async createService(params: CreateServiceParams): Promise<Service> {
+  async createService(params: any): Promise<Service> {
     try {
       // Convert service type to lowercase to avoid validation issues
       const serviceType = params.type.toLowerCase();
@@ -61,7 +61,10 @@ export const serviceService = {
         last_checked: new Date().toLocaleString(),
         heartbeat_interval: params.interval,
         max_retries: params.retries,
-        notification_id: params.notificationChannel,
+        notification_status: params.notificationStatus || "disabled",
+        notification_id: params.notificationChannels && params.notificationChannels.length > 0 
+          ? params.notificationChannels[0] // Store first channel for backward compatibility
+          : null,
         template_id: params.alertTemplate,
         // Regional monitoring fields - use regional_status
         regional_status: params.regionalStatus || "disabled",
@@ -98,6 +101,7 @@ export const serviceService = {
         interval: record.heartbeat_interval || 60,
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
+        notification_status: record.notification_status || "disabled",
         alertTemplate: record.template_id,
         regional_status: record.regional_status || "disabled",
         regional_monitoring_enabled: record.regional_status === "enabled",
@@ -115,7 +119,7 @@ export const serviceService = {
     }
   },
   
-  async updateService(id: string, params: CreateServiceParams): Promise<Service> {
+  async updateService(id: string, params: any): Promise<Service> {
     try {
       // Convert service type to lowercase to avoid validation issues
       const serviceType = params.type.toLowerCase();
@@ -128,7 +132,10 @@ export const serviceService = {
         service_type: serviceType,
         heartbeat_interval: params.interval,
         max_retries: params.retries,
-        notification_id: params.notificationChannel || null,
+        notification_status: params.notificationStatus || "disabled",
+        notification_id: params.notificationChannels && params.notificationChannels.length > 0 
+          ? params.notificationChannels[0] // Store first channel for backward compatibility
+          : null,
         template_id: params.alertTemplate || null,
         // Regional monitoring fields - use regional_status
         regional_status: params.regionalStatus || "disabled",
@@ -172,6 +179,7 @@ export const serviceService = {
         interval: record.heartbeat_interval || 60,
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
+        notification_status: record.notification_status || "disabled",
         alertTemplate: record.template_id,
         regional_status: record.regional_status || "disabled",
         regional_monitoring_enabled: record.regional_status === "enabled",

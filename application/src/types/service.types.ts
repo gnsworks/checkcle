@@ -17,6 +17,7 @@ export interface Service {
   updated?: string;
   notification_channel?: string;
   notificationChannel?: string; // Keep for backward compatibility
+  notification_status?: "enabled" | "disabled"; // Add notification_status field
   alertTemplate?: string;
   alerts?: "muted" | "unmuted"; // Make sure alerts is properly typed as union
   muteAlerts?: boolean; // Keep this to avoid breaking existing code

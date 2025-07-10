@@ -13,3 +13,4 @@ export * from './ServicesTableView';
 export * from './ServiceDeleteDialog';
 export * from './ServiceHistoryDialog';
 export * from './ServiceEditDialog';
+export * from './ServiceForm';

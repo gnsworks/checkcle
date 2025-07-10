@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
 import { serviceSchema, ServiceFormData } from "./types";
 import { ServiceBasicFields } from "./ServiceBasicFields";
 import { ServiceTypeField } from "./ServiceTypeField";
@@ -14,6 +13,7 @@ import { ServiceFormActions } from "./ServiceFormActions";
 import { serviceService } from "@/services/serviceService";
 import { Service } from "@/types/service.types";
 import { ServiceRegionalFields } from "./ServiceRegionalFields";
+import { getServiceFormDefaults, mapServiceToFormData, mapFormDataToServiceData } from "./serviceFormUtils";
 
 interface ServiceFormProps {
   onSuccess: () => void;
@@ -36,73 +36,28 @@ export function ServiceForm({
   // Initialize form with default values
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
-    defaultValues: {
-      name: "",
-      type: "http",
-      url: "",
-      port: "",
-      interval: "60",
-      retries: "3",
-      notificationChannel: "",
-      alertTemplate: "",
-      regionalMonitoringEnabled: false,
-      regionalAgent: "",
-    },
+    defaultValues: getServiceFormDefaults(),
     mode: "onBlur",
   });
 
   // Populate form when initialData changes (separate from initialization)
   useEffect(() => {
     if (initialData && isEdit) {
-      // Ensure the type is one of the allowed values
-      const serviceType = (initialData.type || "http").toLowerCase();
-      const validType = ["http", "ping", "tcp", "dns"].includes(serviceType) 
-        ? serviceType as "http" | "ping" | "tcp" | "dns"
-        : "http";
-
-      // For PING services, use host field; for DNS use domain field; for TCP use host field; others use url
-      let urlValue = "";
-      let portValue = "";
-      
-      if (validType === "ping") {
-        urlValue = initialData.host || "";
-      } else if (validType === "dns") {
-        urlValue = initialData.domain || "";
-      } else if (validType === "tcp") {
-        urlValue = initialData.host || "";
-        portValue = String(initialData.port || "");
-      } else {
-        urlValue = initialData.url || "";
-      }
-
-      // Handle regional monitoring data - ensure proper assignment display
-      const regionalAgent = initialData.region_name && initialData.agent_id 
-        ? `${initialData.region_name}|${initialData.agent_id}` 
-        : "";
-
-      // Reset the form with initial data values
-      form.reset({
-        name: initialData.name || "",
-        type: validType,
-        url: urlValue,
-        port: portValue,
-        interval: String(initialData.interval || 60),
-        retries: String(initialData.retries || 3),
-        notificationChannel: initialData.notificationChannel || "",
-        alertTemplate: initialData.alertTemplate || "",
-        regionalMonitoringEnabled: Boolean(initialData.regional_monitoring_enabled),
-        regionalAgent: regionalAgent,
-      });
+      const formData = mapServiceToFormData(initialData);
+      form.reset(formData);
 
       // Log for debugging
       console.log("Populating form with data:", { 
-        type: validType, 
-        url: urlValue, 
-        port: portValue, 
-        regionalAgent,
-        regionalMonitoringEnabled: Boolean(initialData.regional_monitoring_enabled),
+        type: formData.type, 
+        url: formData.url, 
+        port: formData.port, 
+        regionalAgent: formData.regionalAgent,
+        regionalMonitoringEnabled: formData.regionalMonitoringEnabled,
+        regional_status: initialData.regional_status,
         region_name: initialData.region_name,
-        agent_id: initialData.agent_id
+        agent_id: initialData.agent_id,
+        notification_status: initialData.notification_status,
+        notificationChannels: formData.notificationChannels
       });
     }
   }, [initialData, isEdit, form]);
@@ -114,42 +69,9 @@ export function ServiceForm({
     if (onSubmitStart) onSubmitStart();
     
     try {
-      console.log("Form data being submitted:", data); // Debug log for submitted data
+      console.log("Form data being submitted:", data);
       
-      // Parse regional agent selection
-      let regionName = "";
-      let agentId = "";
-      
-      // Only set region and agent if regional monitoring is enabled AND an agent is selected (not unassign)
-      if (data.regionalMonitoringEnabled && data.regionalAgent && data.regionalAgent !== "") {
-        const [parsedRegionName, parsedAgentId] = data.regionalAgent.split("|");
-        regionName = parsedRegionName || "";
-        agentId = parsedAgentId || "";
-      }
-      
-      // Prepare service data with proper field mapping
-      const serviceData = {
-        name: data.name,
-        type: data.type,
-        interval: parseInt(data.interval),
-        retries: parseInt(data.retries),
-        notificationChannel: data.notificationChannel || undefined,
-        alertTemplate: data.alertTemplate || undefined,
-        regionalMonitoringEnabled: data.regionalMonitoringEnabled || false,
-        // Always set region_name and agent_id - empty strings when unassigned
-        regionName: regionName,
-        agentId: agentId,
-        // Map the URL field to appropriate database field based on service type
-        ...(data.type === "dns" 
-          ? { domain: data.url, url: "", host: "", port: undefined }  // DNS: store in domain field
-          : data.type === "ping"
-          ? { host: data.url, url: "", domain: "", port: undefined }  // PING: store in host field  
-          : data.type === "tcp"
-          ? { host: data.url, port: parseInt(data.port || "80"), url: "", domain: "" }  // TCP: store in host and port fields
-          : { url: data.url, domain: "", host: "", port: undefined }  // HTTP: store in url field
-        )
-      };
-
+      const serviceData = mapFormDataToServiceData(data);
       console.log("Service data being sent:", serviceData);
       
       if (isEdit && initialData) {
@@ -188,7 +110,7 @@ export function ServiceForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 pb-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 pb-6">
         <div className="space-y-6">
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Basic Information</h3>
