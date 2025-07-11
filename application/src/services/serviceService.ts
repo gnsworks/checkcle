@@ -1,3 +1,4 @@
+
 import { pb } from '@/lib/pocketbase';
 import { Service, CreateServiceParams, UptimeData } from '@/types/service.types';
 import { monitoringService } from './monitoring';
@@ -27,6 +28,7 @@ export const serviceService = {
         interval: item.heartbeat_interval || item.interval || 60,
         retries: item.max_retries || item.retries || 3,
         notificationChannel: item.notification_id,
+        notification_channel: item.notification_channel, // Add this field for multiple channels support
         notification_status: item.notification_status || "disabled",
         alertTemplate: item.template_id,
         muteAlerts: item.alerts === "muted",  // Convert string to boolean for compatibility
@@ -39,7 +41,7 @@ export const serviceService = {
         regional_monitoring_enabled: item.regional_status === "enabled", // Backward compatibility
       }));
     } catch (error) {
-     // console.error("Error fetching services:", error);
+    //  console.error("Error fetching services:", error);
       throw new Error('Failed to load services data.');
     }
   },
@@ -50,7 +52,7 @@ export const serviceService = {
       const serviceType = params.type.toLowerCase();
       
       // Debug log to check what we're sending
-      console.log("Creating service with params:", params);
+     // console.log("Creating service with params:", params);
       
       const data = {
         name: params.name,
@@ -62,8 +64,13 @@ export const serviceService = {
         heartbeat_interval: params.interval,
         max_retries: params.retries,
         notification_status: params.notificationStatus || "disabled",
+        // Store multiple notification channels as JSON string
+        notification_channel: params.notificationChannels && params.notificationChannels.length > 0 
+          ? JSON.stringify(params.notificationChannels)
+          : null,
+        // Store multiple notification IDs as comma-separated string in notification_id field
         notification_id: params.notificationChannels && params.notificationChannels.length > 0 
-          ? params.notificationChannels[0] // Store first channel for backward compatibility
+          ? params.notificationChannels.join(',')
           : null,
         template_id: params.alertTemplate,
         // Regional monitoring fields - use regional_status
@@ -81,9 +88,9 @@ export const serviceService = {
         )
       };
 
-      console.log("Creating service with data:", data);
+     // console.log("Creating service with data:", data);
       const record = await pb.collection('services').create(data);
-      console.log("Service created, returned record:", record);
+     // console.log("Service created, returned record:", record);
       
       // Return the newly created service
       const newService = {
@@ -101,6 +108,7 @@ export const serviceService = {
         interval: record.heartbeat_interval || 60,
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
+        notification_channel: record.notification_channel,
         notification_status: record.notification_status || "disabled",
         alertTemplate: record.template_id,
         regional_status: record.regional_status || "disabled",
@@ -114,7 +122,7 @@ export const serviceService = {
       
       return newService;
     } catch (error) {
-      console.error("Error creating service:", error);
+    //  console.error("Error creating service:", error);
       throw new Error('Failed to create service.');
     }
   },
@@ -125,7 +133,7 @@ export const serviceService = {
       const serviceType = params.type.toLowerCase();
       
       // Debug log to check what we're updating
-      console.log("Updating service with params:", params);
+    //  console.log("Updating service with params:", params);
       
       const data = {
         name: params.name,
@@ -133,8 +141,13 @@ export const serviceService = {
         heartbeat_interval: params.interval,
         max_retries: params.retries,
         notification_status: params.notificationStatus || "disabled",
+        // Store multiple notification channels as JSON string
+        notification_channel: params.notificationChannels && params.notificationChannels.length > 0 
+          ? JSON.stringify(params.notificationChannels)
+          : null,
+        // Store multiple notification IDs as comma-separated string in notification_id field
         notification_id: params.notificationChannels && params.notificationChannels.length > 0 
-          ? params.notificationChannels[0] // Store first channel for backward compatibility
+          ? params.notificationChannels.join(',')
           : null,
         template_id: params.alertTemplate || null,
         // Regional monitoring fields - use regional_status
@@ -152,7 +165,7 @@ export const serviceService = {
         )
       };
 
-      console.log("Updating service with data:", data);
+     // console.log("Updating service with data:", data);
       
       // Use timeout to ensure the request doesn't hang
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -161,7 +174,7 @@ export const serviceService = {
       
       const updatePromise = pb.collection('services').update(id, data);
       const record = await Promise.race([updatePromise, timeoutPromise]) as any;
-      console.log("Service updated, returned record:", record);
+     // console.log("Service updated, returned record:", record);
       
       // Return the updated service
       const updatedService = {
@@ -179,6 +192,7 @@ export const serviceService = {
         interval: record.heartbeat_interval || 60,
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
+        notification_channel: record.notification_channel,
         notification_status: record.notification_status || "disabled",
         alertTemplate: record.template_id,
         regional_status: record.regional_status || "disabled",
@@ -189,7 +203,7 @@ export const serviceService = {
       
       return updatedService;
     } catch (error) {
-      console.error("Error updating service:", error);
+      //console.error("Error updating service:", error);
       throw new Error(`Failed to update service: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   },
