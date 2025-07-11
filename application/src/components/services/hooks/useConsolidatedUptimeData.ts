@@ -107,7 +107,7 @@ export const useConsolidatedUptimeData = ({ serviceId, serviceType, status, inte
      //   console.log(`Found default monitoring: ${sourceName} for normalized timestamp ${normalizedTimestamp}`);
       } else {
         // Default monitoring fallback
-        sourceName = 'Default System Check (Agent 1)';
+        sourceName = 'Default (Agent 1)';
         isDefault = true;
      //   console.log(`Using fallback default monitoring for normalized timestamp ${normalizedTimestamp}`);
       }
