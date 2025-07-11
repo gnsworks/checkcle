@@ -42,32 +42,65 @@ export const mapServiceToFormData = (service: Service): ServiceFormData => {
   const isRegionalEnabled = service.regional_status === "enabled";
   const regionalAgents: string[] = [];
   
-  // For backward compatibility, if there's a single regional agent, add it to the array
+  // Parse multiple regional agents from comma-separated region_name and agent_id fields
   if (isRegionalEnabled && service.region_name && service.agent_id) {
-    regionalAgents.push(`${service.region_name}|${service.agent_id}`);
+    const regionNames = service.region_name.includes(',') 
+      ? service.region_name.split(',').map(name => name.trim()).filter(name => name)
+      : [service.region_name];
+    
+    const agentIds = service.agent_id.includes(',')
+      ? service.agent_id.split(',').map(id => id.trim()).filter(id => id)
+      : [service.agent_id];
+    
+    // Combine region names and agent IDs (they should have the same length)
+    const maxLength = Math.max(regionNames.length, agentIds.length);
+    for (let i = 0; i < maxLength; i++) {
+      const regionName = regionNames[i] || regionNames[0] || "";
+      const agentId = agentIds[i] || agentIds[0] || "";
+      if (regionName && agentId) {
+        regionalAgents.push(`${regionName}|${agentId}`);
+      }
+    }
   }
 
-  // Handle notification channels - convert notification_channel and notificationChannel to array
+  // Handle notification channels - prioritize notification_channel field which contains JSON array
   const notificationChannels: string[] = [];
   
-  // Check for notification_channel field (from database)
+  // First check for notification_channel field (JSON string of array)
   if (service.notification_channel) {
-    notificationChannels.push(service.notification_channel);
+    try {
+      const parsedChannels = JSON.parse(service.notification_channel);
+      if (Array.isArray(parsedChannels)) {
+        notificationChannels.push(...parsedChannels);
+      }
+    } catch (error) {
+     // console.warn("Failed to parse notification_channel JSON:", error);
+      // If parsing fails, treat as single channel ID
+      notificationChannels.push(service.notification_channel);
+    }
   }
   
-  // Also check for notificationChannel field (backward compatibility)
-  if (service.notificationChannel && !notificationChannels.includes(service.notificationChannel)) {
-    notificationChannels.push(service.notificationChannel);
+  // Fallback to comma-separated notification_id field
+  if (notificationChannels.length === 0 && service.notificationChannel) {
+    // Check if it's comma-separated
+    if (service.notificationChannel.includes(',')) {
+      const channels = service.notificationChannel.split(',').map(id => id.trim()).filter(id => id);
+      notificationChannels.push(...channels);
+    } else {
+      notificationChannels.push(service.notificationChannel);
+    }
   }
 
-  console.log("Mapping service to form data:", {
-    serviceName: service.name,
-    notification_status: service.notification_status,
-    notification_channel: service.notification_channel,
-    notificationChannel: service.notificationChannel,
-    mappedChannels: notificationChannels,
-    regionalAgents: regionalAgents
-  });
+//  console.log("Mapping service to form data:", {
+ //   serviceName: service.name,
+ //   notification_status: service.notification_status,
+ //   notification_channel: service.notification_channel,
+ //   notificationChannel: service.notificationChannel,
+ //   mappedChannels: notificationChannels,
+  //  regionalAgents: regionalAgents,
+  //  region_name: service.region_name,
+  ///  agent_id: service.agent_id
+ // });
 
   return {
     name: service.name || "",
@@ -85,21 +118,32 @@ export const mapServiceToFormData = (service: Service): ServiceFormData => {
 };
 
 export const mapFormDataToServiceData = (data: ServiceFormData) => {
-  // Parse regional agent selection - for now, use the first agent for backward compatibility
-  let regionName = "";
-  let agentId = "";
+  // Parse regional agent selections - store multiple agents as comma-separated values
+  let regionNames = "";
+  let agentIds = "";
   let regionalStatus: "enabled" | "disabled" = "disabled";
   
   // Set regional status and agent data based on form values
   if (data.regionalMonitoringEnabled && data.regionalAgents && data.regionalAgents.length > 0) {
     regionalStatus = "enabled";
-    // Use the first agent for backward compatibility with single-agent database schema
-    const firstAgent = data.regionalAgents[0];
-    if (firstAgent && firstAgent !== "") {
-      const [parsedRegionName, parsedAgentId] = firstAgent.split("|");
-      regionName = parsedRegionName || "";
-      agentId = parsedAgentId || "";
-    }
+    
+    // Extract region names and agent IDs from the selected agents
+    const parsedRegions: string[] = [];
+    const parsedAgentIds: string[] = [];
+    
+    data.regionalAgents.forEach(agentValue => {
+      if (agentValue && agentValue !== "") {
+        const [regionName, agentId] = agentValue.split("|");
+        if (regionName && agentId) {
+          parsedRegions.push(regionName);
+          parsedAgentIds.push(agentId);
+        }
+      }
+    });
+    
+    // Store as comma-separated strings
+    regionNames = parsedRegions.join(',');
+    agentIds = parsedAgentIds.join(',');
   }
   
   // Prepare service data with proper field mapping
@@ -111,14 +155,10 @@ export const mapFormDataToServiceData = (data: ServiceFormData) => {
     notificationStatus: data.notificationStatus || "disabled",
     notificationChannels: data.notificationChannels || [],
     alertTemplate: data.alertTemplate === "default" ? "" : data.alertTemplate,
-    // Use regional_status field instead of regionalMonitoringEnabled
+    // Use regional_status field and store multiple agents as comma-separated values
     regionalStatus: regionalStatus,
-    regionName: regionName,
-    agentId: agentId,
-    // Store multiple agents as a comment for future use (when backend supports it)
-    regionalAgentsNote: data.regionalAgents && data.regionalAgents.length > 1 
-      ? `Multiple agents selected: ${data.regionalAgents.join(', ')}` 
-      : undefined,
+    regionName: regionNames,
+    agentId: agentIds,
     // Map the URL field to appropriate database field based on service type
     ...(data.type === "dns" 
       ? { domain: data.url, url: "", host: "", port: undefined }  // DNS: store in domain field
