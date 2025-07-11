@@ -2,7 +2,7 @@
 
 ## 📦 Project: [checkcle](https://github.com/operacle/checkcle)
 
-**checkcle** is a lightweight, TypeScript-based built for uptime and server monitoring tools.
+**checkcle** is a self-hosted uptime and server monitoring tool built with TypeScript and Go.
 
 We care about the security and privacy of users running this project in production environments.
 
@@ -47,22 +47,21 @@ We support the latest stable release of `checkcle`. Security patches may also be
 
 ## 🔍 Security Practices
 
-This project adheres to the following practices to enhance security:
+CheckCle follows these practices to improve overall security:
 
-- 🔎 Regular vulnerability checks using `npm audit`
-- ⛓️ Dependency pinning via `package-lock.json`
-- ✅ Type-safe code using `TypeScript`
-- 🧪 Continuous testing and CI
+- 🔎 Regular vulnerability scanning (npm audit for JavaScript dependencies, govulncheck for Go modules)
+- ⛓️ Dependency pinning (package-lock.json and Go modules)
+- ✅ Type-safe code in TypeScript and memory-safe design in Go
+- 🧪 Continuous testing and CI pipelines
 - 🔐 No data is stored or transmitted unless explicitly configured by the user
-- 🧑‍💻 All contributions are reviewed before being merged
+- 🧑‍💻 All code contributions are reviewed before merging
 
 ---
 
 ## ⚠️ Known Security Limitations
 
-- `checkcle` makes outbound HTTPS requests to check certificate details — avoid running in untrusted or high-risk environments without proper network policies.
-- Output may contain certificate metadata (e.g., CN, SANs, expiry dates) — avoid exposing this to public logs unless sanitized.
-- The data may be lost upon system restarts or crashes. Always ensure that backup and recovery mechanisms are in place in production environments.
+- Outbound HTTPS requests: CheckCle agents perform outbound HTTPS connections to send metric data to the backend server. Avoid deploying in untrusted or high-risk environments without appropriate network policies and monitoring.
+- The data may be lost upon system restarts or crashes. Always ensure that backup (pb_data) and recovery mechanisms are in place in production environments.
 
 ---
 
