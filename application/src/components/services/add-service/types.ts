@@ -14,9 +14,9 @@ export const serviceSchema = z.object({
   notificationStatus: z.enum(["enabled", "disabled"]).optional(),
   notificationChannels: z.array(z.string()).optional(),
   alertTemplate: z.string().optional(),
-  // Regional monitoring fields
+  // Regional monitoring fields - now supports multiple agents
   regionalMonitoringEnabled: z.boolean().optional(),
-  regionalAgent: z.string().optional(),
+  regionalAgents: z.array(z.string()).optional(),
 });
 
 export type ServiceFormData = z.infer<typeof serviceSchema>;
