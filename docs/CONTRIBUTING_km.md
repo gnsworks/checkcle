@@ -1,28 +1,28 @@
+
 ## 🌐 Select Language
 
 <table align="center">
   <tr>
     <td align="center">
-      <a href="CONTRIBUTING.md">
+      <a href="../CONTRIBUTING.md">
         <img src="https://flagcdn.com/24x18/gb.png" alt="English" />  
         <br/><strong>English</strong>
       </a>
     </td>
     <td align="center">
-      <a href="docs/CONTRIBUTING_km.md">
+      <a href="CONTRIBUTING_km.md">
         <img src="https://flagcdn.com/24x18/kh.png" alt="Khmer" />  
         <br/><strong>ខ្មែរ</strong>
       </a>
     </td>
     <td align="center">
-      <a href="docs/CONTRIBUTING_ja.md">
+      <a href="CONTRIBUTING_ja.md">
         <img src="https://flagcdn.com/24x18/jp.png" alt="Japanese" />  
         <br/><strong>Japanese</strong>
       </a>
     </td>
   </tr>
 </table>
-
 
 <p align="center">
   Thank you to all our contributors, users, and supporters for making this project thrive.
