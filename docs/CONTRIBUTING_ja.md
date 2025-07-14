@@ -1,4 +1,4 @@
-## 🌐 Select Language
+## 🌐 言語選択
 
 <table align="center">
   <tr>
@@ -17,7 +17,7 @@
     <td align="center">
       <a href="CONTRIBUTING_ja.md">
         <img src="https://flagcdn.com/24x18/jp.png" alt="Japanese" />  
-        <br/><strong>Japanese</strong>
+        <br/><strong>日本語</strong>
       </a>
     </td>
   </tr>
@@ -25,11 +25,11 @@
 
 
 <p align="center">
-  Thank you to all our contributors, users, and supporters for making this project thrive.
+  このプロジェクトを発展させてくださったすべての貢献者、ユーザー、サポーターの皆様に感謝いたします。
 </p>
 
 <p align="center">
-  🚀 <strong>Stay tuned for more updates, features, and improvements.</strong>
+  🚀 <strong>今後のアップデート、機能、改善にご期待ください。</strong>
 </p>
 
 # 🛠️ CheckCleへの貢献
