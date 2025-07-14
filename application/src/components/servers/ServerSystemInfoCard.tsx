@@ -15,7 +15,7 @@ export function ServerSystemInfoCard({ server }: ServerSystemInfoCardProps) {
         ? JSON.parse(server.system_info) 
         : server.system_info;
     } catch (error) {
-      console.log('Error parsing system_info:', error);
+     // console.log('Error parsing system_info:', error);
     }
   }
 

@@ -40,10 +40,10 @@ export const IncidentBasicFields: React.FC = () => {
     queryFn: async () => {
       try {
         const usersList = await userService.getUsers();
-        console.log("Fetched users for incident assignment:", usersList);
+      //  console.log("Fetched users for incident assignment:", usersList);
         return Array.isArray(usersList) ? usersList : [];
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+      //  console.error("Failed to fetch users:", error);
         return [];
       }
     },
@@ -53,7 +53,7 @@ export const IncidentBasicFields: React.FC = () => {
   // Add user to assigned_to
   const addUser = (userId: string) => {
     // For now, we're using a single user assignment
-    console.log("Setting user ID in form:", userId);
+  //  console.log("Setting user ID in form:", userId);
     form.setValue('assigned_to', userId, { shouldValidate: true, shouldDirty: true });
     setSelectedUserIds([userId]);
   };

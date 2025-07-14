@@ -61,14 +61,14 @@ export const filterMetricsByTimeRange = (metrics: any[], timeRange: TimeRange): 
   const bufferMinutes = timeRange === '60m' ? 5 : timeRange === '1d' ? 30 : 60;
   const cutoffTime = new Date(now.getTime() - (selectedRange.hours * 60 * 60 * 1000) - (bufferMinutes * 60 * 1000));
   
-  console.log('filterMetricsByTimeRange: timeRange:', timeRange, 'cutoffTime:', cutoffTime.toISOString());
+//  console.log('filterMetricsByTimeRange: timeRange:', timeRange, 'cutoffTime:', cutoffTime.toISOString());
   
   const filtered = metrics.filter(metric => {
     const metricTime = new Date(metric.created || metric.timestamp);
     return metricTime >= cutoffTime && metricTime <= now;
   });
   
-  console.log('filterMetricsByTimeRange: Filtered', metrics.length, 'to', filtered.length, 'metrics');
+//  console.log('filterMetricsByTimeRange: Filtered', metrics.length, 'to', filtered.length, 'metrics');
   
   // Sort by timestamp for proper chart display
   return filtered.sort((a, b) => 
@@ -129,12 +129,12 @@ const formatTimestamp = (timestamp: string, timeRange: TimeRange): string => {
 
 // Optimized chart data formatting with better performance
 export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
-  console.log('formatChartData: Input metrics count:', metrics?.length || 0, 'timeRange:', timeRange);
+//  console.log('formatChartData: Input metrics count:', metrics?.length || 0, 'timeRange:', timeRange);
   
   if (!metrics?.length) return [];
   
   const filteredMetrics = filterMetricsByTimeRange(metrics, timeRange);
-  console.log('formatChartData: After time filtering:', filteredMetrics?.length || 0, 'metrics');
+//  console.log('formatChartData: After time filtering:', filteredMetrics?.length || 0, 'metrics');
   
   if (!filteredMetrics.length) return [];
   
@@ -154,7 +154,7 @@ export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
     ? filteredMetrics.filter((_, index) => index % Math.ceil(filteredMetrics.length / maxDataPoints) === 0)
     : filteredMetrics;
   
-  console.log('formatChartData: After sampling:', sampledMetrics.length, 'metrics for display');
+//  console.log('formatChartData: After sampling:', sampledMetrics.length, 'metrics for display');
   
   // Batch process the data transformation for better performance
   return sampledMetrics.map((metric) => {

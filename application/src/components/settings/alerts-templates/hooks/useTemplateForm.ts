@@ -52,7 +52,7 @@ export const useTemplateForm = ({ templateId, open, onOpenChange, onSuccess }: U
   const queryClient = useQueryClient();
   const isEditMode = !!templateId;
 
-  console.log("Template form initialized with templateId:", templateId, "isEditMode:", isEditMode);
+ // console.log("Template form initialized with templateId:", templateId, "isEditMode:", isEditMode);
 
   const form = useForm<TemplateFormData>({
     resolver: zodResolver(templateFormSchema),
@@ -74,7 +74,7 @@ export const useTemplateForm = ({ templateId, open, onOpenChange, onSuccess }: U
   // Set form values when template data is loaded
   useEffect(() => {
     if (templateData && open) {
-      console.log("Setting form values with template data:", templateData);
+    //  console.log("Setting form values with template data:", templateData);
       
       form.reset({
         name: templateData.name || "",
@@ -120,7 +120,7 @@ export const useTemplateForm = ({ templateId, open, onOpenChange, onSuccess }: U
       onSuccess();
     },
     onError: (error) => {
-      console.error("Error creating template:", error);
+    //  console.error("Error creating template:", error);
       toast({
         title: "Error",
         description: "Failed to create template. Please check your inputs and try again.",
@@ -142,7 +142,7 @@ export const useTemplateForm = ({ templateId, open, onOpenChange, onSuccess }: U
       onSuccess();
     },
     onError: (error) => {
-      console.error("Error updating template:", error);
+    //  console.error("Error updating template:", error);
       toast({
         title: "Error",
         description: "Failed to update template. Please check your inputs and try again.",
@@ -155,7 +155,7 @@ export const useTemplateForm = ({ templateId, open, onOpenChange, onSuccess }: U
 
   // Handle form submission
   const onSubmit = (formData: TemplateFormData) => {
-    console.log("Submitting form data:", formData);
+   // console.log("Submitting form data:", formData);
     
     // Ensure all required fields are present
     const completeData: CreateUpdateTemplateData = {
@@ -173,10 +173,10 @@ export const useTemplateForm = ({ templateId, open, onOpenChange, onSuccess }: U
     };
     
     if (isEditMode && templateId) {
-      console.log("Updating template with ID:", templateId);
+    //  console.log("Updating template with ID:", templateId);
       updateMutation.mutate({ id: templateId, data: completeData });
     } else {
-      console.log("Creating new template");
+    //  console.log("Creating new template");
       createMutation.mutate(completeData);
     }
   };
@@ -184,7 +184,7 @@ export const useTemplateForm = ({ templateId, open, onOpenChange, onSuccess }: U
   // Reset form when dialog closes
   useEffect(() => {
     if (!open) {
-      console.log("Dialog closed, resetting form");
+     // console.log("Dialog closed, resetting form");
       form.reset(defaultFormValues);
     }
   }, [open, form]);
