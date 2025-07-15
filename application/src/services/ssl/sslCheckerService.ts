@@ -1,7 +1,6 @@
 
 import type { SSLCheckerResponse } from "./types";
 import { toast } from "sonner";
-import { checkWithFetch } from "./sslPrimaryChecker";
 import { normalizeDomain, createErrorResponse } from "./sslCheckerUtils";
 
 /**
@@ -10,7 +9,7 @@ import { normalizeDomain, createErrorResponse } from "./sslCheckerUtils";
  */
 export const checkSSLCertificate = async (domain: string): Promise<SSLCheckerResponse> => {
   try {
-    console.log(`Checking SSL certificate for domain: ${domain}`);
+   // console.log(`Checking SSL certificate for domain: ${domain}`);
     
     // Normalize domain (remove protocol if present)
     const normalizedDomain = normalizeDomain(domain);
@@ -20,11 +19,11 @@ export const checkSSLCertificate = async (domain: string): Promise<SSLCheckerRes
     }
     
     // Use the working CORS proxy approach
-    const result = await checkWithFetch(normalizedDomain);
-    console.log("SSL check result:", result);
-    return result;
+   // const result = await checkWithFetch(normalizedDomain);
+   // console.log("SSL check result:", result);
+   // return result;
   } catch (error) {
-    console.error("SSL check failed completely:", error);
+    //console.error("SSL check failed completely:", error);
     toast.error(`SSL check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return createErrorResponse(domain, error);
   }

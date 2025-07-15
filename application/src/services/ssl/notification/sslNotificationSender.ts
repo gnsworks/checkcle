@@ -14,7 +14,7 @@ export async function sendSSLNotification(
   try {
     // Check if notification channel is set
     if (!certificate.notification_channel) {
-      console.log(`No notification channel set for certificate: ${certificate.domain}`);
+    //  console.log(`No notification channel set for certificate: ${certificate.domain}`);
       return false;
     }
     
@@ -22,12 +22,12 @@ export async function sendSSLNotification(
     const alertConfigRecord = await pb.collection('alert_configurations').getOne(certificate.notification_channel);
     
     if (!alertConfigRecord) {
-      console.error(`Alert configuration not found for ID: ${certificate.notification_channel}`);
+    //  console.error(`Alert configuration not found for ID: ${certificate.notification_channel}`);
       return false;
     }
     
     if (!alertConfigRecord.enabled) {
-      console.log(`Alert configuration is disabled for certificate: ${certificate.domain}`);
+    //  console.log(`Alert configuration is disabled for certificate: ${certificate.domain}`);
       return false;
     }
     
@@ -63,7 +63,7 @@ export async function sendSSLNotification(
     return await sendNotificationByType(alertConfig, certificate, message, isCritical, sslNotification);
     
   } catch (error) {
-    console.error("Error sending SSL notification:", error);
+   // console.error("Error sending SSL notification:", error);
     return false;
   }
 }
@@ -87,7 +87,7 @@ async function sendNotificationByType(
     // case 'slack':
     //   return await sendSlackNotification(alertConfig, certificate, message, isCritical);
     default:
-      console.log(`Notification type ${alertConfig.notification_type} not implemented yet for SSL certificates`);
+    //  console.log(`Notification type ${alertConfig.notification_type} not implemented yet for SSL certificates`);
       return false;
   }
 }
@@ -102,7 +102,7 @@ async function sendTelegramNotification(
   isCritical: boolean
 ): Promise<boolean> {
   if (!alertConfig.bot_token || !alertConfig.telegram_chat_id) {
-    console.error("Missing Telegram bot token or chat ID");
+  //  console.error("Missing Telegram bot token or chat ID");
     return false;
   }
   
