@@ -1,4 +1,3 @@
-
 package pocketbase
 
 import (
@@ -11,37 +10,53 @@ import (
 )
 
 type SSLCertificatesResponse struct {
-	Page       int                     `json:"page"`
-	PerPage    int                     `json:"perPage"`
-	TotalItems int                     `json:"totalItems"`
-	TotalPages int                     `json:"totalPages"`
-	Items      []types.SSLCertificate `json:"items"`
+	Page       int                      `json:"page"`
+	PerPage    int                      `json:"perPage"`
+	TotalItems int                      `json:"totalItems"`
+	TotalPages int                      `json:"totalPages"`
+	Items      []types.SSLCertificate   `json:"items"`
 }
 
 func (c *PocketBaseClient) GetSSLCertificates() ([]types.SSLCertificate, error) {
-	url := fmt.Sprintf("%s/api/collections/ssl_certificates/records", c.baseURL)
-	
-	resp, err := c.httpClient.Get(url)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch SSL certificates: %v", err)
-	}
-	defer resp.Body.Close()
+	var allCertificates []types.SSLCertificate
+	page := 1
+	perPage := 200 // You can increase up to 500 if needed
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("PocketBase returned status %d", resp.StatusCode)
+	for {
+		url := fmt.Sprintf(
+			"%s/api/collections/ssl_certificates/records?page=%d&perPage=%d",
+			c.baseURL, page, perPage,
+		)
+
+		resp, err := c.httpClient.Get(url)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch SSL certificates: %v", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("PocketBase returned status %d", resp.StatusCode)
+		}
+
+		var response SSLCertificatesResponse
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+			return nil, fmt.Errorf("failed to decode SSL certificates response: %v", err)
+		}
+
+		allCertificates = append(allCertificates, response.Items...)
+
+		if page >= response.TotalPages || len(response.Items) == 0 {
+			break
+		}
+		page++
 	}
 
-	var response SSLCertificatesResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, fmt.Errorf("failed to decode SSL certificates response: %v", err)
-	}
-
-	return response.Items, nil
+	return allCertificates, nil
 }
 
 func (c *PocketBaseClient) UpdateSSLCertificate(id string, data map[string]interface{}) error {
 	url := fmt.Sprintf("%s/api/collections/ssl_certificates/records/%s", c.baseURL, id)
-	
+
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("failed to marshal SSL certificate data: %v", err)
@@ -53,7 +68,7 @@ func (c *PocketBaseClient) UpdateSSLCertificate(id string, data map[string]inter
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to update SSL certificate: %v", err)
@@ -69,7 +84,7 @@ func (c *PocketBaseClient) UpdateSSLCertificate(id string, data map[string]inter
 
 func (c *PocketBaseClient) GetSSLCertificateByID(id string) (*types.SSLCertificate, error) {
 	url := fmt.Sprintf("%s/api/collections/ssl_certificates/records/%s", c.baseURL, id)
-	
+
 	resp, err := c.httpClient.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch SSL certificate: %v", err)
