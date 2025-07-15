@@ -1,4 +1,4 @@
-name: Security Issue
+name: 🛡️ Security Issue
 description: Report a potential security vulnerability.
 title: "[Security]: "
 labels: [security]
