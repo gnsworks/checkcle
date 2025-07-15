@@ -1,0 +1,38 @@
+name: Translation Request
+description: Request a translation or report translation issues.
+title: "[Translation]: "
+labels: [translation]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us make this project accessible in more languages!
+
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: What language is this about?
+      placeholder: "Example: Spanish"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Details
+      description: |
+        Describe what you’d like to have translated or what issue you found.
+      placeholder: "Please translate the Getting Started guide..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues for similar requests.
+          required: true

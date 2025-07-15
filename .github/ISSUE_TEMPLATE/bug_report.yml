@@ -1,0 +1,94 @@
+name: Bug Report
+description: Report a reproducible bug to help us improve.
+title: "[Bug]: "
+labels: [bug]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Thank you for taking the time to report a bug!**
+        Please fill out the following template so we can reproduce and fix the issue faster.
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        Describe where you encountered the issue.
+        (e.g., OS, browser, Node version, etc.)
+      placeholder: "Example: macOS 14.0, Chrome 125, Node.js 20.3.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: |
+        A clear and concise description of what the bug is.
+      placeholder: "When I do X, Y happens instead of Z..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        How can we reproduce the behavior?
+        Please list the steps in order.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: "The app should..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or Videos
+      description: |
+        If applicable, add screenshots or screen recordings to help explain your problem.
+      placeholder: "Attach screenshots here."
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        If applicable, paste logs or error messages here.
+        Please remove any sensitive information.
+      render: shell
+      placeholder: |
+        ```
+        Error: Something went wrong
+            at index.js:123:45
+        ```
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      description: Before submitting, please confirm:
+      options:
+        - label: I have searched existing issues to avoid duplicates.
+          required: true
+        - label: I have provided enough information for reproduction.
+          required: true

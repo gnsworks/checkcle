@@ -1,0 +1,51 @@
+name: Security Issue
+description: Report a potential security vulnerability.
+title: "[Security]: "
+labels: [security]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **IMPORTANT: Please do NOT disclose sensitive security details in this public issue.**
+
+        If you believe you have found a security vulnerability, **please report it privately** to help keep users safe.
+
+        📧 **Disclosure Process:**
+        - Email: [security@checkcle.io](mailto:security@checkcle.io)
+        - Or follow our [SECURITY.md](../../blob/main/SECURITY.md) policy.
+
+        You can use this issue only to let maintainers know that you have sent or will send a report.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: |
+        Briefly describe the type of vulnerability you believe you have found (without including sensitive details).
+      placeholder: "Example: Possible SQL injection in the user login endpoint."
+    validations:
+      required: true
+
+  - type: textarea
+    id: contact
+    attributes:
+      label: Contact Information
+      description: |
+        Provide an email or other way for maintainers to contact you if we need clarification.
+      placeholder: "your.email@example.com"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      description: |
+        Please confirm:
+      options:
+        - label: I will not share sensitive exploit details in this issue.
+          required: true
+        - label: I have sent or will send a full report to the private disclosure contact.
+          required: true
