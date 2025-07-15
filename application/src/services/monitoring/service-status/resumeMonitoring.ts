@@ -16,7 +16,7 @@ export async function resumeMonitoring(serviceId: string): Promise<void> {
     // Fetch the current service to get its name for better logging
     const service = await pb.collection('services').getOne(serviceId);
     
-    console.log(`Resuming service ${service.name} at ${now}`);
+  // console.log(`Resuming service ${service.name} at ${now}`);
     
     // First, clear any existing interval just to be safe
     const existingInterval = monitoringIntervals.get(serviceId);
@@ -57,7 +57,7 @@ export async function resumeMonitoring(serviceId: string): Promise<void> {
     const alertsMuted = service.alerts === "muted" || serviceForNotification.alerts === "muted";
     
     if (!alertsMuted) {
-      console.log(`Alerts NOT muted for service ${service.name}, sending resume notification`);
+    //  console.log(`Alerts NOT muted for service ${service.name}, sending resume notification`);
       // Send notification that service has been resumed
       await notificationService.sendNotification({
         service: serviceForNotification,
@@ -65,7 +65,7 @@ export async function resumeMonitoring(serviceId: string): Promise<void> {
         timestamp: now
       });
     } else {
-      console.log(`Alerts muted for service ${service.name}, skipping resume notification`);
+   //   console.log(`Alerts muted for service ${service.name}, skipping resume notification`);
     }
     
     // IMPORTANT: Wait a brief moment to ensure the status update is processed
@@ -76,6 +76,6 @@ export async function resumeMonitoring(serviceId: string): Promise<void> {
     
     console.log(`Service ${service.name} resumed and ready for monitoring`);
   } catch (error) {
-    console.error("Error resuming service:", error);
+ //   console.error("Error resuming service:", error);
   }
 }

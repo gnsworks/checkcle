@@ -83,7 +83,7 @@ export const AboutSystem: React.FC = () => {
               <span>{t('links')}</span>
             </CardTitle>
             <CardDescription className="font-medium text-base">
-              {systemName || 'ReamStack'} {t('resources').toLowerCase()}
+              {systemName || 'CheckCle'} {t('resources').toLowerCase()}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">

@@ -47,21 +47,21 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
         newSet.delete(serverId);
         return newSet;
       });
-      console.log('Resume server monitoring:', serverId);
+    //  console.log('Resume server monitoring:', serverId);
     } else {
       setPausedServers(prev => new Set(prev).add(serverId));
-      console.log('Pause server monitoring:', serverId);
+    //  console.log('Pause server monitoring:', serverId);
     }
   };
 
   const handleEdit = (serverId: string) => {
     // TODO: Implement edit functionality
-    console.log('Edit server:', serverId);
+  //  console.log('Edit server:', serverId);
   };
 
   const handleDelete = (serverId: string) => {
     // TODO: Implement delete functionality
-    console.log('Delete server:', serverId);
+  //  console.log('Delete server:', serverId);
   };
 
   if (isLoading) {
