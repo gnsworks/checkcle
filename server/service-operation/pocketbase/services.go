@@ -62,30 +62,47 @@ func (c *PocketBaseClient) GetService(serviceID string) (*Service, error) {
 }
 
 func (c *PocketBaseClient) GetActiveServices() ([]Service, error) {
-	// Only fetch services that are not paused
-	req, err := http.NewRequest("GET", 
-		fmt.Sprintf("%s/api/collections/services/records?filter=(status!='paused')", c.baseURL), nil)
-	if err != nil {
-		return nil, err
+	var allServices []Service
+	page := 1
+	perPage := 30 // Use default pagination size
+
+	for {
+		// Fetch services page by page with filter for non-paused services
+		req, err := http.NewRequest("GET", 
+			fmt.Sprintf("%s/api/collections/services/records?page=%d&perPage=%d&filter=(status!='paused')", 
+				c.baseURL, page, perPage), nil)
+		if err != nil {
+			return nil, err
+		}
+
+		// No authentication header needed for public access
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("failed to fetch active services, status: %d", resp.StatusCode)
+		}
+
+		var servicesResponse ServicesResponse
+		if err := json.NewDecoder(resp.Body).Decode(&servicesResponse); err != nil {
+			return nil, err
+		}
+
+		// Add current page items to the result
+		allServices = append(allServices, servicesResponse.Items...)
+
+		// Check if we've fetched all pages
+		if page >= servicesResponse.TotalPages || len(servicesResponse.Items) == 0 {
+			break
+		}
+
+		page++
 	}
 
-	// No authentication header needed for public access
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to fetch active services, status: %d", resp.StatusCode)
-	}
-
-	var servicesResponse ServicesResponse
-	if err := json.NewDecoder(resp.Body).Decode(&servicesResponse); err != nil {
-		return nil, err
-	}
-
-	return servicesResponse.Items, nil
+	return allServices, nil
 }
 
 func (c *PocketBaseClient) UpdateServiceStatus(serviceID string, status string, responseTime int64, errorMessage string) error {
