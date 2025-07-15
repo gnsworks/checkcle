@@ -2,10 +2,12 @@
 import { useEffect } from "react";
 import { Service } from "@/types/service.types";
 import { ServicesTableView } from "./ServicesTableView";
+import { ServicesPagination } from "./ServicesPagination";
 import { ServiceDeleteDialog } from "./ServiceDeleteDialog";
 import { ServiceHistoryDialog } from "./ServiceHistoryDialog";
 import { ServiceEditDialog } from "./ServiceEditDialog";
 import { useServiceActions, useDialogState } from "./hooks";
+import { useServicesPagination } from "@/hooks/useServicesPagination";
 
 interface ServicesTableContainerProps {
   services: Service[];
@@ -36,6 +38,16 @@ export const ServicesTableContainer = ({ services }: ServicesTableContainerProps
     handleDeleteDialogChange
   } = useDialogState();
 
+  const {
+    paginatedServices,
+    currentPage,
+    totalPages,
+    pageSize,
+    totalItems,
+    handlePageChange,
+    handlePageSizeChange,
+  } = useServicesPagination({ services: localServices });
+
   // Update local services state when props change
   useEffect(() => {
     updateServices(services);
@@ -62,12 +74,21 @@ export const ServicesTableContainer = ({ services }: ServicesTableContainerProps
   return (
     <div className="flex-1 flex flex-col h-full">
       <ServicesTableView 
-        services={localServices}
+        services={paginatedServices}
         onViewDetail={handleViewDetail}
         onPauseResume={handlePauseResume}
         onEdit={onEdit}
         onDelete={onDelete}
         onMuteAlerts={handleMuteAlerts}
+      />
+
+      <ServicesPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
       />
 
       <ServiceHistoryDialog 
