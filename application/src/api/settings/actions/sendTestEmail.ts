@@ -3,7 +3,7 @@ import { getAuthHeaders, getBaseUrl, validateEmail } from '../utils';
 import { SettingsApiResponse } from '../types';
 
 const createEmailTemplate = (template: string, data: any): { subject: string; htmlBody: string } => {
-  let subject = 'Test Email from ReamStack';
+  let subject = 'Test Email from CheckCle';
   let htmlBody = `
     <html>
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -13,7 +13,7 @@ const createEmailTemplate = (template: string, data: any): { subject: string; ht
           <p>If you received this email, your SMTP configuration is working correctly.</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
           <p style="font-size: 12px; color: #666;">
-            Sent from ReamStack Monitoring System<br>
+            Sent from CheckCle Monitoring System<br>
             Template: ${template}<br>
             ${data.collection ? `Collection: ${data.collection}` : ''}
           </p>
@@ -24,7 +24,7 @@ const createEmailTemplate = (template: string, data: any): { subject: string; ht
 
   switch (template) {
     case 'verification':
-      subject = 'Email Verification Test - ReamStack';
+      subject = 'Email Verification Test - CheckCle';
       htmlBody = `
         <html>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -37,14 +37,14 @@ const createEmailTemplate = (template: string, data: any): { subject: string; ht
                 <p><strong>Collection:</strong> ${data.collection || '_superusers'}</p>
               </div>
               <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-              <p style="font-size: 12px; color: #666;">Sent from ReamStack Monitoring System</p>
+              <p style="font-size: 12px; color: #666;">Sent from CheckCle Monitoring System</p>
             </div>
           </body>
         </html>
       `;
       break;
     case 'password-reset':
-      subject = 'Password Reset Test - ReamStack';
+      subject = 'Password Reset Test - CheckCle';
       htmlBody = `
         <html>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -57,14 +57,14 @@ const createEmailTemplate = (template: string, data: any): { subject: string; ht
                 <p><strong>Collection:</strong> ${data.collection || '_superusers'}</p>
               </div>
               <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-              <p style="font-size: 12px; color: #666;">Sent from ReamStack Monitoring System</p>
+              <p style="font-size: 12px; color: #666;">Sent from CheckCle Monitoring System</p>
             </div>
           </body>
         </html>
       `;
       break;
     case 'email-change':
-      subject = 'Email Change Confirmation Test - ReamStack';
+      subject = 'Email Change Confirmation Test - CheckCle';
       htmlBody = `
         <html>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -76,7 +76,7 @@ const createEmailTemplate = (template: string, data: any): { subject: string; ht
                 <p><strong>Template:</strong> Email Change Confirmation</p>
               </div>
               <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-              <p style="font-size: 12px; color: #666;">Sent from ReamStack Monitoring System</p>
+              <p style="font-size: 12px; color: #666;">Sent from CheckCle Monitoring System</p>
             </div>
           </body>
         </html>
@@ -178,10 +178,6 @@ export const sendTestEmail = async (data: any): Promise<SettingsApiResponse> => 
       smtpPort: smtpSettings.port || 587
     });
 
-    // For now, we'll simulate a successful email send
-    // In a real implementation, you would integrate with your email service here
-    // This could be nodemailer, SendGrid, or your PocketBase email system
-    
     // Simulate processing time
     console.log('Simulating email send...');
     await new Promise(resolve => setTimeout(resolve, 1000));
