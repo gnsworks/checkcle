@@ -9,7 +9,15 @@ export type { Service, UptimeData, CreateServiceParams };
 export const serviceService = {
   async getServices(): Promise<Service[]> {
     try {
-      const response = await pb.collection('services').getList(1, 50, {
+      
+      // First get the total count of records
+      const countResponse = await pb.collection('services').getList(1, 1, {
+        sort: 'name',
+      });
+      const totalRecords = countResponse.totalItems;
+      
+      // Then fetch all records using the total count as the limit
+      const response = await pb.collection('services').getList(1, totalRecords, {
         sort: 'name',
       });
       

@@ -161,6 +161,6 @@ export function useSystemSettings() {
     isUpdating: updateSettingsMutation.isPending,
     testEmailConnection: testEmailConnectionMutation.mutate,
     isTestingConnection: testEmailConnectionMutation.isPending,
-    systemName: settings?.system_name || settings?.meta?.appName || 'ReamStack',
+    systemName: settings?.system_name || settings?.meta?.appName || 'CheckCle',
   };
 }

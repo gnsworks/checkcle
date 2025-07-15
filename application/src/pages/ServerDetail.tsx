@@ -24,7 +24,7 @@ const ServerDetail = () => {
   const { sidebarCollapsed, toggleSidebar } = useSidebar();
   const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
 
-  console.log('ServerDetail component loaded with serverId:', serverId);
+  //console.log('ServerDetail component loaded with serverId:', serverId);
 
   const {
     data: server,
@@ -46,7 +46,7 @@ const ServerDetail = () => {
   };
 
   if (serverError) {
-    console.error('Server detail error:', serverError);
+   // console.error('Server detail error:', serverError);
     return (
       <div className="flex h-screen overflow-hidden bg-background text-foreground">
         <Sidebar collapsed={sidebarCollapsed} />

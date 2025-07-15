@@ -19,10 +19,10 @@ export const useDefaultUptimeData = ({ serviceId, serviceType, status, interval 
     queryKey: ['strictDefaultUptimeHistory', serviceId, serviceType],
     queryFn: async () => {
       if (!serviceId) {
-        console.log('No serviceId provided, skipping fetch');
+       // console.log('No serviceId provided, skipping fetch');
         return [];
       }
-      console.log(`Fetching STRICT Default (Agent ID 1) uptime data for service ${serviceId} of type ${serviceType}`);
+     // console.log(`Fetching STRICT Default (Agent ID 1) uptime data for service ${serviceId} of type ${serviceType}`);
       
       // Get raw uptime history data
       const rawData = await uptimeService.getUptimeHistory(serviceId, 50, undefined, undefined, serviceType);
@@ -38,15 +38,15 @@ export const useDefaultUptimeData = ({ serviceId, serviceType, status, interval 
         );
         
         if (isStrictDefault) {
-          console.log(`✓ ACCEPTED Default record: ${record.id} - ${record.timestamp} - Pure default monitoring`);
+         // console.log(`✓ ACCEPTED Default record: ${record.id} - ${record.timestamp} - Pure default monitoring`);
         } else {
-          console.log(`✗ REJECTED non-default record: ${record.id} - region: ${record.region_name || 'none'}, agent: ${record.agent_id || 'none'}`);
+         // console.log(`✗ REJECTED non-default record: ${record.id} - region: ${record.region_name || 'none'}, agent: ${record.agent_id || 'none'}`);
         }
         
         return isStrictDefault;
       });
       
-      console.log(`ULTRA-STRICT FILTER: Reduced ${rawData.length} records to ${strictDefaultData.length} pure default monitoring records`);
+      //console.log(`ULTRA-STRICT FILTER: Reduced ${rawData.length} records to ${strictDefaultData.length} pure default monitoring records`);
       return strictDefaultData;
     },
     enabled: !!serviceId,
@@ -61,7 +61,7 @@ export const useDefaultUptimeData = ({ serviceId, serviceType, status, interval 
   const processUptimeData = (data: UptimeData[], intervalSeconds: number): UptimeData[] => {
     if (!data || data.length === 0) return [];
     
-    console.log(`Processing ${data.length} strict default monitoring records for service ${serviceId}`);
+   // console.log(`Processing ${data.length} strict default monitoring records for service ${serviceId}`);
     
     // Sort data by timestamp (newest first)
     const sortedData = [...data].sort((a, b) => 
@@ -76,9 +76,9 @@ export const useDefaultUptimeData = ({ serviceId, serviceType, status, interval 
       
       if (!timestampMap.has(exactTimestamp)) {
         timestampMap.set(exactTimestamp, record);
-        console.log(`✓ Added unique default record: ${record.id} - ${exactTimestamp}`);
+      //  console.log(`✓ Added unique default record: ${record.id} - ${exactTimestamp}`);
       } else {
-        console.log(`✗ REJECTED absolute duplicate timestamp: ${record.id} - ${exactTimestamp} (exact timestamp match)`);
+      //  console.log(`✗ REJECTED absolute duplicate timestamp: ${record.id} - ${exactTimestamp} (exact timestamp match)`);
       }
     });
     
@@ -86,7 +86,7 @@ export const useDefaultUptimeData = ({ serviceId, serviceType, status, interval 
     const uniqueRecords = Array.from(timestampMap.values());
     const recentData = uniqueRecords.slice(0, 20);
     
-    console.log(`FINAL RESULT: ${recentData.length} absolutely unique default monitoring records`);
+    //console.log(`FINAL RESULT: ${recentData.length} absolutely unique default monitoring records`);
     
     return recentData;
   };
@@ -94,12 +94,12 @@ export const useDefaultUptimeData = ({ serviceId, serviceType, status, interval 
   // Update history items when data changes
   useEffect(() => {
     if (uptimeData && uptimeData.length > 0) {
-      console.log(`Received ${uptimeData.length} strict default monitoring records for service ${serviceId}`);
+     // console.log(`Received ${uptimeData.length} strict default monitoring records for service ${serviceId}`);
       const processedData = processUptimeData(uptimeData, interval);
       setHistoryItems(processedData);
     } else if (!serviceId || (uptimeData && uptimeData.length === 0)) {
       // Generate placeholder data when no real data is available
-      console.log(`No strict default monitoring data available for service ${serviceId}, generating placeholder`);
+     // console.log(`No strict default monitoring data available for service ${serviceId}, generating placeholder`);
       
       const statusValue = (status === "up" || status === "down" || status === "warning" || status === "paused") 
         ? status 
@@ -157,7 +157,7 @@ export const useDefaultUptimeData = ({ serviceId, serviceType, status, interval 
         seenTimestamps.add(item.timestamp);
         absolutelyUniqueItems.push(item);
       } else {
-        console.log(`FINAL VALIDATION: Removing absolute duplicate timestamp ${item.timestamp} from display`);
+      //  console.log(`FINAL VALIDATION: Removing absolute duplicate timestamp ${item.timestamp} from display`);
       }
     });
 
@@ -166,7 +166,7 @@ export const useDefaultUptimeData = ({ serviceId, serviceType, status, interval 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
     
-    console.log(`DISPLAY READY: ${sortedValidated.length} absolutely validated default monitoring items`);
+   // console.log(`DISPLAY READY: ${sortedValidated.length} absolutely validated default monitoring items`);
     return sortedValidated.slice(0, 20);
   };
 

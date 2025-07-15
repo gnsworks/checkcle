@@ -112,10 +112,10 @@ export const deleteSSLCertificate = async (id: string): Promise<boolean> => {
  */
 export const refreshAllCertificates = async (): Promise<{ success: number; failed: number }> => {
   try {
-    const response = await pb.collection("ssl_certificates").getList(1, 100);
+    const response = await pb.collection("ssl_certificates").getList(1, 200);
     const certificates = response.items as unknown as SSLCertificate[];
 
-    console.log(`Refreshing ${certificates.length} certificates...`);
+   // console.log(`Refreshing ${certificates.length} certificates...`);
 
     let success = 0;
     let failed = 0;
@@ -125,14 +125,14 @@ export const refreshAllCertificates = async (): Promise<{ success: number; faile
         await checkCertificateAndNotify(cert);
         success++;
       } catch (error) {
-        console.error(`Failed to refresh certificate ${cert.domain}:`, error);
+     //   console.error(`Failed to refresh certificate ${cert.domain}:`, error);
         failed++;
       }
     }
 
     return { success, failed };
   } catch (error) {
-    console.error("Error refreshing certificates:", error);
+  //  console.error("Error refreshing certificates:", error);
     throw error;
   }
 };

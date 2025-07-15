@@ -1,6 +1,6 @@
 
 export interface AboutTranslations {
-  aboutReamStack: string;
+  aboutCheckCle: string;
   systemDescription: string;
   systemVersion: string;
   license: string;

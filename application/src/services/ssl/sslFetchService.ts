@@ -14,7 +14,7 @@ export const fetchSSLCertificates = async (): Promise<SSLCertificate[]> => {
     const endpoint = "/api/collections/ssl_certificates/records";
     const params = {
       page: 1,
-      perPage: 50,
+      perPage: 200,
       sort: "-created",
       cache: Date.now() // Prevent caching by adding a timestamp
     };

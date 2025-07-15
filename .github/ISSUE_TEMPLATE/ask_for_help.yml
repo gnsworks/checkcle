@@ -1,0 +1,53 @@
+name: Ask for Help
+description: Ask a question or request guidance about this project.
+title: "[Question]: "
+labels: [question]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Thank you for reaching out!**
+        Please fill out this form to help us understand your question.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: What do you need help with?
+      description: Clearly describe your question or what you're trying to achieve.
+      placeholder: |
+        I am trying to do X but I'm not sure how to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: |
+        Provide any additional context, related issues, or links that help explain your question.
+      placeholder: "Related issues, pull requests, or documentation..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: |
+        If applicable, please provide details about your environment (OS, Node version, browser, etc.).
+      placeholder: "Example: Ubuntu 22.04, Node.js v20, Chrome 125"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Before submitting, please confirm:
+      options:
+        - label: I have searched existing issues and discussions.
+          required: true
+        - label: I have read the documentation.
+          required: true

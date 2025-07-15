@@ -38,8 +38,8 @@ export const generatePdf = async (incident: IncidentItem): Promise<string> => {
     doc.setProperties({
       title: title,
       subject: 'Incident Report',
-      author: 'ReamStack System',
-      creator: 'ReamStack',
+      author: 'CheckCle System',
+      creator: 'CheckCle',
     });
     
     // Add header section

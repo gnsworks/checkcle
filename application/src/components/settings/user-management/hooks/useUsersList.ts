@@ -13,16 +13,16 @@ export const useUsersList = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log("Fetching users list");
+     // console.log("Fetching users list");
       const data = await userService.getUsers();
-      console.log("Received users data:", data);
+    //  console.log("Received users data:", data);
       
       if (Array.isArray(data) && data.length >= 0) {
         setUsers(data);
         // Clear any previous errors
         setError(null);
       } else {
-        console.error("Invalid users data format:", data);
+     //   console.error("Invalid users data format:", data);
         setUsers([]);
         setError("Invalid data format received from server");
         toast({
@@ -32,7 +32,7 @@ export const useUsersList = () => {
         });
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
+    //  console.error("Error fetching users:", error);
       setError(error instanceof Error ? error.message : "Unknown error");
       toast({
         title: "Error fetching users",

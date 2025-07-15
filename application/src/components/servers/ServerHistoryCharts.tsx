@@ -24,7 +24,7 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
     isFetching
   } = useServerHistoryData(serverId);
 
-  console.log('ServerHistoryCharts: Rendering with serverId:', serverId, 'timeRange:', timeRange);
+  //console.log('ServerHistoryCharts: Rendering with serverId:', serverId, 'timeRange:', timeRange);
 
   // Memoize latest data calculation to prevent unnecessary recalculations
   const latestData = useMemo(() => {
@@ -71,7 +71,7 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
   }
 
   if (error) {
-    console.error('ServerHistoryCharts: Error loading data:', error);
+  //  console.error('ServerHistoryCharts: Error loading data:', error);
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -122,7 +122,7 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
     );
   }
 
-  console.log('ServerHistoryCharts: Rendering charts with', chartData.length, 'data points for time range:', timeRange);
+ // console.log('ServerHistoryCharts: Rendering charts with', chartData.length, 'data points for time range:', timeRange);
 
   return (
     <div className="space-y-6">

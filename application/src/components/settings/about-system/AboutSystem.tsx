@@ -40,7 +40,6 @@ export const AboutSystem: React.FC = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{t('aboutSystem')}</h1>
         <p className="text-muted-foreground text-base leading-relaxed mt-2">
-          {t('aboutCheckcle')}
         </p>
       </div>
 
@@ -83,7 +82,7 @@ export const AboutSystem: React.FC = () => {
               <span>{t('links')}</span>
             </CardTitle>
             <CardDescription className="font-medium text-base">
-              {systemName || 'ReamStack'} {t('resources').toLowerCase()}
+              {systemName || 'CheckCle'} {t('resources').toLowerCase()}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">

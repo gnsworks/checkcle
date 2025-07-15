@@ -17,9 +17,9 @@ export const useServerHistoryData = (serverId: string) => {
   } = useQuery({
     queryKey: ['server-metrics-history', serverId, timeRange],
     queryFn: async () => {
-      console.log('useServerHistoryData: Fetching metrics for serverId:', serverId, 'timeRange:', timeRange);
+    //  console.log('useServerHistoryData: Fetching metrics for serverId:', serverId, 'timeRange:', timeRange);
       const result = await serverService.getServerMetrics(serverId, timeRange);
-      console.log('useServerHistoryData: Raw metrics result for timeRange', timeRange, ':', result?.length || 0, 'records');
+    //  console.log('useServerHistoryData: Raw metrics result for timeRange', timeRange, ':', result?.length || 0, 'records');
       return result || [];
     },
     enabled: !!serverId,

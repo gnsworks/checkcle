@@ -31,8 +31,8 @@ export async function pauseMonitoring(serviceId: string): Promise<void> {
     
     // We'll skip the notification here since it will be handled by the UI component
     // This prevents duplicate notifications for the paused status
-    console.log(`Service ${service.name} paused at ${now}, skipping notification to prevent duplication`);
+   // console.log(`Service ${service.name} paused at ${now}, skipping notification to prevent duplication`);
   } catch (error) {
-    console.error("Error pausing monitoring:", error);
+   // console.error("Error pausing monitoring:", error);
   }
 }

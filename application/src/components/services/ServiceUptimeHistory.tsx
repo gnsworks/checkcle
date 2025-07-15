@@ -25,7 +25,7 @@ export function ServiceUptimeHistory({
   const { data: uptimeHistory, isLoading, error } = useQuery({
     queryKey: ['uptimeHistory', serviceId, serviceType, startDate?.toISOString(), endDate?.toISOString()],
     queryFn: () => {
-      console.log(`ServiceUptimeHistory: Fetching for service ${serviceId} of type ${serviceType}`);
+   //   console.log(`ServiceUptimeHistory: Fetching for service ${serviceId} of type ${serviceType}`);
       return uptimeService.getUptimeHistory(serviceId, 200, startDate, endDate, serviceType);
     },
     enabled: !!serviceId && !!serviceType,

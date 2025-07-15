@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -38,8 +38,9 @@ interface EditOperationalPageDialogProps {
 
 export const EditOperationalPageDialog = ({ page, open, onOpenChange }: EditOperationalPageDialogProps) => {
   const [selectedComponents, setSelectedComponents] = useState<Partial<StatusPageComponentRecord>[]>([]);
-  const [existingComponents, setExistingComponents] = useState<StatusPageComponentRecord[]>([]);
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+  const [componentsLoaded, setComponentsLoaded] = useState(false);
+  
   const updateMutation = useUpdateOperationalPage();
   const createComponentMutation = useCreateStatusPageComponent();
   const deleteComponentMutation = useDeleteStatusPageComponent();
@@ -63,28 +64,42 @@ export const EditOperationalPageDialog = ({ page, open, onOpenChange }: EditOper
     },
   });
 
-  useEffect(() => {
-    if (page) {
-      form.reset({
-        title: page.title,
-        description: page.description,
-        slug: page.slug,
-        theme: page.theme,
-        status: page.status,
-        is_public: page.is_public === 'true',
-        logo_url: page.logo_url || '',
-        custom_domain: page.custom_domain || '',
-        custom_css: page.custom_css || '',
-        page_style: page.page_style || '',
-      });
-    }
-  }, [page, form]);
+  // Memoize the form reset values to prevent unnecessary re-renders
+  const formValues = useMemo(() => {
+    if (!page) return null;
+    return {
+      title: page.title,
+      description: page.description,
+      slug: page.slug,
+      theme: page.theme,
+      status: page.status,
+      is_public: page.is_public === 'true',
+      logo_url: page.logo_url || '',
+      custom_domain: page.custom_domain || '',
+      custom_css: page.custom_css || '',
+      page_style: page.page_style || '',
+    };
+  }, [page?.id, page?.title, page?.description, page?.slug, page?.theme, page?.status, page?.is_public, page?.logo_url, page?.custom_domain, page?.custom_css, page?.page_style]);
 
+  // Reset form when page data changes
   useEffect(() => {
-    if (components && components.length > 0) {
-      console.log('Loading existing components:', components);
-      setExistingComponents(components);
-      // Convert existing components to the format expected by ComponentsSelector
+    if (formValues) {
+      form.reset(formValues);
+    }
+  }, [formValues, form]);
+
+  // Convert components to selector format and initialize state - only when dialog opens and components change
+  useEffect(() => {
+    if (!open || !page?.id || !components) {
+      return;
+    }
+
+    // Only update if components actually changed or haven't been loaded yet
+    const componentIds = components.map(c => c.id).sort().join(',');
+    const currentSelectedIds = selectedComponents.map(c => c.id).filter(Boolean).sort().join(',');
+    
+    if (componentIds !== currentSelectedIds || !componentsLoaded) {
+ //     console.log('Loading existing components:', components);
       const existingComponentsForSelector = components.map(comp => ({
         id: comp.id,
         name: comp.name,
@@ -94,25 +109,31 @@ export const EditOperationalPageDialog = ({ page, open, onOpenChange }: EditOper
         display_order: comp.display_order,
         operational_status_id: comp.operational_status_id,
       }));
+      
       setSelectedComponents(existingComponentsForSelector);
-    } else {
-      setExistingComponents([]);
+      setComponentsLoaded(true);
+    }
+  }, [open, page?.id, components, componentsLoaded, selectedComponents]);
+
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setComponentsLoaded(false);
       setSelectedComponents([]);
     }
-  }, [components]);
+  }, [open]);
 
-  const handleComponentDelete = async (componentId: string) => {
+  const handleComponentDelete = useCallback(async (componentId: string) => {
     try {
-      console.log('Deleting component:', componentId);
+   //   console.log('Deleting component:', componentId);
       await deleteComponentMutation.mutateAsync(componentId);
       
       // Update local state to remove the deleted component
       setSelectedComponents(prev => prev.filter(comp => comp.id !== componentId));
-      setExistingComponents(prev => prev.filter(comp => comp.id !== componentId));
     } catch (error) {
-      console.error('Error deleting component:', error);
+   //   console.error('Error deleting component:', error);
     }
-  };
+  }, [deleteComponentMutation]);
 
   const onSubmit = async (data: FormData) => {
     if (!page) return;
@@ -133,21 +154,17 @@ export const EditOperationalPageDialog = ({ page, open, onOpenChange }: EditOper
         page_style: data.page_style || '',
       };
       
-      console.log('Updating operational page with payload:', payload);
+   //   console.log('Updating operational page with payload:', payload);
       await updateMutation.mutateAsync({ id: page.id, data: payload });
       
       // Handle component changes
-      const currentComponentIds = existingComponents.map(c => c.id);
+      const currentComponentIds = components.map(c => c.id);
       const newComponentsToCreate = selectedComponents.filter(comp => !comp.id);
-      const componentsToKeep = selectedComponents.filter(comp => comp.id && currentComponentIds.includes(comp.id));
-      const componentsToDelete = existingComponents.filter(comp => !selectedComponents.some(selected => selected.id === comp.id));
+      const componentsToDelete = components.filter(comp => !selectedComponents.some(selected => selected.id === comp.id));
 
-      // Delete removed components (only if not already deleted via handleComponentDelete)
+      // Delete removed components
       for (const component of componentsToDelete) {
-        if (selectedComponents.some(selected => selected.id === component.id)) {
-          continue; // Skip if already handled by handleComponentDelete
-        }
-        console.log('Deleting component during save:', component.id);
+    //    console.log('Deleting component during save:', component.id);
         await deleteComponentMutation.mutateAsync(component.id);
       }
 
@@ -162,13 +179,13 @@ export const EditOperationalPageDialog = ({ page, open, onOpenChange }: EditOper
           display_order: component.display_order || 1,
         };
         
-        console.log('Creating component with payload:', componentPayload);
+    //    console.log('Creating component with payload:', componentPayload);
         await createComponentMutation.mutateAsync(componentPayload);
       }
       
       onOpenChange(false);
     } catch (error) {
-      console.error('Error updating operational page:', error);
+    //  console.error('Error updating operational page:', error);
     } finally {
       setIsFormSubmitting(false);
     }
