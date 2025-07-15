@@ -22,11 +22,11 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
   const notificationChannels = form.watch("notificationChannels") || [];
   const alertTemplate = form.watch("alertTemplate");
   
-  console.log("Current notification values:", { 
-    notificationStatus, 
-    notificationChannels,
-    alertTemplate 
-  });
+ // console.log("Current notification values:", { 
+ //   notificationStatus, 
+ //   notificationChannels,
+ //   alertTemplate 
+ // });
   
   // Fetch alert configurations for notification channels
   const { data: alertConfigsData } = useQuery({
@@ -42,16 +42,16 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
       setAlertConfigs(enabledChannels);
       
       // Debug log to check what alert configs are loaded
-      console.log("Loaded alert configurations:", enabledChannels);
+   //   console.log("Loaded alert configurations:", enabledChannels);
     }
   }, [alertConfigsData]);
 
   // Log when form values change to debug
   useEffect(() => {
-    console.log("Notification values changed:", {
-      notificationStatus: form.getValues("notificationStatus"),
-      notificationChannels: form.getValues("notificationChannels")
-    });
+  //  console.log("Notification values changed:", {
+   //   notificationStatus: form.getValues("notificationStatus"),
+   //   notificationChannels: form.getValues("notificationChannels")
+   // });
   }, [form.watch("notificationStatus"), form.watch("notificationChannels")]);
 
   const handleChannelAdd = (channelId: string) => {
@@ -161,7 +161,7 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
         render={({ field }) => {
           // Don't convert existing values to "default"
           const displayValue = field.value || "default";
-          console.log("Rendering alert template field with value:", displayValue);
+         // console.log("Rendering alert template field with value:", displayValue);
           
           return (
             <FormItem>

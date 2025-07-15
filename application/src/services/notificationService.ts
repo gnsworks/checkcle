@@ -31,20 +31,20 @@ export const notificationService = {
     try {
       const { service, status, responseTime } = data;
       
-      console.log(`Preparing to send notification for service: ${service.name}, status: ${status}`);
-      console.log(`Service alerts status: ${service.alerts}`);
+    //  console.log(`Preparing to send notification for service: ${service.name}, status: ${status}`);
+     // console.log(`Service alerts status: ${service.alerts}`);
       
       // First check if alerts are muted for this service
       // STRICT equality check against "muted" string value
       if (service.alerts === "muted") {
-        console.log(`NOTIFICATION BLOCKED: Alerts are muted for service: ${service.name}`);
+      //  console.log(`NOTIFICATION BLOCKED: Alerts are muted for service: ${service.name}`);
         return true; // Return true as this is expected behavior
       }
       
       // For paused status, check if this is a duplicate notification from another source
       // This helps prevent the double-notification issue
       if (status === "paused" && data._notificationSource === "duplicate_check") {
-        console.log("NOTIFICATION BLOCKED: Duplicate pause notification detected");
+       // console.log("NOTIFICATION BLOCKED: Duplicate pause notification detected");
         return true; // Return true as this is expected behavior
       }
       
@@ -62,20 +62,20 @@ export const notificationService = {
           if (timeSinceLastNotif < NOTIFICATION_COOLDOWN) {
             // Increment count only if we haven't reached max retries
             if (lastNotif.count < maxRetries) {
-              console.log(`DOWN notification for ${service.name}: ${lastNotif.count + 1}/${maxRetries}`);
+         //     console.log(`DOWN notification for ${service.name}: ${lastNotif.count + 1}/${maxRetries}`);
               lastNotifications[serviceId].count += 1;
             } else {
-              console.log(`DOWN notification for ${service.name} skipped: Max retries (${maxRetries}) reached. Next notification after cooldown.`);
+         //     console.log(`DOWN notification for ${service.name} skipped: Max retries (${maxRetries}) reached. Next notification after cooldown.`);
               return true; // Skip notification but return success
             }
           } else {
             // Reset count after cooldown period
-            console.log(`Cooldown period elapsed for ${service.name}. Resetting notification count.`);
+       //     console.log(`Cooldown period elapsed for ${service.name}. Resetting notification count.`);
             lastNotifications[serviceId] = { timestamp: now, count: 1 };
           }
         } else {
           // First notification for this service
-          console.log(`First DOWN notification for ${service.name}: 1/${maxRetries}`);
+      //    console.log(`First DOWN notification for ${service.name}: 1/${maxRetries}`);
           lastNotifications[serviceId] = { timestamp: now, count: 1 };
         }
         
@@ -85,7 +85,7 @@ export const notificationService = {
       
       // Check if notification channel is set
       if (!service.notificationChannel) {
-        console.log(`No notification channel set for service: ${service.name}`);
+      // console.log(`No notification channel set for service: ${service.name}`);
         return false;
       }
       
@@ -93,12 +93,12 @@ export const notificationService = {
       const alertConfigRecord = await pb.collection('alert_configurations').getOne(service.notificationChannel);
       
       if (!alertConfigRecord) {
-        console.error(`Alert configuration not found for ID: ${service.notificationChannel}`);
+      //  console.error(`Alert configuration not found for ID: ${service.notificationChannel}`);
         return false;
       }
       
       if (!alertConfigRecord.enabled) {
-        console.log(`Alert configuration is disabled for service: ${service.name}`);
+      //  console.log(`Alert configuration is disabled for service: ${service.name}`);
         return false;
       }
       
@@ -127,7 +127,7 @@ export const notificationService = {
         try {
           template = await templateService.getTemplate(service.alertTemplate);
         } catch (error) {
-          console.error(`Error fetching template for ID: ${service.alertTemplate}`, error);
+        //  console.error(`Error fetching template for ID: ${service.alertTemplate}`, error);
         }
       }
       
@@ -146,7 +146,7 @@ export const notificationService = {
         message += `\n\nAlert ${retryInfo.count}/${maxRetries}`;
       }
       
-      console.log(`Prepared notification message: ${message}`);
+    //  console.log(`Prepared notification message: ${message}`);
       
       // Send notification based on notification type
       const notificationType = alertConfig.notification_type;
@@ -156,10 +156,10 @@ export const notificationService = {
       }
       
       // For other types like discord, slack, etc. (not implemented yet)
-      console.log(`Notification type ${notificationType} not implemented yet`);
+    //  console.log(`Notification type ${notificationType} not implemented yet`);
       return false;
     } catch (error) {
-      console.error("Error sending notification:", error);
+    //  console.error("Error sending notification:", error);
       return false;
     }
   },
@@ -173,10 +173,10 @@ export const notificationService = {
         ? `Service ${serviceName} is UP${responseTime ? ` (Response time: ${responseTime}ms)` : ''}`
         : `Service ${serviceName} is DOWN`;
         
-      console.log(`Test notification would have been sent: ${message}`);
+    //  console.log(`Test notification would have been sent: ${message}`);
       return true;  // Just log, don't actually send
     } catch (error) {
-      console.error("Error in test notification:", error);
+    //  console.error("Error in test notification:", error);
       return false;
     }
   },
@@ -187,7 +187,7 @@ export const notificationService = {
    */
   resetNotificationCount(serviceId: string): void {
     if (lastNotifications[serviceId]) {
-      console.log(`Resetting notification count for service ${serviceId}`);
+    //  console.log(`Resetting notification count for service ${serviceId}`);
       delete lastNotifications[serviceId];
     }
   }

@@ -39,7 +39,7 @@ export const ServiceRowActions = ({
     try {
       if (service.status === "paused") {
         // Resume monitoring
-        console.log(`Resuming monitoring for service ${service.id} (${service.name}) from dropdown`);
+   //     console.log(`Resuming monitoring for service ${service.id} (${service.name}) from dropdown`);
         
         // First ensure we update the status
         await serviceService.resumeMonitoring(service.id);
@@ -53,7 +53,7 @@ export const ServiceRowActions = ({
         });
       } else {
         // Pause monitoring
-        console.log(`Pausing monitoring for service ${service.id} (${service.name}) from dropdown`);
+     //   console.log(`Pausing monitoring for service ${service.id} (${service.name}) from dropdown`);
         await serviceService.pauseMonitoring(service.id);
         
         toast({
@@ -65,7 +65,7 @@ export const ServiceRowActions = ({
       // Call the parent handler to refresh the UI
       onPauseResume(service);
     } catch (error) {
-      console.error("Error toggling monitoring:", error);
+   //   console.error("Error toggling monitoring:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -83,10 +83,10 @@ export const ServiceRowActions = ({
     
     if (onMuteAlerts) {
       try {
-        console.log(`Attempting to ${alertsMuted ? 'unmute' : 'mute'} alerts for service ${service.id} (${service.name})`);
+    //    console.log(`Attempting to ${alertsMuted ? 'unmute' : 'mute'} alerts for service ${service.id} (${service.name})`);
         await onMuteAlerts(service);
       } catch (error) {
-        console.error("Error toggling alerts:", error);
+     //   console.error("Error toggling alerts:", error);
         toast({
           variant: "destructive",
           title: "Error",
