@@ -1,71 +1,70 @@
 
-import React from "react";
-import { Check, X, Pause, AlertTriangle } from "lucide-react";
+import React, { memo } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Check } from "lucide-react";
 
-export interface StatusBadgeProps {
-  status: string;
+interface StatusBadgeProps {
+  status: "up" | "down" | "paused" | "warning";
   size?: "sm" | "md" | "lg";
 }
 
-export const StatusBadge = ({ status, size = "sm" }: StatusBadgeProps) => {
-  // Determine the sizing classes based on the size prop
-  const getSizeClasses = () => {
-    switch (size) {
-      case "lg":
-        return "px-3 py-1.5 text-sm gap-1.5";
-      case "md":
-        return "px-2.5 py-1 text-sm gap-1.5";
-      case "sm":
+const StatusBadgeComponent = ({ status, size = "sm" }: StatusBadgeProps) => {
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case "up":
+        return {
+          variant: "default" as const,
+          className: "bg-emerald-700 text-emerald-100 border-emerald-200 hover:bg-emerald-200",
+          label:     
+          <span className="flex items-center gap-1">
+          <Check className="w-4 h-4" /> Up
+          </span>
+          
+        };
+      case "down":
+        return {
+          variant: "destructive" as const,
+          className: "bg-red-700 text-red-100 border-red-200 hover:bg-red-200",
+          label: "Down"
+        };
+      case "warning":
+        return {
+          variant: "destructive" as const,
+          className: "bg-amber-700 text-amber-100 border-amber-200 hover:bg-amber-200",
+          label: "Warning"
+        };
+      case "paused":
+        return {
+          variant: "secondary" as const,
+          className: "bg-gray-700 text-gray-100 border-gray-200 hover:bg-gray-200",
+          label: "Paused"
+        };
       default:
-        return "px-2 py-0.5 text-xs gap-0.5";
+        return {
+          variant: "outline" as const,
+          className: "bg-gray-700 text-gray-100 border-gray-200",
+          label: "Unknown"
+        };
     }
   };
 
-  const getIconSize = () => {
-    switch (size) {
-      case "lg":
-        return "h-4 w-4";
-      case "md":
-        return "h-4 w-4";
-      case "sm":
-      default:
-        return "h-3 w-3";
-    }
+  const sizeClasses = {
+    sm: "text-xs px-2 py-1",
+    md: "text-sm px-3 py-1.5",
+    lg: "text-base px-4 py-2"
   };
 
-  const sizeClasses = getSizeClasses();
-  const iconSize = getIconSize();
+  const config = getStatusConfig(status);
 
-  switch (status) {
-    case "up":
-      return (
-        <div className={`flex items-center bg-emerald-950/60 dark:bg-emerald-950/60 text-emerald-400 font-medium rounded-full w-fit ${sizeClasses}`}>
-          <Check className={iconSize} />
-          <span>Up</span>
-        </div>
-      );
-    case "down":
-      return (
-        <div className={`flex items-center bg-red-950/60 dark:bg-red-950/60 text-red-400 font-medium rounded-full w-fit ${sizeClasses}`}>
-          <X className={iconSize} />
-          <span>Down</span>
-        </div>
-      );
-    case "warning":
-      return (
-        <div className={`flex items-center bg-yellow-950/60 dark:bg-yellow-950/60 text-yellow-400 font-medium rounded-full w-fit ${sizeClasses}`}>
-          <AlertTriangle className={iconSize} />
-          <span>Warning</span>
-        </div>
-      );
-    case "paused":
-      return (
-        <div className={`flex items-center bg-gray-200/30 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 font-medium rounded-full w-fit ${sizeClasses}`}>
-          <Pause className={iconSize} />
-          <span>Paused</span>
-        </div>
-      );
-    default:
-      return null;
-  }
+  return (
+    <Badge 
+      variant={config.variant} 
+      className={`${config.className} ${sizeClasses[size]} font-medium`}
+    >
+      {config.label}
+    </Badge>
+  );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+export const StatusBadge = memo(StatusBadgeComponent);
