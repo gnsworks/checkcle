@@ -7,11 +7,14 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { ServerStatsCards } from "@/components/servers/ServerStatsCards";
 import { ServerTable } from "@/components/servers/ServerTable";
+import { AddServerAgentDialog } from "@/components/servers/AddServerAgentDialog";
 import { serverService } from "@/services/serverService";
 import { Server, ServerStats } from "@/types/server.types";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { authService } from "@/services/authService";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const InstanceMonitoring = () => {
   const { theme } = useTheme();
@@ -27,6 +30,7 @@ const InstanceMonitoring = () => {
   });
   
   const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   
   const { data: servers = [], isLoading, error, refetch } = useQuery({
     queryKey: ['servers'],
@@ -47,6 +51,10 @@ const InstanceMonitoring = () => {
   const handleLogout = () => {
     authService.logout();
     navigate('/login');
+  };
+
+  const handleAgentAdded = () => {
+    refetch();
   };
   
   if (error) {
@@ -102,6 +110,10 @@ const InstanceMonitoring = () => {
                     Monitor and manage your server instances in real-time
                   </p>
                 </div>
+                <Button onClick={() => setAddDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Server Agent
+                </Button>
               </div>
             </div>
 
@@ -117,6 +129,12 @@ const InstanceMonitoring = () => {
           </div>
         </main>
       </div>
+
+      <AddServerAgentDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        onAgentAdded={handleAgentAdded}
+      />
     </div>
   );
 };
