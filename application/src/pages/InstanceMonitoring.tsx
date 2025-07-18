@@ -61,7 +61,7 @@ const InstanceMonitoring = () => {
     return (
       <div className="flex h-screen overflow-hidden bg-background text-foreground">
         <Sidebar collapsed={sidebarCollapsed} />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 min-w-0">
           <Header 
             currentUser={currentUser} 
             onLogout={handleLogout} 
@@ -90,7 +90,7 @@ const InstanceMonitoring = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
       <Sidebar collapsed={sidebarCollapsed} />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 min-w-0">
         <Header 
           currentUser={currentUser} 
           onLogout={handleLogout} 
@@ -98,19 +98,19 @@ const InstanceMonitoring = () => {
           toggleSidebar={toggleSidebar} 
         />
         <main className="flex-1 overflow-auto">
-          <div className="mx-[20px] my-[20px]">
+          <div className="h-full flex flex-col p-4 sm:p-6 lg:p-8 space-y-6">
             {/* Header Section */}
-            <div className="mb-6 lg:mb-8">
+            <div className="flex-shrink-0">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-2xl font-bold text-foreground">
+                  <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
                     Instance Monitoring
                   </h1>
-                  <p className={`text-muted-foreground mt-1 sm:mt-2 transition-all duration-300 ${sidebarCollapsed ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
+                  <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base lg:text-lg">
                     Monitor and manage your server instances in real-time
                   </p>
                 </div>
-                <Button onClick={() => setAddDialogOpen(true)}>
+                <Button onClick={() => setAddDialogOpen(true)} className="flex-shrink-0">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Server Agent
                 </Button>
@@ -118,12 +118,12 @@ const InstanceMonitoring = () => {
             </div>
 
             {/* Stats Cards Section */}
-            <div className="mb-6 lg:mb-8">
+            <div className="flex-shrink-0">
               <ServerStatsCards stats={stats} />
             </div>
             
-            {/* Server Table Section */}
-            <div className="min-w-0">
+            {/* Server Table Section - This will take remaining space */}
+            <div className="flex-1 min-h-0 flex flex-col">
               <ServerTable servers={servers} isLoading={isLoading} onRefresh={handleRefresh} />
             </div>
           </div>

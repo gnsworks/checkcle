@@ -149,11 +149,11 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="flex-1 flex flex-col">
+        <CardHeader className="flex-shrink-0">
           <CardTitle>Servers</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 flex items-center justify-center">
           <div className="flex items-center justify-center h-32">
             <RefreshCw className="h-6 w-6 animate-spin" />
             <span className="ml-2">Loading servers...</span>
@@ -165,8 +165,8 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
 
   return (
     <>
-      <Card>
-        <CardHeader>
+      <Card className="flex-1 flex flex-col min-h-0">
+        <CardHeader className="flex-shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <CardTitle className="text-xl font-semibold">Servers</CardTitle>
             <div className="flex items-center gap-2">
@@ -185,173 +185,180 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 flex flex-col min-h-0 p-0">
           {filteredServers.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="flex-1 flex items-center justify-center p-8">
               <p className="text-muted-foreground">No servers found</p>
             </div>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>OS</TableHead>
-                    <TableHead>IP Address</TableHead>
-                    <TableHead>CPU</TableHead>
-                    <TableHead>Memory</TableHead>
-                    <TableHead>Disk</TableHead>
-                    <TableHead>Uptime</TableHead>
-                    <TableHead>Last Checked</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredServers.map((server) => {
-                    const cpuUsage = server.cpu_usage || 0;
-                    const memoryUsage = server.ram_total > 0 ? (server.ram_used / server.ram_total) * 100 : 0;
-                    const diskUsage = server.disk_total > 0 ? (server.disk_used / server.disk_total) * 100 : 0;
-                    const isPaused = server.status === "paused";
-                    const isProcessing = pausingServers.has(server.id);
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex-1 overflow-auto border-t">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background z-10">
+                    <TableRow>
+                      <TableHead className="w-[150px] min-w-[120px]">Name</TableHead>
+                      <TableHead className="w-[100px] min-w-[80px]">Status</TableHead>
+                      <TableHead className="w-[100px] min-w-[80px]">OS</TableHead>
+                      <TableHead className="w-[120px] min-w-[100px]">IP Address</TableHead>
+                      <TableHead className="w-[140px] min-w-[120px]">CPU</TableHead>
+                      <TableHead className="w-[140px] min-w-[120px]">Memory</TableHead>
+                      <TableHead className="w-[140px] min-w-[120px]">Disk</TableHead>
+                      <TableHead className="w-[100px] min-w-[80px]">Uptime</TableHead>
+                      <TableHead className="w-[150px] min-w-[130px]">Last Checked</TableHead>
+                      <TableHead className="w-[80px] min-w-[60px] text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredServers.map((server) => {
+                      const cpuUsage = server.cpu_usage || 0;
+                      const memoryUsage = server.ram_total > 0 ? (server.ram_used / server.ram_total) * 100 : 0;
+                      const diskUsage = server.disk_total > 0 ? (server.disk_used / server.disk_total) * 100 : 0;
+                      const isPaused = server.status === "paused";
+                      const isProcessing = pausingServers.has(server.id);
 
-                    return (
-                      <TableRow key={server.id} className="hover:bg-muted/50">
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{server.name}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <ServerStatusBadge status={server.status} />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <OSTypeIcon osType={server.os_type} />
-                            <span className="text-sm">{server.os_type}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <code className="text-sm bg-muted px-1 py-0.5 rounded">{server.ip_address}</code>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1 min-w-[120px]">
-                            <div className="flex justify-between text-sm">
-                              <span>{cpuUsage.toFixed(1)}%</span>
-                              <span className="text-muted-foreground">{server.cpu_cores} cores</span>
+                      return (
+                        <TableRow key={server.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">
+                            <div className="truncate max-w-[140px]" title={server.name}>
+                              {server.name}
                             </div>
-                            <Progress 
-                              value={cpuUsage} 
-                              className="h-2"
-                              indicatorClassName={
-                                cpuUsage > 90 ? "bg-red-500" : 
-                                cpuUsage > 75 ? "bg-orange-500" :
-                                cpuUsage > 60 ? "bg-yellow-500" : "bg-green-500"
-                              }
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1 min-w-[120px]">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">{memoryUsage.toFixed(1)}%</span>
-                              <span>{serverService.formatBytes(server.ram_total)}</span>
+                          </TableCell>
+                          <TableCell>
+                            <ServerStatusBadge status={server.status} />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <OSTypeIcon osType={server.os_type} />
+                              <span className="text-sm truncate max-w-[60px]" title={server.os_type}>
+                                {server.os_type}
+                              </span>
                             </div>
-                            <Progress 
-                              value={memoryUsage} 
-                              className="h-2"
-                              indicatorClassName={
-                                memoryUsage > 90 ? "bg-red-500" : 
-                                memoryUsage > 75 ? "bg-yellow-500" : "bg-blue-500"
-                              }
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1 min-w-[120px]">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">{diskUsage.toFixed(1)}%</span>
-                              <span>{serverService.formatBytes(server.disk_total)}</span>
+                          </TableCell>
+                          <TableCell>
+                            <code className="text-sm bg-muted px-1 py-0.5 rounded text-xs">
+                              {server.ip_address}
+                            </code>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1 min-w-[120px]">
+                              <div className="flex justify-between text-sm">
+                                <span>{cpuUsage.toFixed(1)}%</span>
+                                <span className="text-muted-foreground text-xs">{server.cpu_cores} cores</span>
+                              </div>
+                              <Progress 
+                                value={cpuUsage} 
+                                className="h-2"
+                                indicatorClassName={
+                                  cpuUsage > 90 ? "bg-red-500" : 
+                                  cpuUsage > 75 ? "bg-orange-500" :
+                                  cpuUsage > 60 ? "bg-yellow-500" : "bg-green-500"
+                                }
+                              />
                             </div>
-                            <Progress 
-                              value={diskUsage} 
-                              className="h-2"
-                              indicatorClassName={
-                                diskUsage > 95 ? "bg-red-500" : 
-                                diskUsage > 85 ? "bg-yellow-500" : "bg-orange-500"
-                              }
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">{server.uptime}</div>
-                        </TableCell>
-                        
-                        <TableCell>
-                          <div className="text-sm text-muted-foreground">
-                            {new Date(server.last_checked).toLocaleString()}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0" disabled={isProcessing}>
-                                <span className="sr-only">Open menu</span>
-                                {isProcessing ? (
-                                  <RefreshCw className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <MoreHorizontal className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-[200px]">
-                              <DropdownMenuItem onClick={() => handleViewDetails(server.id)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Server Detail
-                              </DropdownMenuItem>
-                              {server.docker === 'true' && (
-                                <DropdownMenuItem onClick={() => handleViewContainers(server.id)}>
-                                  <Activity className="mr-2 h-4 w-4" />
-                                  Container Monitoring
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1 min-w-[120px]">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">{memoryUsage.toFixed(1)}%</span>
+                                <span className="text-xs">{serverService.formatBytes(server.ram_total)}</span>
+                              </div>
+                              <Progress 
+                                value={memoryUsage} 
+                                className="h-2"
+                                indicatorClassName={
+                                  memoryUsage > 90 ? "bg-red-500" : 
+                                  memoryUsage > 75 ? "bg-yellow-500" : "bg-blue-500"
+                                }
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1 min-w-[120px]">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">{diskUsage.toFixed(1)}%</span>
+                                <span className="text-xs">{serverService.formatBytes(server.disk_total)}</span>
+                              </div>
+                              <Progress 
+                                value={diskUsage} 
+                                className="h-2"
+                                indicatorClassName={
+                                  diskUsage > 95 ? "bg-red-500" : 
+                                  diskUsage > 85 ? "bg-yellow-500" : "bg-orange-500"
+                                }
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm truncate max-w-[80px]" title={server.uptime}>
+                              {server.uptime}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-muted-foreground text-xs">
+                              {new Date(server.last_checked).toLocaleString()}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0" disabled={isProcessing}>
+                                  <span className="sr-only">Open menu</span>
+                                  {isProcessing ? (
+                                    <RefreshCw className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-[200px]">
+                                <DropdownMenuItem onClick={() => handleViewDetails(server.id)}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Server Detail
                                 </DropdownMenuItem>
-                              )}
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => handlePauseResume(server)}
-                                disabled={isProcessing}
-                              >
-                                {isPaused ? (
-                                  <>
-                                    <Play className="mr-2 h-4 w-4" />
-                                    Resume Monitoring
-                                  </>
-                                ) : (
-                                  <>
-                                    <Pause className="mr-2 h-4 w-4" />
-                                    Pause Monitoring
-                                  </>
+                                {server.docker === 'true' && (
+                                  <DropdownMenuItem onClick={() => handleViewContainers(server.id)}>
+                                    <Activity className="mr-2 h-4 w-4" />
+                                    Container Monitoring
+                                  </DropdownMenuItem>
                                 )}
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleEdit(server.id)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit Server
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => handleDelete(server)}
-                                className="text-red-600 focus:text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Server
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  onClick={() => handlePauseResume(server)}
+                                  disabled={isProcessing}
+                                >
+                                  {isPaused ? (
+                                    <>
+                                      <Play className="mr-2 h-4 w-4" />
+                                      Resume Monitoring
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Pause className="mr-2 h-4 w-4" />
+                                      Pause Monitoring
+                                    </>
+                                  )}
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleEdit(server.id)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit Server
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handleDelete(server)}
+                                  className="text-red-600 focus:text-red-600"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete Server
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
         </CardContent>
