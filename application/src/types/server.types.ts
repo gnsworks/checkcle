@@ -19,6 +19,7 @@ export interface Server {
   last_checked: string;
   server_token: string;
   template_id: string;
+  threshold_id: string;
   notification_id: string;
   timestamp: string;
   connection: string;

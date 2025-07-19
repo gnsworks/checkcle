@@ -13,7 +13,13 @@ export const Sidebar = ({ collapsed }: SidebarProps) => {
   const { theme } = useTheme();
   
   return (
-    <div className={`${collapsed ? 'w-16' : 'w-64'} ${theme === 'dark' ? 'bg-[#121212] border-[#1e1e1e]' : 'bg-sidebar border-sidebar-border'} border-r flex flex-col transition-all duration-300 h-full`}>
+    <div 
+      className={`
+        ${theme === 'dark' ? 'bg-[#121212] border-[#1e1e1e]' : 'bg-sidebar border-sidebar-border'} 
+        border-r flex flex-col h-full
+        ${collapsed ? 'w-16' : 'w-64'}
+      `}
+    >
       <SidebarHeader collapsed={collapsed} />
       <MainNavigation collapsed={collapsed} />
       <SettingsPanel collapsed={collapsed} />

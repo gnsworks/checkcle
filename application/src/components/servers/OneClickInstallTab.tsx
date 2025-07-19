@@ -27,7 +27,7 @@ export const OneClickInstallTab: React.FC<OneClickInstallTabProps> = ({
   onDialogClose,
 }) => {
   const getOneClickInstallCommand = () => {
-    const scriptUrl = "https://raw.githubusercontent.com/operacle/checke-server-agent/refs/heads/main/server-agent.sh";
+    const scriptUrl = "https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/scripts/server-agent.sh";
 
     return `curl -L -o server-agent.sh "${scriptUrl}"
 chmod +x server-agent.sh

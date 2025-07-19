@@ -62,7 +62,7 @@ export const DockerContainersTable = ({ containers, isLoading, onRefresh }: Dock
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <div className="min-w-full inline-block align-middle">
-              <div className="overflow-hidden border border-border rounded-lg shadow-sm bg-card">
+              <div className="overflow-hidden border border-border rounded-lg shadow-sm">
                 <Table>
                   <DockerTableHeader />
                   <TableBody>

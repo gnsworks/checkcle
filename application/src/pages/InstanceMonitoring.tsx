@@ -98,9 +98,9 @@ const InstanceMonitoring = () => {
           toggleSidebar={toggleSidebar} 
         />
         <main className="flex-1 overflow-auto">
-          <div className="h-full flex flex-col p-4 sm:p-6 lg:p-8 space-y-6">
+          <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             {/* Header Section */}
-            <div className="flex-shrink-0">
+            <div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
@@ -118,12 +118,12 @@ const InstanceMonitoring = () => {
             </div>
 
             {/* Stats Cards Section */}
-            <div className="flex-shrink-0">
+            <div>
               <ServerStatsCards stats={stats} />
             </div>
             
-            {/* Server Table Section - This will take remaining space */}
-            <div className="flex-1 min-h-0 flex flex-col">
+            {/* Server Table Section */}
+            <div>
               <ServerTable servers={servers} isLoading={isLoading} onRefresh={handleRefresh} />
             </div>
           </div>
