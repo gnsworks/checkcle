@@ -1,27 +1,34 @@
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, LineChart, Line } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, LineChart, Line, BarChart, Bar } from "recharts";
 import { UptimeData } from "@/types/service.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { AreaChart as AreaChartIcon, BarChart3, TrendingUp } from "lucide-react";
 
 interface ResponseTimeChartProps {
   uptimeData: UptimeData[];
 }
 
+type ChartType = 'area' | 'line' | 'bar';
+
 export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
   const { theme } = useTheme();
+  const [chartType, setChartType] = useState<ChartType>('area');
   
-  // Modern color palette for different chart lines with solid colors at 90-100% opacity
-  const modernColors = [
-    { stroke: '#f59e0b', fill: 'rgba(111, 86, 63, 0.95)' }, // Yellow (changed from blue)
-    { stroke: '#10b981', fill: 'rgba(0, 84, 56, 0.95)' }, // Emerald
-    { stroke: '#3b82f6', fill: 'rgba(59, 130, 246, 0.95)' }, // Blue (moved to second position)
-    { stroke: '#ef4444', fill: 'rgba(239, 68, 68, 0.95)' }, // Red
-    { stroke: '#8b5cf6', fill: 'rgba(139, 92, 246, 0.95)' }, // Violet
-    { stroke: '#06b6d4', fill: 'rgba(6, 182, 212, 0.95)' }, // Cyan
-    { stroke: '#f97316', fill: 'rgba(231, 148, 89, 0.95)' }, // Orange
-    { stroke: '#84cc16', fill: 'rgba(132, 204, 22, 0.95)' }, // Lime
+  // Fixed color palette - consistent colors that don't change
+  const fixedColors = [
+    { stroke: '#3b82f6', fill: 'rgba(59, 130, 246, 0.2)', name: 'Ocean Blue' },
+    { stroke: '#10b981', fill: 'rgba(16, 185, 129, 0.2)', name: 'Emerald Green' },
+    { stroke: '#f59e0b', fill: 'rgba(245, 158, 11, 0.2)', name: 'Golden Amber' },
+    { stroke: '#ef4444', fill: 'rgba(239, 68, 68, 0.2)', name: 'Ruby Red' },
+    { stroke: '#8b5cf6', fill: 'rgba(139, 92, 246, 0.2)', name: 'Royal Purple' },
+    { stroke: '#06b6d4', fill: 'rgba(6, 182, 212, 0.2)', name: 'Sky Cyan' },
+    { stroke: '#f97316', fill: 'rgba(249, 115, 22, 0.2)', name: 'Sunset Orange' },
+    { stroke: '#84cc16', fill: 'rgba(132, 204, 22, 0.2)', name: 'Fresh Lime' },
+    { stroke: '#ec4899', fill: 'rgba(236, 72, 153, 0.2)', name: 'Vibrant Pink' },
+    { stroke: '#14b8a6', fill: 'rgba(20, 184, 166, 0.2)', name: 'Ocean Teal' },
   ];
   
   // Check if we have data from multiple sources
@@ -160,7 +167,7 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
     return [Math.max(0, minValue - padding), maxValue + padding];
   }, [chartData, hasMultipleSources]);
 
-  // Get unique sources for legend with proper labeling and colors
+  // Get unique sources for legend with consistent fixed colors
   const sources = useMemo(() => {
     if (!hasMultipleSources) return [];
     
@@ -175,25 +182,29 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
       }
     });
     
-    const regionalSources = Array.from(sourceSet).map((source, index) => {
+    // Sort sources to ensure consistent ordering
+    const sortedSources = Array.from(sourceSet).sort();
+    
+    const regionalSources = sortedSources.map((source, index) => {
       const data = sourceInfo.get(source);
       const [regionName, agentId] = source.split('|');
       
       // Create proper label with region and agent info
       let label = regionName;
       if (data?.agent_id && data.agent_id !== '1') {
-        label = `${regionName} (${data.agent_id})`;
+        label = `${regionName} (Agent ${data.agent_id})`;
       } else if (regionName === 'Default' && data?.agent_id === '1') {
-        label = `Default System Check (Agent 1)`;
+        label = `Default System Check`;
       }
       
-      const colorIndex = index % modernColors.length;
+      const colorIndex = index % fixedColors.length;
       
       return {
         key: `regional_${source.replace('|', '_')}`,
         label: label,
-        stroke: modernColors[colorIndex].stroke,
-        fill: modernColors[colorIndex].fill
+        stroke: fixedColors[colorIndex].stroke,
+        fill: fixedColors[colorIndex].fill,
+        colorName: fixedColors[colorIndex].name
       };
     });
 
@@ -205,9 +216,10 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
     
     const defaultSources = (hasPureDefault && !hasRegionalDefault) ? [{
       key: 'default',
-      label: 'Default',
-      stroke: modernColors[regionalSources.length % modernColors.length].stroke,
-      fill: modernColors[regionalSources.length % modernColors.length].fill
+      label: 'Default System',
+      stroke: fixedColors[regionalSources.length % fixedColors.length].stroke,
+      fill: fixedColors[regionalSources.length % fixedColors.length].fill,
+      colorName: fixedColors[regionalSources.length % fixedColors.length].name
     }] : [];
 
     return [...defaultSources, ...regionalSources];
@@ -219,13 +231,13 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
       const data = payload[0].payload;
       
       return (
-        <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} p-3 border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} rounded shadow-md min-w-48`}>
-          <p className="text-sm font-medium">{String(label)}</p>
-          <p className="text-xs text-muted-foreground mb-2">{String(data.date)}</p>
+        <div className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} p-4 border rounded-lg shadow-lg min-w-64`}>
+          <p className="text-sm font-semibold mb-1">{String(label)}</p>
+          <p className="text-xs text-muted-foreground mb-3">{String(data.date)}</p>
           
           {hasMultipleSources ? (
             // Multi-source tooltip
-            <div className="space-y-2">
+            <div className="space-y-3">
               {sources.map(source => {
                 const valueKey = source.key === 'default' ? 'defaultValue' : `${source.key}_value`;
                 const statusKey = source.key === 'default' ? 'defaultStatus' : `${source.key}_status`;
@@ -234,35 +246,45 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
                 
                 if (value === undefined && status === undefined) return null;
                 
-                let statusColor = "bg-gray-800";
+                let statusBadgeClass = "px-2 py-1 rounded-full text-xs font-medium";
                 let statusText = "No Data";
                 
                 if (status === "up") {
-                  statusColor = "bg-emerald-800";
+                  statusBadgeClass += " bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
                   statusText = "Up";
                 } else if (status === "down") {
-                  statusColor = "bg-red-800";
+                  statusBadgeClass += " bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
                   statusText = "Down";
                 } else if (status === "warning") {
-                  statusColor = "bg-yellow-800";
+                  statusBadgeClass += " bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
                   statusText = "Warning";
                 } else if (status === "paused") {
-                  statusColor = "bg-gray-800";
+                  statusBadgeClass += " bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
                   statusText = "Paused";
+                } else {
+                  statusBadgeClass += " bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
                 }
                 
                 return (
-                  <div key={source.key} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  <div key={source.key} className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div 
-                        className="w-3 h-3 rounded-full"
+                        className="w-4 h-4 rounded-full border-2 border-white shadow-sm flex-shrink-0"
                         style={{ backgroundColor: source.stroke }}
                       ></div>
-                      <span className="text-xs">{String(source.label)}</span>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-medium truncate block">{String(source.label)}</span>
+                        <span className="text-xs text-muted-foreground">{source.colorName}</span>
+                      </div>
                     </div>
-                    <div className="text-xs font-mono">
-                      {status === "paused" ? "Paused" : 
-                       value !== null && value !== undefined ? `${value} ms` : "No data"}
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={statusBadgeClass}>
+                        {statusText}
+                      </span>
+                      <div className="text-sm font-mono">
+                        {status === "paused" ? "Paused" : 
+                         value !== null && value !== undefined ? `${value} ms` : "No data"}
+                      </div>
                     </div>
                   </div>
                 );
@@ -271,19 +293,19 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
           ) : (
             // Single source tooltip - showing status with color
             <>
-              <div className={`flex items-center gap-2 mt-1 ${data.status === "paused" ? "opacity-70" : ""}`}>
-                <div className={`w-3 h-3 rounded-full ${
-                  data.status === "up" ? "bg-emerald-800" :
-                  data.status === "down" ? "bg-red-800" :
-                  data.status === "warning" ? "bg-yellow-800" : "bg-gray-800"
+              <div className={`flex items-center gap-3 mt-2 ${data.status === "paused" ? "opacity-70" : ""}`}>
+                <div className={`w-4 h-4 rounded-full ${
+                  data.status === "up" ? "bg-green-500" :
+                  data.status === "down" ? "bg-red-500" :
+                  data.status === "warning" ? "bg-yellow-500" : "bg-gray-500"
                 }`}></div>
-                <span>{
+                <span className="font-medium">{
                   data.status === "up" ? "Up" :
                   data.status === "down" ? "Down" :
                   data.status === "warning" ? "Warning" : "Paused"
                 }</span>
               </div>
-              <p className="mt-1 font-mono text-sm">
+              <p className="mt-2 font-mono text-lg">
                 {data.status === "paused" ? "Monitoring paused" : 
                  data.value !== null ? `${data.value} ms` : "No data"}
               </p>
@@ -293,6 +315,182 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
       );
     }
     return null;
+  };
+
+  // Render different chart types
+  const renderChart = () => {
+    const commonProps = {
+      data: chartData,
+      margin: { top: 10, right: 30, left: 0, bottom: 30 }
+    };
+
+    const commonAxisProps = {
+      xAxis: {
+        dataKey: "time",
+        stroke: theme === 'dark' ? '#666' : '#9ca3af',
+        angle: -45,
+        textAnchor: "end" as const,
+        tick: { fontSize: 10 },
+        height: 60,
+        interval: "preserveStartEnd" as const,
+        minTickGap: 5
+      },
+      yAxis: {
+        stroke: theme === 'dark' ? '#666' : '#9ca3af',
+        allowDecimals: false,
+        domain: yAxisDomain
+      }
+    };
+
+    if (hasMultipleSources) {
+      switch (chartType) {
+        case 'line':
+          return (
+            <LineChart {...commonProps}>
+              <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#e5e7eb'} />
+              <XAxis {...commonAxisProps.xAxis} />
+              <YAxis {...commonAxisProps.yAxis} />
+              <Tooltip content={<CustomTooltip />} />
+              
+              {sources.find(s => s.key === 'default') && (
+                <Line
+                  type="monotone"
+                  dataKey="defaultValue"
+                  stroke={sources.find(s => s.key === 'default')?.stroke}
+                  strokeWidth={3}
+                  dot={{ r: 4, strokeWidth: 2 }}
+                  connectNulls={false}
+                />
+              )}
+              
+              {sources.filter(s => s.key !== 'default').map((source) => (
+                <Line
+                  key={source.key}
+                  type="monotone"
+                  dataKey={`${source.key}_value`}
+                  stroke={source.stroke}
+                  strokeWidth={3}
+                  dot={{ r: 4, strokeWidth: 2 }}
+                  connectNulls={false}
+                />
+              ))}
+            </LineChart>
+          );
+
+        case 'bar':
+          return (
+            <BarChart {...commonProps}>
+              <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#e5e7eb'} />
+              <XAxis {...commonAxisProps.xAxis} />
+              <YAxis {...commonAxisProps.yAxis} />
+              <Tooltip content={<CustomTooltip />} />
+              
+              {sources.find(s => s.key === 'default') && (
+                <Bar
+                  dataKey="defaultValue"
+                  fill={sources.find(s => s.key === 'default')?.stroke}
+                  opacity={0.8}
+                />
+              )}
+              
+              {sources.filter(s => s.key !== 'default').map((source) => (
+                <Bar
+                  key={source.key}
+                  dataKey={`${source.key}_value`}
+                  fill={source.stroke}
+                  opacity={0.8}
+                />
+              ))}
+            </BarChart>
+          );
+
+        default: // area
+          return (
+            <AreaChart {...commonProps}>
+              <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#e5e7eb'} />
+              <XAxis {...commonAxisProps.xAxis} />
+              <YAxis {...commonAxisProps.yAxis} />
+              <Tooltip content={<CustomTooltip />} />
+              
+              {sources.find(s => s.key === 'default') && (
+                <Area
+                  type="monotone"
+                  dataKey="defaultValue"
+                  stroke={sources.find(s => s.key === 'default')?.stroke}
+                  fill={sources.find(s => s.key === 'default')?.fill}
+                  strokeWidth={3}
+                  dot={false}
+                  connectNulls={false}
+                />
+              )}
+              
+              {sources.filter(s => s.key !== 'default').map((source) => (
+                <Area
+                  key={source.key}
+                  type="monotone"
+                  dataKey={`${source.key}_value`}
+                  stroke={source.stroke}
+                  fill={source.fill}
+                  strokeWidth={3}
+                  dot={false}
+                  connectNulls={false}
+                />
+              ))}
+            </AreaChart>
+          );
+      }
+    } else {
+      // Single source charts remain the same
+      return (
+        <AreaChart {...commonProps}>
+          <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#e5e7eb'} />
+          <XAxis {...commonAxisProps.xAxis} />
+          <YAxis {...commonAxisProps.yAxis} />
+          <Tooltip content={<CustomTooltip />} />
+          
+          <Area 
+            type="monotone" 
+            dataKey="upValue"
+            stroke="#10b981"
+            fill="rgba(16, 185, 129, 0.2)"
+            strokeWidth={3}
+            dot={false}
+            connectNulls={false}
+          />
+          
+          <Area 
+            type="monotone" 
+            dataKey="downValue"
+            stroke="#ef4444"
+            fill="rgba(239, 68, 68, 0.2)"
+            strokeWidth={3}
+            dot={false}
+            connectNulls={false}
+          />
+          
+          <Area 
+            type="monotone" 
+            dataKey="warningValue"
+            stroke="#f59e0b"
+            fill="rgba(245, 158, 11, 0.2)"
+            strokeWidth={3}
+            dot={false}
+            connectNulls={false}
+          />
+          
+          {chartData.map((entry, index) => 
+            entry.status === 'paused' ? (
+              <ReferenceLine 
+                key={`ref-${index}`}
+                x={entry.time} 
+                stroke="#9ca3af"
+                strokeDasharray="3 3"
+              />
+            ) : null
+          )}
+        </AreaChart>
+      );
+    }
   };
 
   // Check if we have any data to display
@@ -319,21 +517,55 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
       <CardHeader>
         <CardTitle className="flex flex-col md:flex-row md:items-center gap-2 justify-between">
           <span>Response Time History</span>
-          {hasData && (
-            <span className="text-sm font-normal text-muted-foreground">
-              {dateRangeDisplay}
-            </span>
-          )}
+          <div className="flex items-center gap-4">
+            {hasMultipleSources && (
+              <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-lg border">
+                <Button
+                  variant={chartType === 'area' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setChartType('area')}
+                  className="h-8 px-2"
+                >
+                  <AreaChartIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={chartType === 'line' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setChartType('line')}
+                  className="h-8 px-2"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={chartType === 'bar' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setChartType('bar')}
+                  className="h-8 px-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            {hasData && (
+              <span className="text-sm font-normal text-muted-foreground">
+                {dateRangeDisplay}
+              </span>
+            )}
+          </div>
         </CardTitle>
         {hasMultipleSources && (
-          <div className="flex flex-wrap gap-4 text-sm">
+          <div className="flex flex-wrap gap-4 text-sm bg-muted/30 p-3 rounded-lg border">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2 w-full">
+              <span>Monitoring Sources:</span>
+            </div>
             {sources.map(source => (
-              <div key={source.key} className="flex items-center gap-2">
+              <div key={source.key} className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-md border shadow-sm">
                 <div 
-                  className="w-3 h-3 rounded-full" 
+                  className="w-3 h-3 rounded-full border border-white shadow-sm" 
                   style={{ backgroundColor: source.stroke }}
                 ></div>
-                <span>{String(source.label)}</span>
+                <span className="font-medium">{String(source.label)}</span>
+                <span className="text-xs text-muted-foreground">({source.colorName})</span>
               </div>
             ))}
           </div>
@@ -347,118 +579,7 @@ export function ResponseTimeChart({ uptimeData }: ResponseTimeChartProps) {
         ) : (
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              {hasMultipleSources ? (
-                <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 30 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#e5e7eb'} />
-                  <XAxis 
-                    dataKey="time" 
-                    stroke={theme === 'dark' ? '#666' : '#9ca3af'}
-                    angle={-45}
-                    textAnchor="end"
-                    tick={{ fontSize: 10 }}
-                    height={60}
-                    interval="preserveStartEnd"
-                    minTickGap={5}
-                  />
-                  <YAxis 
-                    stroke={theme === 'dark' ? '#666' : '#9ca3af'} 
-                    allowDecimals={false}
-                    domain={yAxisDomain}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  
-                  {/* Default monitoring area with modern solid background */}
-                  {sources.find(s => s.key === 'default') && (
-                    <Area
-                      type="monotone"
-                      dataKey="defaultValue"
-                      stroke={sources.find(s => s.key === 'default')?.stroke}
-                      fill={sources.find(s => s.key === 'default')?.fill}
-                      strokeWidth={2.5}
-                      dot={false}
-                      connectNulls={false}
-                    />
-                  )}
-                  
-                  {/* Regional monitoring areas with modern solid backgrounds */}
-                  {sources.filter(s => s.key !== 'default').map((source) => (
-                    <Area
-                      key={source.key}
-                      type="monotone" 
-                      dataKey={`${source.key}_value`}
-                      stroke={source.stroke}
-                      fill={source.fill}
-                      strokeWidth={2.5}
-                      dot={false}
-                      connectNulls={false}
-                    />
-                  ))}
-                </AreaChart>
-              ) : (
-                // For single regional agent or default monitoring only - use solid background colors
-                <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 30 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#333' : '#e5e7eb'} />
-                  <XAxis 
-                    dataKey="time" 
-                    stroke={theme === 'dark' ? '#666' : '#9ca3af'}
-                    angle={-45}
-                    textAnchor="end"
-                    tick={{ fontSize: 10 }}
-                    height={60}
-                    interval="preserveStartEnd"
-                    minTickGap={5}
-                  />
-                  <YAxis 
-                    stroke={theme === 'dark' ? '#666' : '#9ca3af'} 
-                    allowDecimals={false}
-                    domain={yAxisDomain}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  
-                  {/* Modern solid background areas for different statuses */}
-                  <Area 
-                    type="monotone" 
-                    dataKey="upValue"
-                    stroke="#10b981"
-                    fill="rgba(16, 185, 129, 0.9)"
-                    strokeWidth={2.5}
-                    dot={false}
-                    connectNulls={false}
-                  />
-                  
-                  <Area 
-                    type="monotone" 
-                    dataKey="downValue"
-                    stroke="#ef4444"
-                    fill="rgba(239, 68, 68, 0.9)"
-                    strokeWidth={2.5}
-                    dot={false}
-                    connectNulls={false}
-                  />
-                  
-                  <Area 
-                    type="monotone" 
-                    dataKey="warningValue"
-                    stroke="#f59e0b"
-                    fill="rgba(245, 158, 11, 0.9)"
-                    strokeWidth={2.5}
-                    dot={false}
-                    connectNulls={false}
-                  />
-                  
-                  {/* Reference lines for paused status */}
-                  {chartData.map((entry, index) => 
-                    entry.status === 'paused' ? (
-                      <ReferenceLine 
-                        key={`ref-${index}`}
-                        x={entry.time} 
-                        stroke="#9ca3af"
-                        strokeDasharray="3 3"
-                      />
-                    ) : null
-                  )}
-                </AreaChart>
-              )}
+              {renderChart()}
             </ResponsiveContainer>
           </div>
         )}
