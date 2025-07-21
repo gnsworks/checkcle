@@ -103,10 +103,10 @@ const InstanceMonitoring = () => {
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+                  <h1 className="text-2xl lg:text-2xl font-bold text-foreground">
                     Instance Monitoring
                   </h1>
-                  <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base lg:text-lg">
+                  <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
                     Monitor and manage your server instances in real-time
                   </p>
                 </div>
