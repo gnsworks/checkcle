@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { RefreshCw, Search, Eye, Activity, MoreHorizontal, Pause, Play, Edit, Trash2 } from "lucide-react";
@@ -150,6 +149,70 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
     }
   };
 
+  const CustomProgressBar = ({ 
+    value, 
+    label, 
+    subtitle, 
+    type 
+  }: { 
+    value: number; 
+    label: string; 
+    subtitle: string; 
+    type: 'cpu' | 'memory' | 'disk' 
+  }) => {
+    const getGradientColors = (type: string, value: number) => {
+      if (type === 'cpu') {
+        if (value > 90) return 'from-red-500 to-red-600';
+        if (value > 75) return 'from-orange-500 to-orange-600';
+        if (value > 60) return 'from-yellow-500 to-yellow-600';
+        return 'from-green-500 to-green-600';
+      }
+      if (type === 'memory') {
+        if (value > 90) return 'from-red-500 to-red-600';
+        if (value > 75) return 'from-yellow-500 to-yellow-600';
+        return 'from-blue-500 to-blue-600';
+      }
+      if (type === 'disk') {
+        if (value > 95) return 'from-red-500 to-red-600';
+        if (value > 85) return 'from-yellow-500 to-yellow-600';
+        return 'from-orange-500 to-orange-600';
+      }
+      return 'from-gray-500 to-gray-600';
+    };
+
+    const getTextColor = (value: number) => {
+      if (value > 90) return 'text-red-600 dark:text-red-400';
+      if (value > 75) return 'text-orange-600 dark:text-orange-400';
+      if (value > 60) return 'text-yellow-600 dark:text-yellow-400';
+      return 'text-green-600 dark:text-green-400';
+    };
+
+    return (
+      <div className="space-y-2 min-w-[120px]">
+        <div className="flex justify-between items-center">
+          <span className={`text-sm font-semibold ${getTextColor(value)}`}>
+            {label}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {subtitle}
+          </span>
+        </div>
+        <div className="relative">
+          <div className="w-full h-3 bg-muted/30 rounded-full overflow-hidden shadow-inner">
+            <div 
+              className={`h-full bg-gradient-to-r ${getGradientColors(type, value)} rounded-full transition-all duration-700 ease-out relative overflow-hidden`}
+              style={{ width: `${Math.min(value, 100)}%` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse opacity-60" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-white/10" />
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <Card className="flex-1 flex flex-col">
@@ -242,53 +305,28 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                           </code>
                         </TableCell>
                         <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                              <span>{cpuUsage.toFixed(1)}%</span>
-                              <span className="text-muted-foreground text-xs">{server.cpu_cores} cores</span>
-                            </div>
-                            <Progress 
-                              value={cpuUsage} 
-                              className="h-2"
-                              indicatorClassName={
-                                cpuUsage > 90 ? "bg-red-500" : 
-                                cpuUsage > 75 ? "bg-orange-500" :
-                                cpuUsage > 60 ? "bg-yellow-500" : "bg-green-500"
-                              }
-                            />
-                          </div>
+                          <CustomProgressBar
+                            value={cpuUsage}
+                            label={`${cpuUsage.toFixed(1)}%`}
+                            subtitle={`${server.cpu_cores} cores`}
+                            type="cpu"
+                          />
                         </TableCell>
                         <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">{memoryUsage.toFixed(1)}%</span>
-                              <span className="text-xs">{serverService.formatBytes(server.ram_total)}</span>
-                            </div>
-                            <Progress 
-                              value={memoryUsage} 
-                              className="h-2"
-                              indicatorClassName={
-                                memoryUsage > 90 ? "bg-red-500" : 
-                                memoryUsage > 75 ? "bg-yellow-500" : "bg-blue-500"
-                              }
-                            />
-                          </div>
+                          <CustomProgressBar
+                            value={memoryUsage}
+                            label={`${memoryUsage.toFixed(1)}%`}
+                            subtitle={serverService.formatBytes(server.ram_total)}
+                            type="memory"
+                          />
                         </TableCell>
                         <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">{diskUsage.toFixed(1)}%</span>
-                              <span className="text-xs">{serverService.formatBytes(server.disk_total)}</span>
-                            </div>
-                            <Progress 
-                              value={diskUsage} 
-                              className="h-2"
-                              indicatorClassName={
-                                diskUsage > 95 ? "bg-red-500" : 
-                                diskUsage > 85 ? "bg-yellow-500" : "bg-orange-500"
-                              }
-                            />
-                          </div>
+                          <CustomProgressBar
+                            value={diskUsage}
+                            label={`${diskUsage.toFixed(1)}%`}
+                            subtitle={serverService.formatBytes(server.disk_total)}
+                            type="disk"
+                          />
                         </TableCell>
                         <TableCell>
                           <div className="text-sm truncate" title={server.uptime}>
