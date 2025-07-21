@@ -7,7 +7,7 @@ import { formatChartData } from "../dataUtils";
 type TimeRange = '60m' | '1d' | '7d' | '1m' | '3m';
 
 export const useServerHistoryData = (serverId: string) => {
-  const [timeRange, setTimeRange] = useState<TimeRange>("1d");
+  const [timeRange, setTimeRange] = useState<TimeRange>("60m");
 
   const {
     data: metrics = [],

@@ -59,39 +59,26 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
     try {
       setPausingServers(prev => new Set(prev).add(serverId));
       
-      if (isPaused) {
-        // Resume monitoring
-        await pb.collection('servers').update(serverId, {
-          status: "up",
-          last_checked: new Date().toISOString()
-        });
-        
-        toast({
-          title: "Server resumed",
-          description: `Monitoring resumed for ${server.name}`,
-        });
-        
-        console.log(`Resume server monitoring: ${serverId}`);
-      } else {
-        // Pause monitoring
-        await pb.collection('servers').update(serverId, {
-          status: "paused",
-          last_checked: new Date().toISOString()
-        });
-        
-        toast({
-          title: "Server paused",
-          description: `Monitoring paused for ${server.name}`,
-        });
-        
-        console.log(`Pause server monitoring: ${serverId}`);
-      }
+      // Only update the status field, preserving all other server configuration
+      const updateData = {
+        status: isPaused ? "up" : "paused",
+        last_checked: new Date().toISOString()
+      };
+      
+      await pb.collection('servers').update(serverId, updateData);
+      
+      toast({
+        title: isPaused ? "Server resumed" : "Server paused",
+        description: `Monitoring ${isPaused ? 'resumed' : 'paused'} for ${server.name}`,
+      });
+      
+     // console.log(`${isPaused ? 'Resume' : 'Pause'} server monitoring: ${serverId}`);
       
       // Refresh the server list to show updated status
       onRefresh();
       
     } catch (error) {
-      console.error('Error updating server status:', error);
+     // console.error('Error updating server status:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -138,7 +125,7 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
       setSelectedServer(null);
       
     } catch (error) {
-      console.error('Error deleting server:', error);
+     // console.error('Error deleting server:', error);
       toast({
         variant: "destructive",
         title: "Error",

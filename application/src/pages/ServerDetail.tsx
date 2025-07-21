@@ -22,7 +22,7 @@ const ServerDetail = () => {
   const { sidebarCollapsed, toggleSidebar } = useSidebar();
   const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
 
-  console.log('ServerDetail component loaded with serverId:', serverId);
+  //console.log('ServerDetail component loaded with serverId:', serverId);
 
   const {
     data: server,
@@ -48,7 +48,7 @@ const ServerDetail = () => {
           systemInfo = JSON.parse(server.system_info);
         } catch (error) {
           // If JSON parsing fails, treat it as plain text
-          console.log('system_info is plain text:', server.system_info);
+       //   console.log('system_info is plain text:', server.system_info);
           systemInfoText = server.system_info.toLowerCase();
         }
       } else {
@@ -64,7 +64,7 @@ const ServerDetail = () => {
     // Combine all OS information for detection
     const combinedOSInfo = `${osFromJson} ${osFromText} ${osFromType}`.toLowerCase();
     
-    console.log('OS detection info:', { osFromJson, osFromText, osFromType, combinedOSInfo });
+   // console.log('OS detection info:', { osFromJson, osFromText, osFromType, combinedOSInfo });
     
     // Check for specific OS distributions first (most specific to least specific)
     if (combinedOSInfo.includes('ubuntu')) {

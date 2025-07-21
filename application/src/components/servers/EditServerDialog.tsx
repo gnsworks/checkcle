@@ -78,7 +78,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   // Initialize form data when server changes
   useEffect(() => {
     if (server) {
-      console.log("Setting form data for server:", server);
+    //  console.log("Setting form data for server:", server);
       // Parse comma-separated notification_id into array
       const notificationChannels = server.notification_id 
         ? server.notification_id.split(',').map(id => id.trim()).filter(id => id)
@@ -109,10 +109,10 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   // Load existing threshold data when thresholds are loaded and we have a server with threshold_id
   useEffect(() => {
     if (server && server.threshold_id && thresholds.length > 0) {
-      console.log("Loading existing threshold data for server:", server.threshold_id);
+    //  console.log("Loading existing threshold data for server:", server.threshold_id);
       const existingThreshold = thresholds.find(t => t.id === server.threshold_id);
       if (existingThreshold) {
-        console.log("Found existing threshold:", existingThreshold);
+      //  console.log("Found existing threshold:", existingThreshold);
         setSelectedThreshold(existingThreshold);
         // Handle the API response format with proper field names and type conversion
         setThresholdFormData({
@@ -166,7 +166,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       const configs = await alertConfigService.getAlertConfigurations();
       setAlertConfigs(configs);
     } catch (error) {
-      console.error('Error loading alert configurations:', error);
+    //  console.error('Error loading alert configurations:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -183,7 +183,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       const templateList = await templateService.getTemplates();
       setTemplates(templateList);
     } catch (error) {
-      console.error('Error loading templates:', error);
+    //  console.error('Error loading templates:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -200,7 +200,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       const thresholdList = await serverThresholdService.getServerThresholds();
       setThresholds(thresholdList);
     } catch (error) {
-      console.error('Error loading server thresholds:', error);
+     // console.error('Error loading server thresholds:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -243,7 +243,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
         description: "Server threshold values have been updated successfully.",
       });
     } catch (error) {
-      console.error('Error updating threshold:', error);
+    //  console.error('Error updating threshold:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -301,7 +301,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       onOpenChange(false);
       
     } catch (error) {
-      console.error('Error updating server:', error);
+    //  console.error('Error updating server:', error);
       toast({
         variant: "destructive",
         title: "Error",

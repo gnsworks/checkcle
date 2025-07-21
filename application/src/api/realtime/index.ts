@@ -2,7 +2,7 @@
 // This file handles realtime notifications in a client-side environment
 // In a production app, this would be a server-side endpoint
 
-console.log("API Realtime endpoint loaded");
+//console.log("API Realtime endpoint loaded");
 
 // Simple implementation that simulates sending notifications
 export default async function handler(req) {

@@ -50,21 +50,21 @@ export const timeRangeOptions = [
 
 export const filterMetricsByTimeRange = (metrics: any[], timeRange: TimeRange): any[] => {
   if (!metrics?.length) {
-    console.log('🔍 filterMetricsByTimeRange: No metrics provided');
+   // console.log('🔍 filterMetricsByTimeRange: No metrics provided');
     return [];
   }
   
-  console.log('🔍 filterMetricsByTimeRange: Starting with', metrics.length, 'metrics for', timeRange);
+  //console.log('🔍 filterMetricsByTimeRange: Starting with', metrics.length, 'metrics for', timeRange);
   
   const now = new Date();
   
   // For 60m, let's be very specific about what we're looking for
   if (timeRange === '60m') {
-    console.log('⏰ 60m filter: Current time:', now.toISOString());
+   // console.log('⏰ 60m filter: Current time:', now.toISOString());
     
     // Try exact 60 minutes first
     const cutoffTime60m = new Date(now.getTime() - (60 * 60 * 1000));
-    console.log('⏰ 60m filter: Cutoff time:', cutoffTime60m.toISOString());
+   // console.log('⏰ 60m filter: Cutoff time:', cutoffTime60m.toISOString());
     
     const filtered60m = metrics.filter(metric => {
       const metricTime = new Date(metric.created || metric.timestamp);
@@ -72,17 +72,17 @@ export const filterMetricsByTimeRange = (metrics: any[], timeRange: TimeRange): 
       
       if (!isWithinRange) {
         const ageMinutes = Math.round((now.getTime() - metricTime.getTime()) / (1000 * 60));
-        console.log('⏰ Excluding record:', {
-          created: metric.created || metric.timestamp,
-          ageMinutes: ageMinutes,
-          reason: ageMinutes > 60 ? 'too old' : 'future date'
-        });
+      //  console.log('⏰ Excluding record:', {
+       //   created: metric.created || metric.timestamp,
+       //   ageMinutes: ageMinutes,
+       //   reason: ageMinutes > 60 ? 'too old' : 'future date'
+       // });
       }
       
       return isWithinRange;
     });
     
-    console.log('✅ 60m strict filter result:', filtered60m.length, 'records');
+   // console.log('✅ 60m strict filter result:', filtered60m.length, 'records');
     
     if (filtered60m.length > 0) {
       return filtered60m.sort((a, b) => 
@@ -91,18 +91,18 @@ export const filterMetricsByTimeRange = (metrics: any[], timeRange: TimeRange): 
     }
     
     // If no data in exactly 60m, show what we have and return it anyway for debugging
-    console.log('⚠️ No data in 60m range, showing all available data ages:');
+   // console.log('⚠️ No data in 60m range, showing all available data ages:');
     metrics.forEach((metric, index) => {
       const metricTime = new Date(metric.created || metric.timestamp);
       const ageMinutes = Math.round((now.getTime() - metricTime.getTime()) / (1000 * 60));
-      console.log(`Record ${index}: ${metric.created || metric.timestamp} (${ageMinutes} minutes ago)`);
+    //  console.log(`Record ${index}: ${metric.created || metric.timestamp} (${ageMinutes} minutes ago)`);
     });
     
     // Return the most recent data regardless of age
     const sorted = metrics.sort((a, b) => 
       new Date(b.created || b.timestamp).getTime() - new Date(a.created || a.timestamp).getTime()
     );
-    console.log('🔄 Returning most recent available data for 60m view');
+   // console.log('🔄 Returning most recent available data for 60m view');
     return sorted.slice(0, 20); // Show last 20 records
   }
   
@@ -117,7 +117,7 @@ export const filterMetricsByTimeRange = (metrics: any[], timeRange: TimeRange): 
     return metricTime >= cutoffTime && metricTime <= now;
   });
   
-  console.log('✅ Filtered', metrics.length, 'to', filtered.length, 'metrics for', timeRange);
+ // console.log('✅ Filtered', metrics.length, 'to', filtered.length, 'metrics for', timeRange);
   
   return filtered.sort((a, b) => 
     new Date(a.created || a.timestamp).getTime() - new Date(b.created || b.timestamp).getTime()
@@ -174,27 +174,27 @@ const formatTimestamp = (timestamp: string, timeRange: TimeRange): string => {
 };
 
 export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
-  console.log('📊 formatChartData: Processing', {
-    inputCount: metrics?.length || 0,
-    timeRange,
-    sampleMetric: metrics?.[0] ? {
-      id: metrics[0].id,
-      created: metrics[0].created,
-      timestamp: metrics[0].timestamp,
-      server_id: metrics[0].server_id
-    } : null
-  });
+ // console.log('📊 formatChartData: Processing', {
+  //  inputCount: metrics?.length || 0,
+ //   timeRange,
+ //   sampleMetric: metrics?.[0] ? {
+  //    id: metrics[0].id,
+  //    created: metrics[0].created,
+  //    timestamp: metrics[0].timestamp,
+  //    server_id: metrics[0].server_id
+  //  } : null
+ // });
   
   if (!metrics?.length) {
-    console.log('❌ formatChartData: No metrics provided');
+  //  console.log('❌ formatChartData: No metrics provided');
     return [];
   }
   
   const filteredMetrics = filterMetricsByTimeRange(metrics, timeRange);
-  console.log('📊 formatChartData: After time filtering:', filteredMetrics?.length || 0, 'metrics');
+ // console.log('📊 formatChartData: After time filtering:', filteredMetrics?.length || 0, 'metrics');
   
   if (!filteredMetrics.length) {
-    console.log('❌ formatChartData: No metrics after time filtering');
+  //  console.log('❌ formatChartData: No metrics after time filtering');
     return [];
   }
   
@@ -213,7 +213,7 @@ export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
     ? filteredMetrics.filter((_, index) => index % Math.ceil(filteredMetrics.length / maxDataPoints) === 0)
     : filteredMetrics;
   
-  console.log('📊 formatChartData: After sampling:', sampledMetrics.length, 'metrics for display');
+ // console.log('📊 formatChartData: After sampling:', sampledMetrics.length, 'metrics for display');
   
   const formattedData = sampledMetrics.map((metric) => {
     const cpuUsage = typeof metric.cpu_usage === 'string' ? 
@@ -269,6 +269,6 @@ export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
     };
   });
   
-  console.log('✅ formatChartData: Final formatted data count:', formattedData.length);
+ // console.log('✅ formatChartData: Final formatted data count:', formattedData.length);
   return formattedData;
 };

@@ -29,7 +29,7 @@ const ContainerMonitoring = () => {
   });
   const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
 
-  console.log('ContainerMonitoring component loaded with serverId:', serverId);
+ // console.log('ContainerMonitoring component loaded with serverId:', serverId);
 
   const {
     data: containers = [],
@@ -39,26 +39,26 @@ const ContainerMonitoring = () => {
   } = useQuery({
     queryKey: ['docker-containers', serverId],
     queryFn: () => {
-      console.log('Query function called with serverId:', serverId);
+   //   console.log('Query function called with serverId:', serverId);
       return serverId ? dockerService.getContainersByServerId(serverId) : dockerService.getContainers();
     },
     refetchInterval: 30000 // Refetch every 30 seconds
   });
 
-  console.log('Query state:', { containers, isLoading, error });
+ // console.log('Query state:', { containers, isLoading, error });
 
   useEffect(() => {
-    console.log('Containers changed:', containers);
+  //  console.log('Containers changed:', containers);
     if (containers.length > 0) {
       dockerService.getContainerStats(containers).then(newStats => {
-        console.log('Stats calculated:', newStats);
+      //  console.log('Stats calculated:', newStats);
         setStats(newStats);
       });
     }
   }, [containers]);
 
   const handleRefresh = () => {
-    console.log('Manual refresh triggered');
+  //  console.log('Manual refresh triggered');
     refetch();
   };
 
@@ -72,7 +72,7 @@ const ContainerMonitoring = () => {
   };
 
   if (error) {
-    console.error('Container monitoring error:', error);
+  //  console.error('Container monitoring error:', error);
     return (
       <div className="flex h-screen overflow-hidden bg-background text-foreground">
         <Sidebar collapsed={sidebarCollapsed} />
