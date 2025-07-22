@@ -28,7 +28,10 @@ export const ServerMetricsCharts = ({ serverId }: ServerMetricsChartsProps) => {
     queryKey: ['server-metrics', serverId, timeRange],
     queryFn: () => serverService.getServerMetrics(serverId, timeRange),
     enabled: !!serverId,
-    refetchInterval: 30000
+    refetchInterval: timeRange === '60m' ? 60000 : timeRange === '1d' ? 120000 : 300000, // Increased intervals
+    staleTime: timeRange === '60m' ? 30000 : timeRange === '1d' ? 60000 : 120000, // Increased stale time
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
+    refetchOnWindowFocus: false, // Prevent refetch on window focus
   });
 
   const chartData = formatChartData(metrics, timeRange);

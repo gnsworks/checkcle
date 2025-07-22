@@ -1,4 +1,3 @@
-
 export const formatBytes = (bytes: number, decimals = 2) => {
   if (bytes === 0) return '0 B';
   const k = 1024;
@@ -49,34 +48,82 @@ export const timeRangeOptions = [
   { value: '3m' as TimeRange, label: 'Last 90 days', hours: 24 * 90 },
 ];
 
-// Optimized time range filtering with early returns
 export const filterMetricsByTimeRange = (metrics: any[], timeRange: TimeRange): any[] => {
-  if (!metrics?.length) return [];
+  if (!metrics?.length) {
+   // console.log('🔍 filterMetricsByTimeRange: No metrics provided');
+    return [];
+  }
+  
+  //console.log('🔍 filterMetricsByTimeRange: Starting with', metrics.length, 'metrics for', timeRange);
   
   const now = new Date();
+  
+  // For 60m, let's be very specific about what we're looking for
+  if (timeRange === '60m') {
+   // console.log('⏰ 60m filter: Current time:', now.toISOString());
+    
+    // Try exact 60 minutes first
+    const cutoffTime60m = new Date(now.getTime() - (60 * 60 * 1000));
+   // console.log('⏰ 60m filter: Cutoff time:', cutoffTime60m.toISOString());
+    
+    const filtered60m = metrics.filter(metric => {
+      const metricTime = new Date(metric.created || metric.timestamp);
+      const isWithinRange = metricTime >= cutoffTime60m && metricTime <= now;
+      
+      if (!isWithinRange) {
+        const ageMinutes = Math.round((now.getTime() - metricTime.getTime()) / (1000 * 60));
+      //  console.log('⏰ Excluding record:', {
+       //   created: metric.created || metric.timestamp,
+       //   ageMinutes: ageMinutes,
+       //   reason: ageMinutes > 60 ? 'too old' : 'future date'
+       // });
+      }
+      
+      return isWithinRange;
+    });
+    
+   // console.log('✅ 60m strict filter result:', filtered60m.length, 'records');
+    
+    if (filtered60m.length > 0) {
+      return filtered60m.sort((a, b) => 
+        new Date(a.created || a.timestamp).getTime() - new Date(b.created || b.timestamp).getTime()
+      );
+    }
+    
+    // If no data in exactly 60m, show what we have and return it anyway for debugging
+   // console.log('⚠️ No data in 60m range, showing all available data ages:');
+    metrics.forEach((metric, index) => {
+      const metricTime = new Date(metric.created || metric.timestamp);
+      const ageMinutes = Math.round((now.getTime() - metricTime.getTime()) / (1000 * 60));
+    //  console.log(`Record ${index}: ${metric.created || metric.timestamp} (${ageMinutes} minutes ago)`);
+    });
+    
+    // Return the most recent data regardless of age
+    const sorted = metrics.sort((a, b) => 
+      new Date(b.created || b.timestamp).getTime() - new Date(a.created || a.timestamp).getTime()
+    );
+   // console.log('🔄 Returning most recent available data for 60m view');
+    return sorted.slice(0, 20); // Show last 20 records
+  }
+  
+  // For other time ranges, use normal filtering
   const selectedRange = timeRangeOptions.find(opt => opt.value === timeRange);
   if (!selectedRange) return metrics;
 
-  // Add small buffer to avoid edge cases
-  const bufferMinutes = timeRange === '60m' ? 5 : timeRange === '1d' ? 30 : 60;
-  const cutoffTime = new Date(now.getTime() - (selectedRange.hours * 60 * 60 * 1000) - (bufferMinutes * 60 * 1000));
-  
-//  console.log('filterMetricsByTimeRange: timeRange:', timeRange, 'cutoffTime:', cutoffTime.toISOString());
+  const cutoffTime = new Date(now.getTime() - (selectedRange.hours * 60 * 60 * 1000));
   
   const filtered = metrics.filter(metric => {
     const metricTime = new Date(metric.created || metric.timestamp);
     return metricTime >= cutoffTime && metricTime <= now;
   });
   
-//  console.log('filterMetricsByTimeRange: Filtered', metrics.length, 'to', filtered.length, 'metrics');
+ // console.log('✅ Filtered', metrics.length, 'to', filtered.length, 'metrics for', timeRange);
   
-  // Sort by timestamp for proper chart display
   return filtered.sort((a, b) => 
     new Date(a.created || a.timestamp).getTime() - new Date(b.created || b.timestamp).getTime()
   );
 };
 
-// Optimized timestamp formatting with caching
 const timestampCache = new Map<string, string>();
 
 const formatTimestamp = (timestamp: string, timeRange: TimeRange): string => {
@@ -118,7 +165,6 @@ const formatTimestamp = (timestamp: string, timeRange: TimeRange): string => {
     });
   }
   
-  // Cache the result (limit cache size)
   if (timestampCache.size > 1000) {
     timestampCache.clear();
   }
@@ -127,37 +173,49 @@ const formatTimestamp = (timestamp: string, timeRange: TimeRange): string => {
   return formatted;
 };
 
-// Optimized chart data formatting with better performance
 export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
-//  console.log('formatChartData: Input metrics count:', metrics?.length || 0, 'timeRange:', timeRange);
+ // console.log('📊 formatChartData: Processing', {
+  //  inputCount: metrics?.length || 0,
+ //   timeRange,
+ //   sampleMetric: metrics?.[0] ? {
+  //    id: metrics[0].id,
+  //    created: metrics[0].created,
+  //    timestamp: metrics[0].timestamp,
+  //    server_id: metrics[0].server_id
+  //  } : null
+ // });
   
-  if (!metrics?.length) return [];
+  if (!metrics?.length) {
+  //  console.log('❌ formatChartData: No metrics provided');
+    return [];
+  }
   
   const filteredMetrics = filterMetricsByTimeRange(metrics, timeRange);
-//  console.log('formatChartData: After time filtering:', filteredMetrics?.length || 0, 'metrics');
+ // console.log('📊 formatChartData: After time filtering:', filteredMetrics?.length || 0, 'metrics');
   
-  if (!filteredMetrics.length) return [];
+  if (!filteredMetrics.length) {
+  //  console.log('❌ formatChartData: No metrics after time filtering');
+    return [];
+  }
   
   // Dynamic sampling based on time range and data volume
   let maxDataPoints: number;
   switch (timeRange) {
-    case '60m': maxDataPoints = 60; break;   // 1 point per minute max
-    case '1d': maxDataPoints = 144; break;   // 1 point per 10 minutes max
-    case '7d': maxDataPoints = 168; break;   // 1 point per hour max
-    case '1m': maxDataPoints = 120; break;   // 1 point per 6 hours max
-    case '3m': maxDataPoints = 90; break;    // 1 point per day max
+    case '60m': maxDataPoints = 60; break;
+    case '1d': maxDataPoints = 144; break;
+    case '7d': maxDataPoints = 168; break;
+    case '1m': maxDataPoints = 120; break;
+    case '3m': maxDataPoints = 90; break;
     default: maxDataPoints = 100;
   }
   
-  // Smart sampling - only sample if we have significantly more data
   const sampledMetrics = filteredMetrics.length > maxDataPoints * 1.2
     ? filteredMetrics.filter((_, index) => index % Math.ceil(filteredMetrics.length / maxDataPoints) === 0)
     : filteredMetrics;
   
-//  console.log('formatChartData: After sampling:', sampledMetrics.length, 'metrics for display');
+ // console.log('📊 formatChartData: After sampling:', sampledMetrics.length, 'metrics for display');
   
-  // Batch process the data transformation for better performance
-  return sampledMetrics.map((metric) => {
+  const formattedData = sampledMetrics.map((metric) => {
     const cpuUsage = typeof metric.cpu_usage === 'string' ? 
       parseFloat(metric.cpu_usage.replace('%', '')) : 
       parseFloat(metric.cpu_usage) || 0;
@@ -210,4 +268,7 @@ export const formatChartData = (metrics: any[], timeRange: TimeRange) => {
       networkTxSpeed: Math.round(networkTxSpeed * 100) / 100,
     };
   });
+  
+ // console.log('✅ formatChartData: Final formatted data count:', formattedData.length);
+  return formattedData;
 };

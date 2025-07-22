@@ -13,7 +13,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({ collapsed }) => {
     <div className={`p-4 ${theme === 'dark' ? 'border-[#1e1e1e]' : 'border-sidebar-border'} border-b flex items-center ${collapsed ? 'justify-center' : ''}`}>
       <div className="h-8 w-8 bg-gray-600 rounded flex items-center justify-center mr-2">
         <img
-          src="/favicon.ico"
+          src="/favicon_sidebar.ico"
           alt="CheckCle"
           className="h-6 w-6"
         />

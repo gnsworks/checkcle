@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { serverService } from "@/services/serverService";
 import { formatChartData } from "../dataUtils";
@@ -7,7 +7,7 @@ import { formatChartData } from "../dataUtils";
 type TimeRange = '60m' | '1d' | '7d' | '1m' | '3m';
 
 export const useServerHistoryData = (serverId: string) => {
-  const [timeRange, setTimeRange] = useState<TimeRange>("1d");
+  const [timeRange, setTimeRange] = useState<TimeRange>("60m");
 
   const {
     data: metrics = [],
@@ -23,15 +23,19 @@ export const useServerHistoryData = (serverId: string) => {
       return result || [];
     },
     enabled: !!serverId,
-    refetchInterval: timeRange === '60m' ? 30000 : timeRange === '1d' ? 60000 : 120000, // Reduced frequency
-    staleTime: timeRange === '60m' ? 15000 : timeRange === '1d' ? 30000 : 60000, // Increased stale time
-    retry: 2, // Reduced retries
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Faster retry
-    gcTime: 5 * 60 * 1000, // 5 minutes cache
+    refetchInterval: timeRange === '60m' ? 60000 : timeRange === '1d' ? 120000 : 300000, // Significantly increased intervals
+    staleTime: timeRange === '60m' ? 30000 : timeRange === '1d' ? 60000 : 120000, // Increased stale time
+    retry: 1, // Reduced retries to prevent excessive requests
+    retryDelay: 2000, // Slower retry
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
+    refetchOnWindowFocus: false, // Prevent refetch on window focus
+    refetchOnMount: false, // Prevent refetch on mount if data exists
   });
 
   // Memoize chart data formatting to prevent unnecessary recalculations
-  const chartData = formatChartData(metrics, timeRange);
+  const chartData = useMemo(() => {
+    return formatChartData(metrics, timeRange);
+  }, [metrics, timeRange]);
 
   return {
     timeRange,

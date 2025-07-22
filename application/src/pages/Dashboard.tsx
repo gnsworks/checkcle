@@ -20,7 +20,7 @@ const Dashboard = () => {
   
   // For debugging user data
   useEffect(() => {
-   // console.log("Current user data:", currentUser);
+  //  console.log("Current user data:", currentUser);
   }, [currentUser]);
   
   // Handle logout
@@ -29,22 +29,39 @@ const Dashboard = () => {
     navigate("/login");
   };
 
-  // Fetch all services
+  // Fetch all services with 1-minute polling for real-time updates
   const { data: services = [], isLoading, error } = useQuery({
     queryKey: ['services'],
     queryFn: serviceService.getServices,
-    refetchInterval: 10000, // Refresh data every 10 seconds
+    refetchInterval: 60000, // 1 minute as requested
+    staleTime: 30000, // Data is fresh for 30 seconds
+    gcTime: 120000, // Keep in cache for 2 minutes
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnMount: true, // Refetch on mount
+    refetchOnReconnect: true, // Refetch on reconnect
+    retry: 2,
+    retryDelay: 3000,
   });
 
-  // Start monitoring all active services when the dashboard loads
+  // Start monitoring all active services when the dashboard loads - only once
   useEffect(() => {
+    let hasStarted = false;
+    
     const startActiveServices = async () => {
+      if (hasStarted) return;
+      hasStarted = true;
+      
       await serviceService.startAllActiveServices();
-    //  console.log("Active services monitoring started");
+     // console.log("Active services monitoring started");
     };
 
-    startActiveServices();
-  }, []);
+    // Only start once and add a delay to prevent immediate execution
+    const timeoutId = setTimeout(startActiveServices, 2000);
+    
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []); // Remove services dependency to prevent re-runs
 
   // Show the loading state while fetching data
   if (isLoading) {

@@ -1,4 +1,3 @@
-
 import { Service, UptimeData } from "@/types/service.types";
 import { ServiceHeader } from "@/components/services/ServiceHeader";
 import { ServiceStatsCards } from "@/components/services/ServiceStatsCards";
@@ -37,6 +36,7 @@ export const ServiceDetailContent = ({
         onStatusChange={onStatusChange}
         selectedRegionalAgent={selectedRegionalAgent}
         onRegionalAgentChange={onRegionalAgentChange}
+        uptimeData={uptimeData}
       />
       <ServiceStatsCards service={service} uptimeData={uptimeData} />
       

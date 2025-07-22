@@ -14,7 +14,7 @@ interface UseUptimeDataProps {
 export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseUptimeDataProps) => {
   const [historyItems, setHistoryItems] = useState<UptimeData[]>([]);
   
-  // Fetch ALL uptime history data including regional monitoring data
+  // Fetch ALL uptime history data including regional monitoring data with 1-minute polling
   const { data: uptimeData, isLoading, error, isFetching, refetch } = useQuery({
     queryKey: ['allUptimeHistory', serviceId, serviceType],
     queryFn: async () => {
@@ -34,8 +34,8 @@ export const useUptimeData = ({ serviceId, serviceType, status, interval }: UseU
       return allMonitoringData;
     },
     enabled: !!serviceId,
-    refetchInterval: 30000,
-    staleTime: 15000,
+    refetchInterval: 60000, // 1 minute polling
+    staleTime: 30000, // Data is fresh for 30 seconds
     placeholderData: (previousData) => previousData,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),

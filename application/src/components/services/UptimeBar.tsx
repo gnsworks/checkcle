@@ -1,9 +1,10 @@
 
-import React from "react";
-import { useConsolidatedUptimeData } from "./hooks/useConsolidatedUptimeData";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { UptimeSummary } from "./uptime/UptimeSummary";
-import { formatRelative } from "date-fns";
+import React, { memo, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { UptimeStatusItem } from './uptime/UptimeStatusItem';
+import { uptimeService } from '@/services/uptimeService';
+import { UptimeData } from '@/types/service.types';
 
 interface UptimeBarProps {
   uptime: number;
@@ -13,127 +14,81 @@ interface UptimeBarProps {
   serviceType?: string;
 }
 
-export const UptimeBar = ({ uptime, status, serviceId, interval, serviceType }: UptimeBarProps) => {
-  // Use consolidated hook to get properly merged data
-  const { consolidatedItems, isLoading } = useConsolidatedUptimeData({
-    serviceId,
-    serviceType,
-    status,
-    interval
+const UptimeBarComponent = ({ uptime, status, serviceId, interval, serviceType = "HTTP" }: UptimeBarProps) => {
+  // Calculate date range for last 20 checks with much more aggressive caching
+  const endDate = useMemo(() => new Date(), []);
+  const startDate = useMemo(() => {
+    const start = new Date(endDate);
+    start.setHours(start.getHours() - Math.max(interval * 20 / 3600, 24)); // At least 24 hours
+    return start;
+  }, [endDate, interval]);
+
+  // Fetch uptime data with very aggressive caching to reduce API calls
+  const { data: uptimeData = [] } = useQuery({
+    queryKey: ['uptime-bar', serviceId, serviceType],
+    queryFn: () => uptimeService.getUptimeHistory(serviceId, 20, startDate, endDate, serviceType),
+    enabled: !!serviceId,
+    staleTime: 30000, // Data is fresh for 30 seconds
+    gcTime: 600000, // Keep in cache for 10 minutes
+    refetchInterval: 60000, // 1 minute polling
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 
-  const getStatusColor = (itemStatus: string, hasData: boolean = true) => {
-    if (!hasData) {
-      return "bg-gray-400"; // No data color - grey
+  // Memoize the uptime calculation to prevent unnecessary recalculations
+  const { uptimePercentage, displayData } = useMemo(() => {
+    if (!uptimeData || uptimeData.length === 0) {
+      return {
+        uptimePercentage: uptime || 0,
+        displayData: []
+      };
     }
-    
-    switch (itemStatus) {
-      case "up":
-        return "bg-emerald-500";
-      case "down":
-        return "bg-red-500";
-      case "warning":
-        return "bg-yellow-500";
-      case "paused":
-        return "bg-gray-400"; // Paused status - grey
-      case "unknown":
-      case "NA":
-      default:
-        return "bg-gray-400"; // Unknown/NA/default - grey
-    }
-  };
 
-  if (isLoading) {
-    return (
-      <div className="w-52">
-        <div className="flex items-center gap-1">
-          {Array(20).fill(null).map((_, index) => (
-            <div key={index} className="h-6 w-1 bg-gray-200 rounded animate-pulse" />
-          ))}
-        </div>
-        <UptimeSummary uptime={uptime} interval={interval} />
-      </div>
-    );
-  }
+    // Calculate uptime percentage from actual data
+    const upCount = uptimeData.filter(item => item.status === 'up').length;
+    const totalCount = uptimeData.length;
+    const calculatedUptime = totalCount > 0 ? (upCount / totalCount) * 100 : 0;
 
- // console.log('UptimeBar rendering consolidated items:', consolidatedItems.length);
+    // Limit display to last 20 items for performance
+    const limitedData = uptimeData.slice(0, 20);
+
+    return {
+      uptimePercentage: Math.round(calculatedUptime * 100) / 100,
+      displayData: limitedData
+    };
+  }, [uptimeData, uptime]);
+
+  // Memoize the status items to prevent unnecessary re-renders
+  const statusItems = useMemo(() => 
+    displayData.map((item, index) => (
+      <UptimeStatusItem key={`${item.id}-${index}`} item={item} index={index} />
+    )),
+    [displayData]
+  );
 
   return (
-    <div className="w-52">
-      <TooltipProvider>
-        <div className="flex items-center gap-1">
-          {consolidatedItems.map((slot, index) => {
-            // Check if we have actual monitoring data with valid status
-            const hasValidData = slot.items.length > 0 && slot.items.some(item => 
-              item.status && ['up', 'down', 'warning', 'paused'].includes(item.status)
-            );
-
-            // Determine the primary status for bar color (prioritize worst status)
-            let primaryStatus = 'unknown';
-            if (hasValidData) {
-              const statuses = slot.items.map(item => item.status);
-              primaryStatus = statuses.includes('down') ? 'down' :
-                            statuses.includes('warning') ? 'warning' :
-                            statuses.includes('up') ? 'up' : 
-                            statuses.includes('paused') ? 'paused' : 'unknown';
-            }
-
-           // console.log(`Bar ${index} - Timestamp: ${slot.timestamp}, Items: ${slot.items.length}, Primary Status: ${primaryStatus}, Has Valid Data: ${hasValidData}`);
-            slot.items.forEach((item, itemIndex) => {
-            //  console.log(`  Item ${itemIndex}: Source=${item.source}, Status=${item.status}, ResponseTime=${item.responseTime}, IsDefault=${item.isDefault}`);
-            });
-
-            return (
-              <Tooltip key={index}>
-                <TooltipTrigger asChild>
-                  <div 
-                    className={`h-6 w-1 rounded cursor-pointer ${getStatusColor(primaryStatus, hasValidData)}`}
-                  />
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <div className="text-sm">
-                    <div className="font-medium mb-2 text-center">
-                      {formatRelative(new Date(slot.timestamp), new Date())}
-                    </div>
-                    {hasValidData ? (
-                      <div className="space-y-2">
-                        {slot.items.map((item, itemIndex) => (
-                          <div key={itemIndex} className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                                item.status === 'up' ? 'bg-emerald-500' :
-                                item.status === 'down' ? 'bg-red-500' :
-                                item.status === 'warning' ? 'bg-yellow-500' : 
-                                item.status === 'paused' ? 'bg-gray-400' : 'bg-gray-400'
-                              }`} />
-                              <span className="text-xs font-medium truncate">{item.source}</span>
-                            </div>
-                            <div className="text-xs font-mono text-right flex-shrink-0">
-                              {item.status === 'paused' ? 'Paused' :
-                               item.responseTime && item.responseTime > 0 ? `${item.responseTime}ms` : 
-                               'No response'}
-                            </div>
-                          </div>
-                        ))}
-                        {slot.items.length > 1 && (
-                          <div className="border-t pt-1 mt-2 text-xs text-muted-foreground text-center">
-                            {slot.items.length} monitoring sources
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-muted-foreground text-center">
-                        No monitoring data available
-                      </div>
-                    )}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
+    <TooltipProvider>
+      <div className="flex items-center space-x-3">
+        <div className="flex space-x-0.5 min-w-0">
+          {statusItems.length > 0 ? statusItems : (
+            // Fallback display when no data
+            <div className="h-5 w-1.5 rounded-sm bg-gray-400" />
+          )}
         </div>
-      </TooltipProvider>
-      <UptimeSummary uptime={uptime} interval={interval} />
-    </div>
+        <span className="text-sm font-medium whitespace-nowrap">
+          {uptimePercentage.toFixed(1)}%
+        </span>
+      </div>
+      
+      <span className="text-xs text-muted-foreground">
+            Last 20 checks 
+      </span>    
+    </TooltipProvider>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+export const UptimeBar = memo(UptimeBarComponent);
