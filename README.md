@@ -163,7 +163,7 @@ Here are some ways you can help improve CheckCle:
 - Website: [checkcle.io](https://checkcle.io)
 - Documentation: [docs.checkcle.io](https://docs.checkcle.io)
 - GitHub Repository: ⭐ [CheckCle](https://github.com/operacle/checkcle.git)
-- Community Channels: Engage via discussions and issues!
+- Reddit Community: [reddit](https://www.reddit.com/r/checkcle)
 - Discord: Join our community [@discord](https://discord.gg/xs9gbubGwX)
 - X: [@tlengoss](https://x.com/tlengoss)
 
