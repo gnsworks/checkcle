@@ -39,6 +39,7 @@ CheckCle is an Open Source solution for seamless, real-time monitoring of full-s
 
 ## 🎯 Live Demo  
 👉 **Try it now:** [CheckCle Live Demo](https://demo.checkcle.io)
+    User: admin@example.com | Passwd: Admin123456
 
 ## 🌟 Core Features
 
@@ -110,11 +111,12 @@ services:
 4. Follow the Quick Start Guide at https://docs.checkcle.io
 
 ###
-![checkcle-collapse-black](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/uptime-monitoring.png)
-![Service Detail Page](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/uptime-service-detail.png)
-![checkcle-server-instance](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/instance-server-monitoring.png)
+![checkcle-collapse-black](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/uptime-1.4.png)
+![Service Detail Page](https://cdn.checkcle.io/images/uptime/uptime-regional-detail.png)
+![checkcle-server-instance](https://cdn.checkcle.io/images/server/server-list.png)
+![SSL Monitoring](https://cdn.checkcle.io/images/ssl-domain/ssl-list.png)
 ![Schedule Maintenance](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/checkcle-schedule-maintenance.png)
-![SSL Monitoring](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/ssl-monitoring.png)
+
 
 ## 📝 Development Roadmap
 
@@ -171,12 +173,7 @@ CheckCle is released under the MIT License.
 
 ---
 ## 👥 Contributors
+Thank you for contributing and continuously making CheckCle better, you're awesome 🫶
 
 [![](https://contrib.rocks/image?repo=operacle/checkcle)](https://github.com/operacle/checkcle/graphs/contributors)
 
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=operacle/checkcle&type=Date)](https://www.star-history.com/#operacle/checkcle&Date)
-
-Stay informed, stay online, with CheckCle! 🌐
