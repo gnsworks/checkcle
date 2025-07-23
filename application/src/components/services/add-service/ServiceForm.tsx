@@ -13,6 +13,7 @@ import { serviceService } from "@/services/serviceService";
 import { Service } from "@/types/service.types";
 import { ServiceRegionalFields } from "./ServiceRegionalFields";
 import { getServiceFormDefaults, mapServiceToFormData, mapFormDataToServiceData } from "./serviceFormUtils";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ServiceFormProps {
   onSuccess: () => void;
@@ -31,6 +32,7 @@ export function ServiceForm({
 }: ServiceFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   // Initialize form with default values
   const form = useForm<ServiceFormData>({
@@ -91,6 +93,16 @@ export function ServiceForm({
         });
       }
       
+      // Force immediate refresh of services data
+      queryClient.setQueryData(["services"], (oldData: any) => {
+        // Invalidate the cache to force a fresh fetch
+        return undefined;
+      });
+      
+      // Invalidate and refetch services query
+      await queryClient.invalidateQueries({ queryKey: ["services"] });
+      await queryClient.refetchQueries({ queryKey: ["services"] });
+
       onSuccess();
       if (!isEdit) {
         form.reset();

@@ -232,7 +232,7 @@ configure_agent() {
     log_info "Final configuration:"
     log_info "  Server Name: $SERVER_NAME"
     log_info "  Agent ID: $AGENT_ID"
-    log_info "  PocketBase URL: $POCKETBASE_URL"
+    log_info "  PB API URL: $POCKETBASE_URL"
     log_info "  IP Address: $IP_ADDRESS"
     log_info "  OS Type: $OS_TYPE"
     log_info "  Health Check Port: $HEALTH_CHECK_PORT"
@@ -341,7 +341,7 @@ test_installation() {
 show_post_install_info() {
     echo
     echo "============================================="
-    echo "  Installation Complete!"
+    echo "  CheckCle Server Agent Installation Complete!"
     echo "============================================="
     echo
     log_success "CheckCle Monitoring Agent installed and configured successfully"
