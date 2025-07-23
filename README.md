@@ -130,10 +130,10 @@ services:
 - ✅ SSL & Domain Monitoring
 - ✅ Schedule Maintenance 
 - ✅ Incident Management
-- [ ] Infrastructure Server Monitoring
+- ✅ Infrastructure Server Monitoring
 - ✅ Operational Status / Public Status Pages
 - ✅ Uptime monitoring (HTTP, TCP, PING, DNS) Full functionality
-- ✅ Distributed Regional Monitoring Agent [Support Operation](https://github.com/operacle/Distributed-Regional-Monitoring)
+- ✅ Distributed Regional Monitoring Agent
 - ✅ System Setting Panel and Mail Settings
 - ✅ User Permission Roles
 - [ ] Notifications (Email/Slack/Discord/Signal)  
