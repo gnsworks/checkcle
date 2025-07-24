@@ -269,7 +269,11 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                     const isProcessing = pausingServers.has(server.id);
 
                     return (
-                      <TableRow key={server.id} className="hover:bg-muted/50">
+                      <TableRow 
+                        key={server.id} 
+                        className="hover:bg-muted/50 cursor-pointer"
+                        onClick={() => handleViewDetails(server.id)}
+                      >
                         <TableCell className="font-medium">
                           <div className="truncate" title={server.name}>
                             {server.name}
@@ -325,7 +329,7 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                             {new Date(server.last_checked).toLocaleString()}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" className="h-8 w-8 p-0" disabled={isProcessing}>
@@ -338,19 +342,19 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-[200px]">
-                              <DropdownMenuItem onClick={() => handleViewDetails(server.id)}>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleViewDetails(server.id); }}>
                                 <Eye className="mr-2 h-4 w-4" />
                                 View Server Detail
                               </DropdownMenuItem>
                               {server.docker === 'true' && (
-                                <DropdownMenuItem onClick={() => handleViewContainers(server.id)}>
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleViewContainers(server.id); }}>
                                   <Activity className="mr-2 h-4 w-4" />
                                   Container Monitoring
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
-                                onClick={() => handlePauseResume(server)}
+                                onClick={(e) => { e.stopPropagation(); handlePauseResume(server); }}
                                 disabled={isProcessing}
                               >
                                 {isPaused ? (
@@ -366,12 +370,12 @@ export const ServerTable = ({ servers, isLoading, onRefresh }: ServerTableProps)
                                 )}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleEdit(server)}>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(server); }}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit Server
                               </DropdownMenuItem>
                               <DropdownMenuItem 
-                                onClick={() => handleDelete(server)}
+                                onClick={(e) => { e.stopPropagation(); handleDelete(server); }}
                                 className="text-red-600 focus:text-red-600"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />

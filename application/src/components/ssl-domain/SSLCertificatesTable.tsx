@@ -151,7 +151,11 @@ export const SSLCertificatesTable = () => {
             </TableHeader>
             <TableBody>
               {certificates.map((certificate) => (
-                <TableRow key={certificate.id} className="hover:bg-muted/50">
+                <TableRow 
+                  key={certificate.id} 
+                  className="hover:bg-muted/50 cursor-pointer"
+                  onClick={() => openViewDialog(certificate)}
+                >
                   <TableCell className="font-medium">
                     {certificate.domain}
                   </TableCell>
@@ -170,7 +174,7 @@ export const SSLCertificatesTable = () => {
                   <TableCell>
                     {certificate.check_interval || 1} {t('days')}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <SSLCertificateActions
                       certificate={certificate}
                       onView={openViewDialog}
