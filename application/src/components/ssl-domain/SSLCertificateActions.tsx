@@ -45,20 +45,20 @@ export const SSLCertificateActions = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => onView(certificate)}>
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(certificate); }}>
           <Eye className="mr-2 h-4 w-4" />
           {t('view')}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleCheck}>
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleCheck(); }}>
           <RefreshCw className="mr-2 h-4 w-4" />
           Check
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onEdit(certificate)}>
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(certificate); }}>
           <Edit className="mr-2 h-4 w-4" />
           {t('edit')}
         </DropdownMenuItem>
         <DropdownMenuItem 
-          onClick={() => onDelete(certificate)}
+          onClick={(e) => { e.stopPropagation(); onDelete(certificate); }}
           className="text-destructive"
         >
           <Trash2 className="mr-2 h-4 w-4" />
