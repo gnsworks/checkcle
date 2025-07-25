@@ -8,7 +8,7 @@ export interface Server {
   hostname: string;
   ip_address: string;
   os_type: string;
-  status: 'up' | 'down' | 'warning';
+  status: 'up' | 'down' | 'warning' | 'paused';
   uptime: string;
   ram_total: number;
   ram_used: number;
@@ -19,6 +19,7 @@ export interface Server {
   last_checked: string;
   server_token: string;
   template_id: string;
+  threshold_id: string;
   notification_id: string;
   timestamp: string;
   connection: string;

@@ -24,183 +24,144 @@ export const serverService = {
 
   async getServerMetrics(serverId: string, timeRange?: string): Promise<any[]> {
     try {
-    //  console.log('serverService.getServerMetrics: Fetching metrics for serverId:', serverId, 'timeRange:', timeRange);
+     // console.log('🔍 serverService.getServerMetrics: Starting with serverId:', serverId, 'timeRange:', timeRange);
       
       // First, get the server to find the correct server_id for metrics
       let server;
       try {
         server = await this.getServer(serverId);
-     //   console.log('serverService.getServerMetrics: Found server:', server);
+       // console.log('✅ serverService.getServerMetrics: Found server:', {
+      //    id: server.id,
+      //    server_id: server.server_id,
+      //    name: server.name
+      //  });
       } catch (error) {
-     //   console.log('serverService.getServerMetrics: Could not fetch server details:', error);
+      //  console.log('❌ serverService.getServerMetrics: Could not fetch server details:', error);
       }
 
-      // Try multiple filter strategies to find data
-      let filter = '';
-      let metricsServerId = serverId;
-      
-      // Strategy 1: Use server.server_id if available
-      if (server && server.server_id) {
-        metricsServerId = server.server_id;
-        filter = `server_id = "${metricsServerId}"`;
-     //   console.log('serverService.getServerMetrics: Strategy 1 - Using server.server_id for metrics:', metricsServerId);
-      } else {
-        // Strategy 2: Use the serverId directly
-        filter = `server_id = "${serverId}"`;
-     //   console.log('serverService.getServerMetrics: Strategy 2 - Using serverId directly for metrics:', serverId);
-      }
-      
-      // Add agent_id filter if available in server data
-      if (server && server.agent_id) {
-        filter += ` && agent_id = "${server.agent_id}"`;
-    //    console.log('serverService.getServerMetrics: Added agent_id filter:', server.agent_id);
-      }
-
-      // Add time range filter
-      if (timeRange) {
-        const now = new Date();
-        let cutoffTime;
-        
-        switch (timeRange) {
-          case '60m':
-            cutoffTime = new Date(now.getTime() - (60 * 60 * 1000));
-            break;
-          case '1d':
-            cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-            break;
-          case '7d':
-            cutoffTime = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-            break;
-          case '1m':
-            cutoffTime = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
-            break;
-          case '3m':
-            cutoffTime = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
-            break;
-          default:
-            cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-        }
-        
-        const cutoffISO = cutoffTime.toISOString();
-        filter += ` && created >= "${cutoffISO}"`;
-    //    console.log('serverService.getServerMetrics: Using time filter from:', cutoffISO, 'to now');
-      }
-
-    //  console.log('serverService.getServerMetrics: Final filter:', filter);
-
-      // Fetch filtered records with proper sorting
-      let records = await pb.collection('server_metrics').getFullList({
-        filter: filter,
+      // Let's first check what data exists in the database for this server
+    //  console.log('🔍 Checking all records for this server...');
+      const allServerRecords = await pb.collection('server_metrics').getFullList({
+        filter: `server_id = "${serverId}" || server_id = "${server?.server_id}" || server_id = "${server?.id}"`,
         sort: '-created',
         requestKey: null
       });
-
-     // console.log('serverService.getServerMetrics: Found', records.length, 'records with primary filter');
       
-      // If no records found with primary strategy, try fallback strategies
-      if (records.length === 0) {
-    //    console.log('serverService.getServerMetrics: No records found, trying fallback strategies...');
+     // console.log('📊 Found total records for server:', allServerRecords.length);
+      if (allServerRecords.length > 0) {
+      //  console.log('📅 Date range of all records:', {
+      //    newest: allServerRecords[0]?.created,
+      //    oldest: allServerRecords[allServerRecords.length - 1]?.created
+      //  });
         
-        // Fallback 1: Try without agent_id filter
-        let fallbackFilter = `server_id = "${metricsServerId}"`;
-        if (timeRange) {
-          const now = new Date();
-          let cutoffTime;
-          
-          switch (timeRange) {
-            case '60m':
-              cutoffTime = new Date(now.getTime() - (60 * 60 * 1000));
-              break;
-            case '1d':
-              cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-              break;
-            case '7d':
-              cutoffTime = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-              break;
-            case '1m':
-              cutoffTime = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
-              break;
-            case '3m':
-              cutoffTime = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
-              break;
-            default:
-              cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-          }
-          
+        // Check last 5 records
+       // console.log('🔄 Last 5 records timestamps:', allServerRecords.slice(0, 5).map(r => ({
+       //   created: r.created,
+       //   age_minutes: Math.round((new Date().getTime() - new Date(r.created).getTime()) / (1000 * 60))
+       // })));
+      }
+
+      // Calculate time range for filtering
+      const now = new Date();
+      let cutoffTime;
+      
+      if (timeRange === '60m') {
+        cutoffTime = new Date(now.getTime() - (60 * 60 * 1000)); // Exactly 60 minutes
+      //  console.log('⏰ 60m filter: Looking for records newer than:', cutoffTime.toISOString());
+      //  console.log('⏰ Current time:', now.toISOString());
+      //  console.log('⏰ Time difference in minutes:', Math.round((now.getTime() - cutoffTime.getTime()) / (1000 * 60)));
+      } else if (timeRange === '1d') {
+        cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+      } else if (timeRange === '7d') {
+        cutoffTime = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+      } else if (timeRange === '1m') {
+        cutoffTime = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+      } else if (timeRange === '3m') {
+        cutoffTime = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
+      } else {
+        cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+      }
+
+      // Try to get filtered records
+      const searchStrategies = [
+        server?.server_id,
+        serverId,
+        server?.id
+      ].filter(Boolean);
+
+      let filteredRecords: any[] = [];
+
+      for (const strategy of searchStrategies) {
+        try {
           const cutoffISO = cutoffTime.toISOString();
-          fallbackFilter += ` && created >= "${cutoffISO}"`;
-        }
-        
-    //   console.log('serverService.getServerMetrics: Trying fallback filter without agent_id:', fallbackFilter);
-        records = await pb.collection('server_metrics').getFullList({
-          filter: fallbackFilter,
-          sort: '-created',
-          requestKey: null
-        });
-        
-     //   console.log('serverService.getServerMetrics: Fallback found', records.length, 'records');
-        
-        // Fallback 2: Try with different server_id strategies
-        if (records.length === 0) {
-          const alternativeIds = [serverId, server?.server_id, server?.id].filter(Boolean);
-      //    console.log('serverService.getServerMetrics: Trying alternative server IDs:', alternativeIds);
+          const filter = `server_id = "${strategy}" && created >= "${cutoffISO}"`;
           
-          for (const altId of alternativeIds) {
-            if (altId && altId !== metricsServerId) {
-              let altFilter = `server_id = "${altId}"`;
-              if (timeRange) {
-                const now = new Date();
-                let cutoffTime;
-                
-                switch (timeRange) {
-                  case '60m':
-                    cutoffTime = new Date(now.getTime() - (60 * 60 * 1000));
-                    break;
-                  case '1d':
-                    cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-                    break;
-                  case '7d':
-                    cutoffTime = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-                    break;
-                  case '1m':
-                    cutoffTime = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
-                    break;
-                  case '3m':
-                    cutoffTime = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
-                    break;
-                  default:
-                    cutoffTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-                }
-                
-                const cutoffISO = cutoffTime.toISOString();
-                altFilter += ` && created >= "${cutoffISO}"`;
-              }
+       //   console.log(`🔍 Trying filter: ${filter}`);
+
+          const records = await pb.collection('server_metrics').getFullList({
+            filter: filter,
+            sort: '-created',
+            requestKey: null
+          });
+
+        //  console.log(`📊 Strategy "${strategy}" found ${records.length} records within time range`);
+
+          if (records.length > 0) {
+            filteredRecords = records;
+          //  console.log('✅ Using records from strategy:', strategy);
+            break;
+          }
+        } catch (error) {
+        //  console.error(`❌ Error with strategy ${strategy}:`, error);
+          continue;
+        }
+      }
+
+      // If no filtered records found and it's 60m, let's see what we have in a larger window
+      if (filteredRecords.length === 0 && timeRange === '60m') {
+      //  console.log('⚠️ No records found in 60m window, checking last 24 hours...');
+        
+        const last24h = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+        
+        for (const strategy of searchStrategies) {
+          try {
+            const filter = `server_id = "${strategy}" && created >= "${last24h.toISOString()}"`;
+            
+            const records = await pb.collection('server_metrics').getFullList({
+              filter: filter,
+              sort: '-created',
+              requestKey: null
+            });
+
+         //   console.log(`📊 Last 24h check for "${strategy}": ${records.length} records`);
+            
+            if (records.length > 0) {
+           //   console.log('📅 Sample record ages (minutes ago):', records.slice(0, 3).map(r => 
+              //  Math.round((now.getTime() - new Date(r.created).getTime()) / (1000 * 60))
+             // ));
               
-          //    console.log('serverService.getServerMetrics: Trying alternative ID filter:', altFilter);
-              const altRecords = await pb.collection('server_metrics').getFullList({
-                filter: altFilter,
-                sort: '-created',
-                requestKey: null
-              });
-              
-              if (altRecords.length > 0) {
-          //      console.log('serverService.getServerMetrics: Alternative ID found', altRecords.length, 'records');
-                records = altRecords;
-                break;
-              }
+              // Return all recent records for 60m if we have any
+              filteredRecords = records;
+              break;
             }
+          } catch (error) {
+         //   console.error(`❌ Error with 24h fallback for ${strategy}:`, error);
+            continue;
           }
         }
       }
 
-    //  console.log('serverService.getServerMetrics: Final result:', records.length, 'records found');
-      if (records.length > 0) {
-     //   console.log('serverService.getServerMetrics: Sample record:', records[0]);
+     // console.log('🎯 Final result:', filteredRecords.length, 'records found for', timeRange);
+      if (filteredRecords.length > 0) {
+     //   console.log('📅 Returned records age range (minutes ago):', {
+      //    newest: Math.round((now.getTime() - new Date(filteredRecords[0].created).getTime()) / (1000 * 60)),
+      //    oldest: Math.round((now.getTime() - new Date(filteredRecords[filteredRecords.length - 1].created).getTime()) / (1000 * 60))
+      //  });
       }
       
-      return records;
+      return filteredRecords;
     } catch (error) {
-    //  console.error('Error fetching server metrics:', error);
+    //  console.error('❌ Error fetching server metrics:', error);
       throw error;
     }
   },

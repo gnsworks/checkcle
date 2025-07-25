@@ -5,25 +5,25 @@ import { DockerContainer, DockerMetrics, DockerStats } from "@/types/docker.type
 class DockerService {
   async getContainers(): Promise<DockerContainer[]> {
     try {
-      console.log('Fetching all Docker containers...');
+    //  console.log('Fetching all Docker containers...');
       const records = await pb.collection('dockers').getFullList({
         sort: '-created',
       });
-      console.log('Docker containers fetched:', records);
+   //   console.log('Docker containers fetched:', records);
       return records as DockerContainer[];
     } catch (error) {
-      console.error('Error fetching Docker containers:', error);
+    //  console.error('Error fetching Docker containers:', error);
       throw error;
     }
   }
 
   async getContainersByServerId(serverId: string): Promise<DockerContainer[]> {
     try {
-      console.log('Fetching Docker containers for server ID:', serverId);
+    //  console.log('Fetching Docker containers for server ID:', serverId);
       
       // First, try to get the server details to find the correct hostname
       const server = await pb.collection('servers').getOne(serverId);
-      console.log('Server details:', server);
+    //  console.log('Server details:', server);
       
       // Try multiple filter approaches to find containers
       const filters = [
@@ -36,57 +36,57 @@ class DockerService {
       let containers: DockerContainer[] = [];
       
       for (const filter of filters) {
-        console.log('Trying filter:', filter);
+      //  console.log('Trying filter:', filter);
         try {
           const records = await pb.collection('dockers').getFullList({
             filter: filter,
             sort: '-created',
           });
-          console.log(`Filter "${filter}" returned:`, records);
+        //  console.log(`Filter "${filter}" returned:`, records);
           
           if (records.length > 0) {
             containers = records as DockerContainer[];
             break;
           }
         } catch (filterError) {
-          console.warn(`Filter "${filter}" failed:`, filterError);
+        //  console.warn(`Filter "${filter}" failed:`, filterError);
           continue;
         }
       }
       
       // If no containers found with filters, get all and log for debugging
       if (containers.length === 0) {
-        console.log('No containers found with filters, fetching all for debugging...');
+      //  console.log('No containers found with filters, fetching all for debugging...');
         const allContainers = await pb.collection('dockers').getFullList({
           sort: '-created',
         });
-        console.log('All available Docker containers:', allContainers);
-        console.log('Looking for containers that might match server:', {
-          serverId,
-          serverHostname: server.hostname,
-          serverIp: server.ip_address
-        });
+      //  console.log('All available Docker containers:', allContainers);
+      //  console.log('Looking for containers that might match server:', {
+      ////    serverId,
+       //   serverHostname: server.hostname,
+      //    serverIp: server.ip_address
+      //  });
       }
       
       return containers;
     } catch (error) {
-      console.error('Error fetching Docker containers by server ID:', error);
+    //  console.error('Error fetching Docker containers by server ID:', error);
       throw error;
     }
   }
 
   async getContainerMetrics(dockerId: string): Promise<DockerMetrics[]> {
     try {
-      console.log('Fetching metrics for docker ID:', dockerId);
+    //  console.log('Fetching metrics for docker ID:', dockerId);
       const records = await pb.collection('docker_metrics').getFullList({
         filter: `docker_id = "${dockerId}"`,
         sort: '-timestamp',
         perPage: 100,
       });
-      console.log('Docker metrics fetched:', records);
+    //  console.log('Docker metrics fetched:', records);
       return records as DockerMetrics[];
     } catch (error) {
-      console.error('Error fetching Docker metrics:', error);
+    //  console.error('Error fetching Docker metrics:', error);
       throw error;
     }
   }

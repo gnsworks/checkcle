@@ -1,8 +1,8 @@
+
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -37,10 +37,12 @@ import { fetchSSLCertificates, addSSLCertificate, deleteSSLCertificate } from "@
 import { pb } from "@/lib/pocketbase";
 import { SSLCertificate } from "@/types/ssl.types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
 
 export const SSLCertificatesTable = () => {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   const queryClient = useQueryClient();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -65,7 +67,7 @@ export const SSLCertificatesTable = () => {
       setShowAddDialog(false);
       toast.success(t('certificateAdded'));
     } catch (error) {
-      console.error("Error adding certificate:", error);
+    //  console.error("Error adding certificate:", error);
       toast.error(t('failedToAddCertificate'));
     } finally {
       setIsSubmitting(false);
@@ -87,7 +89,7 @@ export const SSLCertificatesTable = () => {
       setSelectedCertificate(null);
       toast.success(t('certificateUpdated'));
     } catch (error) {
-      console.error("Error updating certificate:", error);
+    //  console.error("Error updating certificate:", error);
       toast.error(t('failedToUpdateCertificate'));
     } finally {
       setIsSubmitting(false);
@@ -105,7 +107,7 @@ export const SSLCertificatesTable = () => {
       setSelectedCertificate(null);
       toast.success(t('certificateDeleted'));
     } catch (error) {
-      console.error("Error deleting certificate:", error);
+     // console.error("Error deleting certificate:", error);
       toast.error(t('failedToDeleteCertificate'));
     } finally {
       setIsSubmitting(false);
@@ -128,24 +130,32 @@ export const SSLCertificatesTable = () => {
   };
 
   return (
-    <>
-      <Card>
-        <CardContent>
+    <div className="flex-1 flex flex-col h-full">
+      {certificates.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          {t('noCertificatesFound')}
+        </div>
+      ) : (
+        <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg border border-border shadow-sm`}>
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('domain')}</TableHead>
-                <TableHead>{t('status')}</TableHead>
-                <TableHead>{t('issuer')}</TableHead>
-                <TableHead>{t('validUntil')}</TableHead>
-                <TableHead>{t('daysLeft')}</TableHead>
-                <TableHead>Check Interval</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
+            <TableHeader className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}>
+              <TableRow className={`${theme === 'dark' ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-200 hover:bg-gray-100'}`}>
+                <TableHead className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} font-medium text-base py-4`}>{t('domain')}</TableHead>
+                <TableHead className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} font-medium text-base py-4`}>{t('status')}</TableHead>
+                <TableHead className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} font-medium text-base py-4`}>{t('issuer')}</TableHead>
+                <TableHead className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} font-medium text-base py-4`}>{t('validUntil')}</TableHead>
+                <TableHead className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} font-medium text-base py-4`}>{t('daysLeft')}</TableHead>
+                <TableHead className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} font-medium text-base py-4`}>Check Interval</TableHead>
+                <TableHead className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} font-medium text-base py-4 text-right w-[50px]`}>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {certificates.map((certificate) => (
-                <TableRow key={certificate.id}>
+                <TableRow 
+                  key={certificate.id} 
+                  className="hover:bg-muted/50 cursor-pointer"
+                  onClick={() => openViewDialog(certificate)}
+                >
                   <TableCell className="font-medium">
                     {certificate.domain}
                   </TableCell>
@@ -164,7 +174,7 @@ export const SSLCertificatesTable = () => {
                   <TableCell>
                     {certificate.check_interval || 1} {t('days')}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                     <SSLCertificateActions
                       certificate={certificate}
                       onView={openViewDialog}
@@ -176,14 +186,8 @@ export const SSLCertificatesTable = () => {
               ))}
             </TableBody>
           </Table>
-
-          {certificates.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              {t('noCertificatesFound')}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
       {/* View Certificate Dialog */}
       <SSLCertificateDetailDialog
@@ -250,6 +254,6 @@ export const SSLCertificatesTable = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 };

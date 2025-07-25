@@ -1,0 +1,49 @@
+name: 📝 Documentation Improvement
+description: Suggest improvements or report issues in documentation.
+title: "[Docs]: "
+labels: [documentation]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve our documentation!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What part of the documentation needs improvement?
+      description: |
+        Describe the issue clearly.
+      placeholder: "The installation guide is missing steps for..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Location
+      description: |
+        Provide a link or path to the affected documentation.
+      placeholder: "https://github.com/operacle/checkcle/docs/INSTALL.md"
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Change
+      description: |
+        How would you improve it?
+      placeholder: "I suggest adding a section about..."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues for similar documentation problems.
+          required: true

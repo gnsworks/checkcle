@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { ServiceForm } from "./ServiceForm";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AddServiceDialogProps {
   open: boolean;
@@ -15,7 +16,11 @@ interface AddServiceDialogProps {
 }
 
 export function AddServiceDialog({ open, onOpenChange }: AddServiceDialogProps) {
-  const handleSuccess = () => {
+  const queryClient = useQueryClient();
+  const handleSuccess = async () => {
+    // Immediately invalidate and refetch services data
+    await queryClient.invalidateQueries({ queryKey: ["services"] });
+    await queryClient.refetchQueries({ queryKey: ["services"] });
     onOpenChange(false);
   };
 

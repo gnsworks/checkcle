@@ -40,7 +40,6 @@ export const AboutSystem: React.FC = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{t('aboutSystem')}</h1>
         <p className="text-muted-foreground text-base leading-relaxed mt-2">
-          {t('aboutCheckcle')}
         </p>
       </div>
 

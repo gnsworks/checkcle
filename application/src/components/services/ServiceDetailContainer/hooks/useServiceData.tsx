@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { pb } from "@/lib/pocketbase";
 import { Service, UptimeData } from "@/types/service.types";
 import { useToast } from "@/hooks/use-toast";
@@ -16,14 +17,17 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Get regional agents for "all" monitoring
+  // Get regional agents for "all" monitoring with optimized caching
   const { data: regionalAgents = [] } = useQuery({
     queryKey: ['regional-services'],
     queryFn: regionalService.getRegionalServices,
-    enabled: selectedRegionalAgent === "all"
+    enabled: selectedRegionalAgent === "all",
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false,
   });
 
-  const handleStatusChange = async (newStatus: "up" | "down" | "paused" | "warning") => {
+  const handleStatusChange = useCallback(async (newStatus: "up" | "down" | "paused" | "warning") => {
     if (!service || !serviceId) return;
 
     try {
@@ -38,7 +42,7 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
         description: `Service status changed to ${newStatus}`,
       });
     } catch (error) {
-     // console.error("Failed to update service status:", error);
+    //  console.error("Failed to update service status:", error);
       setService(prevService => prevService);
       
       toast({
@@ -47,9 +51,9 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
         description: "Could not update service status. Please try again.",
       });
     }
-  };
+  }, [service, serviceId, toast]);
 
-  const fetchUptimeData = async (serviceId: string, start: Date, end: Date, selectedRange?: DateRangeOption | string, regionalAgent?: string) => {
+  const fetchUptimeData = useCallback(async (serviceId: string, start: Date, end: Date, selectedRange?: DateRangeOption | string, regionalAgent?: string) => {
     try {
       if (!service) {
       //  console.log('No service data available for uptime fetch');
@@ -80,7 +84,7 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
         
         // Fetch default monitoring data
         const defaultData = await uptimeService.getUptimeHistory(serviceId, limit, start, end, service.type);
-      //  console.log(`Retrieved ${defaultData.length} default monitoring records`);
+       // console.log(`Retrieved ${defaultData.length} default monitoring records`);
         
         // Mark default data with source identifier
         const markedDefaultData = defaultData.map(record => ({
@@ -100,7 +104,7 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
             const regionalData = await uptimeService.getUptimeHistoryByRegionalAgent(
               serviceId, limit, start, end, service.type, agent.region_name, agent.agent_id
             );
-         //   console.log(`Retrieved ${regionalData.length} records from ${agent.region_name}`);
+          //  console.log(`Retrieved ${regionalData.length} records from ${agent.region_name}`);
             
             // Mark regional data with source identifier
             const markedRegionalData = regionalData.map(record => ({
@@ -112,18 +116,18 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
             
             history = [...history, ...markedRegionalData];
           } catch (error) {
-        //    console.error(`Error fetching data from ${agent.region_name}:`, error);
+          //  console.error(`Error fetching data from ${agent.region_name}:`, error);
           }
         }
         
-      //  console.log(`Total combined records: ${history.length}`);
+       // console.log(`Total combined records: ${history.length}`);
         
       } else {
         // Fetch regional agent specific data
         const [regionName, agentId] = currentAgent.split("|");
-      //  console.log(`Fetching regional agent data for region: ${regionName}, agent: ${agentId} from ${service.type} collection`);
+        console.log(`Fetching regional agent data for region: ${regionName}, agent: ${agentId} from ${service.type} collection`);
         history = await uptimeService.getUptimeHistoryByRegionalAgent(serviceId, limit, start, end, service.type, regionName, agentId);
-      //  console.log(`Retrieved ${history.length} regional monitoring records`);
+       // console.log(`Retrieved ${history.length} regional monitoring records`);
       }
       
       // Sort by timestamp (newest first)
@@ -131,7 +135,7 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
       
-      //console.log(`Final dataset: ${filteredHistory.length} records for ${currentAgent === "all" ? "all sources" : "regional"} monitoring`);
+     // console.log(`Final dataset: ${filteredHistory.length} records for ${currentAgent === "all" ? "all sources" : "regional"} monitoring`);
       setUptimeData(filteredHistory);
       return filteredHistory;
     } catch (error) {
@@ -143,9 +147,9 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
       });
       return [];
     }
-  };
+  }, [service, selectedRegionalAgent, regionalAgents, toast]);
 
-  const handleRegionalAgentChange = (agent: string) => {
+  const handleRegionalAgentChange = useCallback((agent: string) => {
    // console.log(`Regional agent changed from ${selectedRegionalAgent} to: ${agent}`);
     
     // Clear data immediately when switching
@@ -154,78 +158,83 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
     
     // Refetch data with new agent selection
     if (serviceId && !isLoading && service) {
-     // console.log(`Refetching data for new agent: ${agent}`);
+    //  console.log(`Refetching data for new agent: ${agent}`);
       fetchUptimeData(serviceId, startDate, endDate, '24h', agent);
     }
-  };
+  }, [selectedRegionalAgent, serviceId, isLoading, service, fetchUptimeData, startDate, endDate]);
+
+  // Memoize the service data fetching to prevent unnecessary re-runs
+  const fetchServiceData = useCallback(async () => {
+    try {
+      if (!serviceId) {
+        setIsLoading(false);
+        return;
+      }
+      
+      setIsLoading(true);
+      
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Request timed out")), 10000);
+      });
+      
+      const fetchPromise = pb.collection('services').getOne(serviceId);
+      const serviceData = await Promise.race([fetchPromise, timeoutPromise]) as any;
+      
+      const formattedService: Service = {
+        id: serviceData.id,
+        name: serviceData.name,
+        url: serviceData.url || "",
+        host: serviceData.host || "",
+        port: serviceData.port || undefined,
+        domain: serviceData.domain || "",
+        type: serviceData.service_type || serviceData.type || "HTTP",
+        status: serviceData.status || "paused",
+        responseTime: serviceData.response_time || serviceData.responseTime || 0,
+        uptime: serviceData.uptime || 0,
+        lastChecked: serviceData.last_checked || serviceData.lastChecked || new Date().toLocaleString(),
+        interval: serviceData.heartbeat_interval || serviceData.interval || 60,
+        retries: serviceData.max_retries || serviceData.retries || 3,
+        notificationChannel: serviceData.notification_id,
+        alertTemplate: serviceData.template_id,
+        alerts: serviceData.alerts || "unmuted"
+      };
+      
+     // console.log(`Loaded service: ${formattedService.name} (${formattedService.type})`);
+      setService(formattedService);
+      
+      // Small delay to ensure state is updated before fetching uptime data
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } catch (error) {
+     // console.error("Error fetching service:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load service data. Please try again.",
+      });
+      navigate("/dashboard");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [serviceId, navigate, toast]);
 
   // Initial data loading
   useEffect(() => {
-    const fetchServiceData = async () => {
-      try {
-        if (!serviceId) {
-          setIsLoading(false);
-          return;
-        }
-        
-        setIsLoading(true);
-        
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("Request timed out")), 10000);
-        });
-        
-        const fetchPromise = pb.collection('services').getOne(serviceId);
-        const serviceData = await Promise.race([fetchPromise, timeoutPromise]) as any;
-        
-        const formattedService: Service = {
-          id: serviceData.id,
-          name: serviceData.name,
-          url: serviceData.url || "",
-          host: serviceData.host || "",
-          port: serviceData.port || undefined,
-          domain: serviceData.domain || "",
-          type: serviceData.service_type || serviceData.type || "HTTP",
-          status: serviceData.status || "paused",
-          responseTime: serviceData.response_time || serviceData.responseTime || 0,
-          uptime: serviceData.uptime || 0,
-          lastChecked: serviceData.last_checked || serviceData.lastChecked || new Date().toLocaleString(),
-          interval: serviceData.heartbeat_interval || serviceData.interval || 60,
-          retries: serviceData.max_retries || serviceData.retries || 3,
-          notificationChannel: serviceData.notification_id,
-          alertTemplate: serviceData.template_id,
-          alerts: serviceData.alerts || "unmuted"
-        };
-        
-       // console.log(`Loaded service: ${formattedService.name} (${formattedService.type})`);
-        setService(formattedService);
-        
-        // Small delay to ensure state is updated before fetching uptime data
-        await new Promise(resolve => setTimeout(resolve, 100));
-      } catch (error) {
-      //  console.error("Error fetching service:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load service data. Please try again.",
-        });
-        navigate("/dashboard");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     fetchServiceData();
-  }, [serviceId, navigate, toast]);
+  }, [fetchServiceData]);
 
-  // Update data when date range changes or when service is loaded
+  // Update data when date range changes or when service is loaded - with debouncing
   useEffect(() => {
     if (serviceId && !isLoading && service) {
-     // console.log(`Date range changed or service loaded, refetching data for ${serviceId}: ${startDate.toISOString()} to ${endDate.toISOString()}`);
-      fetchUptimeData(serviceId, startDate, endDate, '24h', selectedRegionalAgent);
-    }
-  }, [startDate, endDate, serviceId, isLoading, service, selectedRegionalAgent, regionalAgents]);
+      const timeoutId = setTimeout(() => {
+      //  console.log(`Date range changed or service loaded, refetching data for ${serviceId}: ${startDate.toISOString()} to ${endDate.toISOString()}`);
+        fetchUptimeData(serviceId, startDate, endDate, '24h', selectedRegionalAgent);
+      }, 500); // Debounce API calls by 500ms
 
-  return {
+      return () => clearTimeout(timeoutId);
+    }
+  }, [startDate, endDate, serviceId, isLoading, service, selectedRegionalAgent, regionalAgents, fetchUptimeData]);
+
+  return useMemo(() => ({
     service,
     setService,
     uptimeData,
@@ -235,5 +244,5 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
     fetchUptimeData,
     selectedRegionalAgent,
     handleRegionalAgentChange
-  };
+  }), [service, uptimeData, isLoading, handleStatusChange, fetchUptimeData, selectedRegionalAgent, handleRegionalAgentChange]);
 };

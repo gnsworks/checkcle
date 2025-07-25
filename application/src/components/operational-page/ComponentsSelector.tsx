@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X, Server, Shield, AlertTriangle } from 'lucide-react';
+import { Plus, X, Server } from 'lucide-react';
 import { StatusPageComponentRecord } from '@/types/statusPageComponents.types';
 import { useQuery } from '@tanstack/react-query';
 import { serviceService } from '@/services/serviceService';
@@ -16,12 +17,6 @@ interface ComponentsSelectorProps {
   onComponentsChange: (components: Partial<StatusPageComponentRecord>[]) => void;
   onComponentDelete?: (componentId: string) => void;
 }
-
-const componentTypes = [
-  { value: 'uptime', label: 'Uptime Service', icon: Server },
-  { value: 'ssl', label: 'SSL Certificate', icon: Shield },
-  { value: 'incident', label: 'Incident Monitoring', icon: AlertTriangle },
-];
 
 export const ComponentsSelector = ({ selectedComponents, onComponentsChange, onComponentDelete }: ComponentsSelectorProps) => {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -169,7 +164,7 @@ export const ComponentsSelector = ({ selectedComponents, onComponentsChange, onC
                   <SelectTrigger>
                     <SelectValue placeholder="Select an uptime service" />
                   </SelectTrigger>
-                  <SelectContent className="z-50 bg-white border shadow-lg">
+                  <SelectContent>
                     {services.map((service) => (
                       <SelectItem key={service.id} value={service.id}>
                         <div className="flex items-center gap-2">
@@ -206,37 +201,6 @@ export const ComponentsSelector = ({ selectedComponents, onComponentsChange, onC
             </div>
           </div>
         )}
-
-        <div className="mt-4">
-          <Label>Quick Add Templates</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
-            {componentTypes.map((type) => {
-              const Icon = type.icon;
-              return (
-                <Button
-                  key={type.value}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const component: Partial<StatusPageComponentRecord> = {
-                      name: type.label,
-                      description: `Monitor ${type.label.toLowerCase()}`,
-                      service_id: '',
-                      server_id: '',
-                      display_order: selectedComponents.length + 1,
-                      operational_status_id: '',
-                    };
-                    onComponentsChange([...selectedComponents, component]);
-                  }}
-                  className="justify-start"
-                >
-                  <Icon className="h-4 w-4 mr-2" />
-                  {type.label}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
       </CardContent>
     </Card>
   );

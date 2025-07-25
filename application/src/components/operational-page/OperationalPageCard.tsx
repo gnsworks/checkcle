@@ -41,11 +41,11 @@ export const OperationalPageCard = ({ page, onEdit, onView, onDelete }: Operatio
           </div>
           <div>
             <span className="font-medium text-muted-foreground">Public:</span>
-            <p className="mt-1">
+            <div className="mt-1">
               <Badge variant={page.is_public === 'true' ? 'default' : 'secondary'}>
                 {page.is_public === 'true' ? 'Yes' : 'No'}
               </Badge>
-            </p>
+            </div>
           </div>
           <div>
             <span className="font-medium text-muted-foreground">Updated:</span>

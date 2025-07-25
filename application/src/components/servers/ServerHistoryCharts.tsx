@@ -24,7 +24,7 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
     isFetching
   } = useServerHistoryData(serverId);
 
-  //console.log('ServerHistoryCharts: Rendering with serverId:', serverId, 'timeRange:', timeRange);
+ // console.log('ServerHistoryCharts: Rendering with serverId:', serverId, 'timeRange:', timeRange);
 
   // Memoize latest data calculation to prevent unnecessary recalculations
   const latestData = useMemo(() => {
@@ -48,10 +48,10 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
         </div>
         
         {/* Skeleton loading cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
           {[1, 2, 3, 4].map((index) => (
             <Card key={index} className="bg-gradient-to-br from-background to-muted/20">
-              <CardContent className="p-6">
+              <CardContent className="p-4 lg:p-6">
                 <div className="animate-pulse">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -60,7 +60,7 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
                     </div>
                     <div className="w-16 h-4 bg-muted rounded"></div>
                   </div>
-                  <div className="w-full h-80 bg-muted rounded"></div>
+                  <div className="w-full h-64 lg:h-80 bg-muted rounded"></div>
                 </div>
               </CardContent>
             </Card>
@@ -122,11 +122,11 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
     );
   }
 
- // console.log('ServerHistoryCharts: Rendering charts with', chartData.length, 'data points for time range:', timeRange);
+//  console.log('ServerHistoryCharts: Rendering charts with', chartData.length, 'data points for time range:', timeRange);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
           <h2 className="text-lg font-medium">Historical Performance</h2>
@@ -143,12 +143,20 @@ export const ServerHistoryCharts = ({ serverId }: ServerHistoryChartsProps) => {
         <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
       </div>
 
-      {/* Use CSS Grid for better performance than flexbox */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <CPUChart data={chartData} latestData={latestData} />
-        <MemoryChart data={chartData} latestData={latestData} />
-        <DiskChart data={chartData} latestData={latestData} />
-        <NetworkChart data={chartData} latestData={latestData} />
+      {/* Improved responsive grid layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6 auto-rows-fr">
+        <div className="w-full min-w-0">
+          <CPUChart data={chartData} latestData={latestData} />
+        </div>
+        <div className="w-full min-w-0">
+          <MemoryChart data={chartData} latestData={latestData} />
+        </div>
+        <div className="w-full min-w-0">
+          <DiskChart data={chartData} latestData={latestData} />
+        </div>
+        <div className="w-full min-w-0">
+          <NetworkChart data={chartData} latestData={latestData} />
+        </div>
       </div>
     </div>
   );
