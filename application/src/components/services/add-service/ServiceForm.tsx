@@ -70,10 +70,10 @@ export function ServiceForm({
     if (onSubmitStart) onSubmitStart();
     
     try {
-      console.log("Form data being submitted:", data);
+     // console.log("Form data being submitted:", data);
       
       const serviceData = mapFormDataToServiceData(data);
-      console.log("Service data being sent:", serviceData);
+     // console.log("Service data being sent:", serviceData);
       
       if (isEdit && initialData) {
         // Update existing service

@@ -27,7 +27,7 @@ export const operationalPageService = {
       const result = await response.json();
       return result.items || [];
     } catch (error) {
-      console.error('Error fetching operational pages:', error);
+     // console.error('Error fetching operational pages:', error);
       throw error;
     }
   },
@@ -55,7 +55,7 @@ export const operationalPageService = {
 
       return await response.json();
     } catch (error) {
-      console.error('Error fetching operational page:', error);
+    //  console.error('Error fetching operational page:', error);
       throw error;
     }
   },
@@ -84,7 +84,7 @@ export const operationalPageService = {
 
       return await response.json();
     } catch (error) {
-      console.error('Error updating operational page:', error);
+     // console.error('Error updating operational page:', error);
       throw error;
     }
   },
@@ -113,7 +113,7 @@ export const operationalPageService = {
 
       return await response.json();
     } catch (error) {
-      console.error('Error creating operational page:', error);
+    //  console.error('Error creating operational page:', error);
       throw error;
     }
   },
@@ -139,7 +139,7 @@ export const operationalPageService = {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error deleting operational page:', error);
+     // console.error('Error deleting operational page:', error);
       throw error;
     }
   }

@@ -67,7 +67,7 @@ export function ServiceUrlField({ form }: ServiceUrlFieldProps) {
                 placeholder={getPlaceholder()}
                 {...field}
                 onChange={(e) => {
-                  console.log(`${serviceType === "dns" ? "Domain" : serviceType === "tcp" ? "Host" : "URL"} field changed:`, e.target.value);
+                //  console.log(`${serviceType === "dns" ? "Domain" : serviceType === "tcp" ? "Host" : "URL"} field changed:`, e.target.value);
                   field.onChange(e);
                 }}
               />
@@ -93,7 +93,7 @@ export function ServiceUrlField({ form }: ServiceUrlFieldProps) {
                   type="number"
                   {...field}
                   onChange={(e) => {
-                    console.log("Port field changed:", e.target.value);
+                   // console.log("Port field changed:", e.target.value);
                     field.onChange(e);
                   }}
                 />

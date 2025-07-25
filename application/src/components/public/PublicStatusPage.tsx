@@ -12,7 +12,7 @@ import { PublicStatusPageFooter } from './PublicStatusPageFooter';
 
 export const PublicStatusPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  console.log('PublicStatusPage - slug from params:', slug);
+//  console.log('PublicStatusPage - slug from params:', slug);
   
   const { page, components, services, uptimeData, loading, error } = usePublicStatusPageData(slug);
   const [lastUpdated, setLastUpdated] = useState(new Date());
@@ -51,7 +51,7 @@ export const PublicStatusPage = () => {
     };
   }, [page?.theme]);
 
-  console.log('PublicStatusPage state:', { loading, error, page: !!page, components: components.length, services: services.length });
+ // console.log('PublicStatusPage state:', { loading, error, page: !!page, components: components.length, services: services.length });
 
   if (loading) {
     return (

@@ -27,7 +27,7 @@ export const statusPageComponentsService = {
       const result = await response.json();
       return result.items || [];
     } catch (error) {
-      console.error('Error fetching status page components:', error);
+     // console.error('Error fetching status page components:', error);
       throw error;
     }
   },
@@ -56,7 +56,7 @@ export const statusPageComponentsService = {
       const result = await response.json();
       return result.items || [];
     } catch (error) {
-      console.error('Error fetching status page components by operational ID:', error);
+    //  console.error('Error fetching status page components by operational ID:', error);
       throw error;
     }
   },
@@ -79,7 +79,7 @@ export const statusPageComponentsService = {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
 
-      console.log('Creating status page component with data:', data);
+     // console.log('Creating status page component with data:', data);
 
       const baseUrl = getCurrentEndpoint();
       const response = await fetch(`${baseUrl}/api/collections/status_page_components/records`, {
@@ -95,10 +95,10 @@ export const statusPageComponentsService = {
       }
 
       const result = await response.json();
-      console.log('Created component:', result);
+     // console.log('Created component:', result);
       return result;
     } catch (error) {
-      console.error('Error creating status page component:', error);
+     // console.error('Error creating status page component:', error);
       throw error;
     }
   },
@@ -124,7 +124,7 @@ export const statusPageComponentsService = {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error deleting status page component:', error);
+     // console.error('Error deleting status page component:', error);
       throw error;
     }
   }

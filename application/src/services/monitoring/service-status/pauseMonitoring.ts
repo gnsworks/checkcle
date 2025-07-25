@@ -13,7 +13,7 @@ export async function pauseMonitoring(serviceId: string): Promise<void> {
     if (intervalId) {
       clearInterval(intervalId);
       monitoringIntervals.delete(serviceId);
-      console.log(`Monitoring paused for service ${serviceId}`);
+     // console.log(`Monitoring paused for service ${serviceId}`);
     }
     
     // Get current timestamp formatted as a string
