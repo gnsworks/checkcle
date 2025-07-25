@@ -164,7 +164,7 @@ export const ComponentsSelector = ({ selectedComponents, onComponentsChange, onC
                   <SelectTrigger>
                     <SelectValue placeholder="Select an uptime service" />
                   </SelectTrigger>
-                  <SelectContent className="z-50 bg-white border shadow-lg">
+                  <SelectContent>
                     {services.map((service) => (
                       <SelectItem key={service.id} value={service.id}>
                         <div className="flex items-center gap-2">
