@@ -64,26 +64,9 @@ CheckCle is an Open Source solution for seamless, real-time monitoring of full-s
 * ✅ x86_64 PCs, laptops, servers (amd64)
 * ✅ Modern Raspberry Pi 3/4/5 with (64-bit OS), Apple Silicon Macs (arm64)
 
-### Install CheckCle using one of the options below.
+### Install CheckCle using one of the following methods:
 
-
-1. CheckCle One-Click Installation - Just copy and run on terminal
-```bash 
-curl -fsSL https://checkcle.io/install.sh | bash
-
-```
-2. Install with docker run. Just copy ready docker run command below
-```bash 
-docker run -d \
-  --name checkcle \
-  --restart unless-stopped \
-  -p 8090:8090 \
-  -v /opt/pb_data:/mnt/pb_data \
-  --ulimit nofile=4096:8192 \
-  operacle/checkcle:latest
-
-```
-3. Install with Docker compose Configuration.
+1. Install with Docker Compose Configuration (Recommended)
 ```bash 
 
 version: '3.9'
@@ -103,6 +86,18 @@ services:
         hard: 8192
 
 ```
+2. Install with docker run. Just copy ready docker run command below
+```bash 
+docker run -d \
+  --name checkcle \
+  --restart unless-stopped \
+  -p 8090:8090 \
+  -v /opt/pb_data:/mnt/pb_data \
+  --ulimit nofile=4096:8192 \
+  operacle/checkcle:latest
+
+```
+
 3. Admin Web Management
 
     Default URL: http://0.0.0.0:8090
@@ -126,6 +121,23 @@ services:
 
 ---
 
+## Sponsors
+🙏 We're incredibly thankful to our sponsors. Your contributions enable us to maintain infrastructure (hosting, domains), run tests, and continue developing valuable features.
+
+### 🥈 Silver Uptime Ally
+
+<a href="https://github.com/sponsors/tolaleng">
+  <img src="https://avatars.githubusercontent.com/u/135371107?v=4" width="75" height="75" style="border-radius: 50%" />
+</a>
+
+### 🧡 Ping Supporter
+
+<a href="https://github.com/sponsors/tolaleng">
+  <img src="https://avatars.githubusercontent.com/u/4575656?v=4" width="75" height="75" style="border-radius: 50%" />
+</a>
+
+---
+
 ## 👥 Contributors
 Thank you for contributing and continuously making CheckCle better, you're awesome 🫶
 
@@ -141,16 +153,15 @@ Here are some ways you can help improve CheckCle:
 - 🌟 **Suggest Features** – Have an idea? Start a [Discussion](https://github.com/operacle/checkcle/discussions) or open a Feature Request issue.
 - 🛠 **Submit Pull Requests** – Improve the code, fix bugs, add features, or enhance the docs.
 - 📝 **Improve Documentation** – Even a typo fix helps!
-- 🌍 **Spread the Word** – Star ⭐ the repo, share it on socials, and invite others to contribute!
+- 🌍 **Spread the Word** – Star ⭐ the [CheckCle](https://github.com/operacle/checkcle.git)  repo, share it on socials, and invite others to contribute!
 
 ---
 
 ## 🌍 Stay Connected
 - Website: [checkcle.io](https://checkcle.io)
 - Documentation: [docs.checkcle.io](https://docs.checkcle.io)
-- GitHub Repository: ⭐ [CheckCle](https://github.com/operacle/checkcle.git)
-- Discord: Join our community [@discord](https://discord.gg/xs9gbubGwX)
-- X: [@tlengoss](https://x.com/tlengoss)
+- Chat on Discord: Join our community [@discord](https://discord.gg/xs9gbubGwX)
+- Follow us on X: [@checkcle_oss](https://x.com/checkcle_oss)
 
 ## 📜 License
 
