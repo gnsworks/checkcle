@@ -162,7 +162,7 @@ CheckCleの改善にご協力いただける方法をご紹介します：
 - GitHubリポジトリ: ⭐ [CheckCle](https://github.com/operacle/checkcle.git)
 - コミュニティチャンネル: ディスカッションやissuesで参加してください！
 - Discord: コミュニティに参加 [@discord](https://discord.gg/xs9gbubGwX)
-- X: [@tlengoss](https://x.com/tlengoss)
+- X: [@checkcle_oss](https://x.com/checkcle_oss)
 
 ## 📜 ライセンス
 

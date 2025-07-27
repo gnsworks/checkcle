@@ -162,7 +162,7 @@ export const Header = ({
           variant="outline" 
           size="icon" 
           className="rounded-full w-8 h-8 border-border"
-          onClick={() => window.open("https://x.com/tlengoss", "_blank")}
+          onClick={() => window.open("https://x.com/checkcle_oss", "_blank")}
         >
           <span className="sr-only">X (Twitter)</span>
           <Twitter className="w-4 h-4" />

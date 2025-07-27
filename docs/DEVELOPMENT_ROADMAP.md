@@ -67,6 +67,7 @@ The roadmap is divided into the following stages:
 **Status:** 🔧 In Progress
 #### Tentative Features:
 - [ ] ✅ Server and Service Table row clickable to detail page.
+- [ ] ✅ Implement pagination for the SSL dashboard table
 - [ ] 🔧 Server Agent (RPM, Docker container, and general binary package) 
 - [ ] 🔧 Notification System (Webhook, Telegram, Discord, Slack, Email, Google Chat)
 - [ ] 🔧 Improve Uptime Service and Server connection update based on status and notification.

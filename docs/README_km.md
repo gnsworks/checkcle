@@ -163,7 +163,7 @@ services:
 - ឃ្លាំងផ្ទុកកូដ: ⭐ [CheckCle](https://github.com/operacle/checkcle.git)
 - ទំនាក់ទំនងក្រុម: Engage via discussions and issues!
 - បណ្តាញសង្គម: Join our community [@discord](https://discord.gg/xs9gbubGwX)
-- X: [@tlengoss](https://x.com/tlengoss)
+- X: [@checkcle_oss](https://x.com/checkcle_oss)
 
 ## 📜 License
 
