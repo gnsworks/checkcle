@@ -42,8 +42,9 @@ CheckCle is an Open Source solution for seamless, real-time monitoring of full-s
     User: admin@example.com | Passwd: Admin123456
 
 ## 🌟 Core Features
+### 📝 Roadmap : [DEVELOPMENT_ROADMAP](docs/DEVELOPMENT_ROADMAP.md) 
 
-### Uptime Services & Infrastructure Server Monitoring
+### Uptime Services & Infrastructure Server Monitoring 
 - Monitor HTTP, DNS, and Ping protocols
 - Monitor TCP-based, API services (e.g., FTP, SMTP, HTTP)
 - Track detail uptime, response times, and performance issues
@@ -118,32 +119,17 @@ services:
 ![Schedule Maintenance](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/checkcle-schedule-maintenance.png)
 
 
-## 📝 Development Roadmap
-
-- ✅ Health check & uptime monitoring (HTTP)
-- ✅ Dashboard UI with live stats  
-- ✅ Auth with Multi-users system (admin)
-- ✅ Notifications (Telegram)
-- ✅ Docker containerization 
-- ✅ CheckCle Website
-- ✅ CheckCle Demo Server
-- ✅ SSL & Domain Monitoring
-- ✅ Schedule Maintenance 
-- ✅ Incident Management
-- ✅ Infrastructure Server Monitoring
-- ✅ Operational Status / Public Status Pages
-- ✅ Uptime monitoring (HTTP, TCP, PING, DNS) Full functionality
-- ✅ Distributed Regional Monitoring Agent
-- ✅ System Setting Panel and Mail Settings
-- ✅ User Permission Roles
-- [ ] Notifications (Email/Slack/Discord/Signal)  
-- ✅ Data Retention & Automate Strink (Muti Options to Shrink Data & Database )
-- ✅ Open-source release with full documentation 
-
 ## 🌟 CheckCle for Communities?
 - **Built with Passion**: Created by an open-source enthusiast for the community
 - **Free & Open Source**: Completely free to use with no hidden costs
 - **Collaborate & Connect**: Meet like-minded people passionate about Open Source
+
+---
+
+## 👥 Contributors
+Thank you for contributing and continuously making CheckCle better, you're awesome 🫶
+
+[![](https://contrib.rocks/image?repo=operacle/checkcle)](https://github.com/operacle/checkcle/graphs/contributors)
 
 ---
 
@@ -163,7 +149,6 @@ Here are some ways you can help improve CheckCle:
 - Website: [checkcle.io](https://checkcle.io)
 - Documentation: [docs.checkcle.io](https://docs.checkcle.io)
 - GitHub Repository: ⭐ [CheckCle](https://github.com/operacle/checkcle.git)
-- Reddit Community: [reddit](https://www.reddit.com/r/checkcle)
 - Discord: Join our community [@discord](https://discord.gg/xs9gbubGwX)
 - X: [@tlengoss](https://x.com/tlengoss)
 
@@ -172,8 +157,5 @@ Here are some ways you can help improve CheckCle:
 CheckCle is released under the MIT License.
 
 ---
-## 👥 Contributors
-Thank you for contributing and continuously making CheckCle better, you're awesome 🫶
 
-[![](https://contrib.rocks/image?repo=operacle/checkcle)](https://github.com/operacle/checkcle/graphs/contributors)
 
