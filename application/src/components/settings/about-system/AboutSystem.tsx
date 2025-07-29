@@ -95,7 +95,7 @@ export const AboutSystem: React.FC = () => {
                 <FileText className={`h-5 w-5 ${theme === 'dark' ? 'text-white/80' : 'text-gray-700'}`} />
                 <span>{t('viewDocumentation')}</span>
               </Button>
-              <Button variant="outline" className="flex items-center justify-start gap-3 h-12 hover:bg-muted/50 transition-all duration-200" onClick={() => window.open("https://x.com/tlengoss", "_blank")}>
+              <Button variant="outline" className="flex items-center justify-start gap-3 h-12 hover:bg-muted/50 transition-all duration-200" onClick={() => window.open("https://x.com/checkcle_oss", "_blank")}>
                 <Twitter className={`h-5 w-5 ${theme === 'dark' ? 'text-white/80' : 'text-gray-700'}`} />
                 <span>{t('followOnX')}</span>
               </Button>
