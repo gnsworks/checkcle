@@ -67,13 +67,13 @@ export const CreateOperationalPageDialog = () => {
         page_style: data.page_style || '',
       };
       
-      console.log('Creating operational page with payload:', payload);
+     // console.log('Creating operational page with payload:', payload);
       const createdPage = await createMutation.mutateAsync(payload);
-      console.log('Created page:', createdPage);
+     // console.log('Created page:', createdPage);
       
       // Create components after page is created
       if (selectedComponents.length > 0) {
-        console.log('Creating components for page:', createdPage.id);
+      //  console.log('Creating components for page:', createdPage.id);
         for (const component of selectedComponents) {
           const componentPayload = {
             operational_status_id: createdPage.id,
@@ -84,7 +84,7 @@ export const CreateOperationalPageDialog = () => {
             display_order: component.display_order || 1,
           };
           
-          console.log('Creating component with payload:', componentPayload);
+        //  console.log('Creating component with payload:', componentPayload);
           await createComponentMutation.mutateAsync(componentPayload);
         }
       }
@@ -93,7 +93,7 @@ export const CreateOperationalPageDialog = () => {
       form.reset();
       setSelectedComponents([]);
     } catch (error) {
-      console.error('Error creating operational page:', error);
+     // console.error('Error creating operational page:', error);
     }
   };
 

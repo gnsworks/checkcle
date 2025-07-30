@@ -1,0 +1,35 @@
+name: checkcle-server-agent
+
+services:
+  checkcle-server-agent:
+    container_name: monitoring-agent
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    group_add:
+      - 999
+    environment:
+      AGENT_ID: agent_124343535
+      SERVER_NAME: "test"
+      SERVER_TOKEN: srv_123243434
+      POCKETBASE_URL: http://x.x.x.x:8090
+      POCKETBASE_ENABLED: "true"
+    volumes:
+      - /proc:/host/proc:ro
+      - /etc:/host/etc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro
+      - /var/run:/host/var/run:ro
+      - /dev:/host/dev:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - monitoring_data:/var/lib/monitoring-agent
+      - monitoring_logs:/var/log/monitoring-agent
+    image: operacle/checkcle-server-agent:latest
+
+volumes:
+  monitoring_data:
+    external: true
+    name: monitoring_data
+  monitoring_logs:
+    external: true
+    name: monitoring_logs
