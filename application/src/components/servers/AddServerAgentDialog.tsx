@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCurrentEndpoint } from "@/lib/pocketbase";
 import { ServerAgentConfigForm } from "./ServerAgentConfigForm";
 import { OneClickInstallTab } from "./OneClickInstallTab";
+import { DockerOneClickTab } from "./DockerOneClickTab";
 import { ManualInstallTab } from "./ManualInstallTab";
 
 interface AddServerAgentDialogProps {
@@ -123,9 +124,10 @@ export const AddServerAgentDialog: React.FC<AddServerAgentDialogProps> = ({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="configure">Configure Agent</TabsTrigger>
             <TabsTrigger value="one-click">One-Click Install</TabsTrigger>
+            <TabsTrigger value="docker-one-click">Docker One-Click</TabsTrigger>
             <TabsTrigger value="manual">Manual Installation</TabsTrigger>
           </TabsList>
 
@@ -143,6 +145,16 @@ export const AddServerAgentDialog: React.FC<AddServerAgentDialogProps> = ({
 
           <TabsContent value="one-click" className="space-y-6">
             <OneClickInstallTab
+              serverToken={serverToken}
+              currentPocketBaseUrl={currentPocketBaseUrl}
+              formData={formData}
+              serverId={serverId}
+              onDialogClose={handleDialogClose}
+            />
+          </TabsContent>
+          
+          <TabsContent value="docker-one-click" className="space-y-6">
+            <DockerOneClickTab
               serverToken={serverToken}
               currentPocketBaseUrl={currentPocketBaseUrl}
               formData={formData}
