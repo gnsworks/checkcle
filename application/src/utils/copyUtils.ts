@@ -2,12 +2,12 @@
 import { toast } from "@/hooks/use-toast";
 
 export const copyToClipboard = async (text: string) => {
-  console.log('copyToClipboard called with text:', text); // Debug log
+ // console.log('copyToClipboard called with text:', text); // Debug log
   
   try {
     // Try modern clipboard API first
     if (navigator.clipboard && window.isSecureContext) {
-      console.log('Using modern clipboard API'); // Debug log
+    //  console.log('Using modern clipboard API'); // Debug log
       await navigator.clipboard.writeText(text);
       toast({
         title: "Copied!",
@@ -16,7 +16,7 @@ export const copyToClipboard = async (text: string) => {
       return;
     }
 
-    console.log('Using fallback clipboard method'); // Debug log
+  //  console.log('Using fallback clipboard method'); // Debug log
     
     // Fallback for older browsers or non-secure contexts
     const textArea = document.createElement("textarea");
@@ -39,7 +39,7 @@ export const copyToClipboard = async (text: string) => {
     document.body.removeChild(textArea);
     
     if (successful) {
-      console.log('Copy successful with execCommand'); // Debug log
+   //   console.log('Copy successful with execCommand'); // Debug log
       toast({
         title: "Copied!",
         description: "Content copied to clipboard successfully.",
@@ -48,7 +48,7 @@ export const copyToClipboard = async (text: string) => {
       throw new Error('Copy command failed');
     }
   } catch (error) {
-    console.error('Failed to copy to clipboard:', error);
+  //  console.error('Failed to copy to clipboard:', error);
     
     // Show error toast
     toast({

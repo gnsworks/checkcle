@@ -38,7 +38,7 @@ export const addSSLCertificate = async (
 
     return record as unknown as SSLCertificate;
   } catch (error) {
-    console.error("Error adding SSL certificate:", error);
+   // console.error("Error adding SSL certificate:", error);
     throw error;
   }
 };
@@ -67,7 +67,7 @@ export const checkAndUpdateCertificate = async (
     // Return the current certificate data
     return typedCertificate;
   } catch (error) {
-    console.error("Error updating SSL certificate:", error);
+   // console.error("Error updating SSL certificate:", error);
     throw error;
   }
 };
@@ -84,10 +84,10 @@ export const triggerImmediateCheck = async (certificateId: string): Promise<void
       check_at: currentTime
     });
     
-    console.log(`Triggered immediate check for certificate ${certificateId} at ${currentTime}`);
+   // console.log(`Triggered immediate check for certificate ${certificateId} at ${currentTime}`);
     toast.success("SSL check scheduled - certificate will be checked shortly");
   } catch (error) {
-    console.error("Error triggering immediate SSL check:", error);
+   // console.error("Error triggering immediate SSL check:", error);
     toast.error("Failed to schedule SSL check");
     throw error;
   }
@@ -101,7 +101,7 @@ export const deleteSSLCertificate = async (id: string): Promise<boolean> => {
     await pb.collection("ssl_certificates").delete(id);
     return true;
   } catch (error) {
-    console.error("Error deleting SSL certificate:", error);
+   // console.error("Error deleting SSL certificate:", error);
     throw error;
   }
 };

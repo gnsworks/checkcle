@@ -64,18 +64,18 @@ sudo -E bash ./server-docker-agent.sh`;
   const handleCopyOneClickCommand = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Copy one-click command button clicked');
+  //  console.log('Copy one-click command button clicked');
     const command = getDockerOneClickCommand();
-    console.log('Copying one-click command:', command);
+  //  console.log('Copying one-click command:', command);
     await copyToClipboard(command);
   };
 
   const handleCopyDockerCommand = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Copy docker command button clicked');
+   // console.log('Copy docker command button clicked');
     const command = getDirectDockerCommand();
-    console.log('Copying docker command:', command);
+  //  console.log('Copying docker command:', command);
     await copyToClipboard(command);
   };
 
