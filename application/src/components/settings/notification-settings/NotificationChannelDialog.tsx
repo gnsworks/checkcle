@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { 
   Dialog, 
@@ -14,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -24,7 +26,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
-import { Loader2 } from "lucide-react";
+import { Loader2, Copy } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 interface NotificationChannelDialogProps {
   open: boolean;
@@ -76,6 +80,9 @@ const webhookSchema = baseSchema.extend({
   webhook_secret: z.string().optional(),
   webhook_headers: z.string().optional(),
   webhook_description: z.string().optional(),
+  webhook_payload_template: z.string().optional(),
+  webhook_retry_count: z.string().optional(),
+  webhook_trigger_events: z.string().optional(),
 });
 
 const formSchema = z.discriminatedUnion("notification_type", [
@@ -98,6 +105,53 @@ const notificationTypeOptions = [
   { value: "webhook", label: "Webhook", description: "Send notifications to custom webhook" },
 ];
 
+const webhookPayloadTemplates = {
+  server: `{
+  "alert_type": "server",
+  "server_name": "\${server_name}",
+  "status": "\${status}",
+  "cpu_usage": "\${cpu_usage}",
+  "ram_usage": "\${ram_usage}",
+  "disk_usage": "\${disk_usage}",
+  "network_usage": "\${network_usage}",
+  "cpu_temp": "\${cpu_temp}",
+  "disk_io": "\${disk_io}",
+  "threshold": "\${threshold}",
+  "timestamp": "\${time}",
+  "message": "Server \${server_name} alert: \${status}"
+}`,
+  service: `{
+  "alert_type": "service",
+  "service_name": "\${service_name}",
+  "status": "\${status}",
+  "response_time": "\${response_time}",
+  "url": "\${url}",
+  "uptime": "\${uptime}",
+  "downtime": "\${downtime}",
+  "timestamp": "\${time}",
+  "message": "Service \${service_name} is \${status}"
+}`,
+  ssl: `{
+  "alert_type": "ssl",
+  "domain": "\${domain}",
+  "certificate_name": "\${certificate_name}",
+  "expiry_date": "\${expiry_date}",
+  "days_left": "\${days_left}",
+  "issuer": "\${issuer}",
+  "serial_number": "\${serial_number}",
+  "timestamp": "\${time}",
+  "message": "SSL certificate for \${domain} expires in \${days_left} days"
+}`
+};
+
+const defaultPayloadTemplate = `{
+  "alert_type": "general",
+  "service_name": "\${service_name}",
+  "status": "\${status}",
+  "message": "\${message}",
+  "timestamp": "\${time}"
+}`;
+
 export const NotificationChannelDialog = ({ 
   open, 
   onClose,
@@ -115,7 +169,7 @@ export const NotificationChannelDialog = ({
     },
   });
 
-  const { watch, reset } = form;
+  const { watch, reset, setValue } = form;
   const notificationType = watch("notification_type");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
@@ -145,6 +199,18 @@ export const NotificationChannelDialog = ({
     onClose(false);
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied",
+      description: "Template copied to clipboard",
+    });
+  };
+
+  const insertTemplate = (template: string) => {
+    setValue("webhook_payload_template", template);
+  };
+
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
@@ -158,6 +224,9 @@ export const NotificationChannelDialog = ({
           secret: values.webhook_secret || "",
           headers: values.webhook_headers || "",
           description: values.webhook_description || "",
+          payload_template: values.webhook_payload_template || "",
+          retry_count: values.webhook_retry_count || "3",
+          trigger_events: values.webhook_trigger_events || "all",
           user_id: "global", // or get current user id
         };
 
@@ -187,7 +256,7 @@ export const NotificationChannelDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={() => handleClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Edit Notification Channel" : "Add Notification Channel"}
@@ -433,6 +502,7 @@ export const NotificationChannelDialog = ({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
+                            <SelectItem value="GET">GET</SelectItem>
                             <SelectItem value="POST">POST</SelectItem>
                             <SelectItem value="PUT">PUT</SelectItem>
                             <SelectItem value="PATCH">PATCH</SelectItem>
@@ -456,6 +526,42 @@ export const NotificationChannelDialog = ({
                     )}
                   />
                 </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="webhook_retry_count"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Retry Count</FormLabel>
+                        <FormControl>
+                          <Input placeholder="3" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Number of retry attempts on failure
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="webhook_trigger_events"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Trigger Events</FormLabel>
+                        <FormControl>
+                          <Input placeholder="all" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Events that trigger this webhook (comma-separated)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="webhook_headers"
@@ -463,7 +569,11 @@ export const NotificationChannelDialog = ({
                     <FormItem>
                       <FormLabel>Custom Headers (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder='{"Authorization": "Bearer token"}' {...field} />
+                        <Textarea 
+                          placeholder='{"Authorization": "Bearer token", "Content-Type": "application/json"}' 
+                          className="min-h-20"
+                          {...field} 
+                        />
                       </FormControl>
                       <FormDescription>
                         JSON format for additional headers
@@ -472,6 +582,7 @@ export const NotificationChannelDialog = ({
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="webhook_description"
@@ -485,6 +596,111 @@ export const NotificationChannelDialog = ({
                     </FormItem>
                   )}
                 />
+
+                {/* Payload Template Section */}
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="webhook_payload_template"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Payload Template</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder={defaultPayloadTemplate}
+                            className="min-h-32 font-mono text-sm"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          JSON template for the webhook payload. Use placeholders like ${'{service_name}'}, ${'{status}'}, etc.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium">Payload Templates</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => insertTemplate(webhookPayloadTemplates.server)}
+                            className="justify-start"
+                          >
+                            Server Monitoring
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => insertTemplate(webhookPayloadTemplates.service)}
+                            className="justify-start"
+                          >
+                            Service Uptime
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => insertTemplate(webhookPayloadTemplates.ssl)}
+                            className="justify-start"
+                          >
+                            SSL Certificate
+                          </Button>
+                        </div>
+                        
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium mb-2">Available Placeholders:</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            <div className="space-y-1">
+                              <p className="font-medium text-muted-foreground">Server:</p>
+                              <div className="space-y-0.5">
+                                <code className="bg-muted px-1 rounded">${'{server_name}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{cpu_usage}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{ram_usage}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{disk_usage}'}</code>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-medium text-muted-foreground">Service:</p>
+                              <div className="space-y-0.5">
+                                <code className="bg-muted px-1 rounded">${'{service_name}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{response_time}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{url}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{uptime}'}</code>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-medium text-muted-foreground">SSL:</p>
+                              <div className="space-y-0.5">
+                                <code className="bg-muted px-1 rounded">${'{domain}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{expiry_date}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{days_left}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{issuer}'}</code>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-medium text-muted-foreground">Common:</p>
+                              <div className="space-y-0.5">
+                                <code className="bg-muted px-1 rounded">${'{status}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{time}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{message}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{threshold}'}</code>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </>
             )}
             
