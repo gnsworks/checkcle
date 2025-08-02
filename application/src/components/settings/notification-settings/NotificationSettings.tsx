@@ -87,6 +87,7 @@ const NotificationSettings = () => {
             <TabsTrigger value="slack">Slack</TabsTrigger>
             <TabsTrigger value="signal">Signal</TabsTrigger>
             <TabsTrigger value="email">Email</TabsTrigger>
+            <TabsTrigger value="webhook">Webhook</TabsTrigger>
           </TabsList>
           
           <TabsContent value={currentTab} className="mt-0">

@@ -1,17 +1,15 @@
 
 import React, { useState } from "react";
-import { NotificationTemplate, templateService } from "@/services/templateService";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
-import { 
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Edit, MoreVertical } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -22,63 +20,75 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { templateService, AnyTemplate, TemplateType } from "@/services/templateService";
 
 interface TemplateListProps {
-  templates: NotificationTemplate[];
+  templates: AnyTemplate[];
   isLoading: boolean;
   onEdit: (id: string) => void;
   refetchTemplates: () => void;
+  templateType: TemplateType;
 }
 
-export const TemplateList: React.FC<TemplateListProps> = ({
-  templates,
-  isLoading,
-  onEdit,
+export const TemplateList: React.FC<TemplateListProps> = ({ 
+  templates, 
+  isLoading, 
+  onEdit, 
   refetchTemplates,
+  templateType 
 }) => {
   const { toast } = useToast();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [templateToDelete, setTemplateToDelete] = useState<NotificationTemplate | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const queryClient = useQueryClient();
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
 
-  const handleDeletePrompt = (template: NotificationTemplate) => {
-    setTemplateToDelete(template);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteTemplate = async () => {
-    if (!templateToDelete) return;
-    
-    setIsDeleting(true);
-    try {
-      await templateService.deleteTemplate(templateToDelete.id);
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => templateService.deleteTemplate(id, templateType),
+    onSuccess: () => {
       toast({
         title: "Template deleted",
-        description: `Template "${templateToDelete.name}" has been removed.`,
+        description: "The template has been deleted successfully.",
       });
+      queryClient.invalidateQueries({ queryKey: ['notification_templates', templateType] });
       refetchTemplates();
-    } catch (error) {
-      console.error("Error deleting template:", error);
+    },
+    onError: (error) => {
+     // console.error("Error deleting template:", error);
       toast({
         title: "Error",
         description: "Failed to delete template. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsDeleting(false);
-      setDeleteDialogOpen(false);
-      setTemplateToDelete(null);
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    setDeleteTemplateId(id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteTemplateId) {
+      deleteMutation.mutate(deleteTemplateId);
+      setDeleteTemplateId(null);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="py-8 flex justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-64"></div>
-        </div>
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex items-center justify-between p-4 border border-border rounded-lg">
+            <div className="space-y-2">
+              <div className="h-4 bg-muted animate-pulse rounded w-32"></div>
+              <div className="h-3 bg-muted animate-pulse rounded w-48"></div>
+            </div>
+            <div className="flex space-x-2">
+              <div className="h-8 w-8 bg-muted animate-pulse rounded"></div>
+              <div className="h-8 w-8 bg-muted animate-pulse rounded"></div>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -86,79 +96,82 @@ export const TemplateList: React.FC<TemplateListProps> = ({
   if (templates.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground mb-2">No templates found</p>
-        <p className="text-sm text-muted-foreground">
-          Create your first notification template to get started.
-        </p>
+        <p className="text-muted-foreground">No templates found. Create your first template to get started.</p>
       </div>
     );
   }
 
+  const getTemplateTypeLabel = (type: TemplateType) => {
+    switch (type) {
+      case 'server': return 'Server';
+      case 'service': return 'Service';
+      case 'ssl': return 'SSL';
+      default: return 'Unknown';
+    }
+  };
+
   return (
     <>
-      <div className="border rounded-md overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="w-24">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {templates.map((template) => (
-              <TableRow key={template.id}>
-                <TableCell className="font-medium">{template.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{template.type}</Badge>
-                </TableCell>
-                <TableCell>
-                  {new Date(template.created).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => onEdit(template.id)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDeletePrompt(template)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="space-y-4">
+        {templates.map((template) => (
+          <div key={template.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium">{template.name}</h3>
+                <Badge variant="outline">{getTemplateTypeLabel(templateType)}</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Created: {new Date(template.created).toLocaleDateString()}
+                {template.updated !== template.created && 
+                  ` • Updated: ${new Date(template.updated).toLocaleDateString()}`
+                }
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(template.id)}
+              >
+                <Edit className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => handleDelete(template.id)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={!!deleteTemplateId} onOpenChange={() => setDeleteTemplateId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Template</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the template "{templateToDelete?.name}"? This action cannot be undone.
+              This action cannot be undone. This will permanently delete the template.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                handleDeleteTemplate();
-              }}
-              disabled={isDeleting}
+              onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
