@@ -13,6 +13,8 @@ export const addSSLCertificate = async (
   certificateData: AddSSLCertificateDto
 ): Promise<SSLCertificate> => {
   try {
+    const currentTime = new Date().toISOString();
+    
     // Prepare the data for saving to database
     // The Go service will handle the actual SSL checking
     const data = {
@@ -23,14 +25,15 @@ export const addSSLCertificate = async (
       cert_sans: "",
       cert_alg: "",
       serial_number: "",
-      valid_from: new Date().toISOString(), // Will be updated by Go service
-      valid_till: new Date().toISOString(), // Will be updated by Go service
+      valid_from: currentTime, // Will be updated by Go service
+      valid_till: currentTime, // Will be updated by Go service
       validity_days: 0, // Will be updated by Go service
       days_left: 0, // Will be updated by Go service
       warning_threshold: Number(certificateData.warning_threshold) || 30,
       expiry_threshold: Number(certificateData.expiry_threshold) || 7,
       notification_channel: certificateData.notification_channel || "",
       check_interval: Number(certificateData.check_interval) || 1, // New field
+      check_at: currentTime, // Set to current time to trigger immediate check
     };
 
     // Save to database
@@ -112,10 +115,10 @@ export const deleteSSLCertificate = async (id: string): Promise<boolean> => {
  */
 export const refreshAllCertificates = async (): Promise<{ success: number; failed: number }> => {
   try {
-    const response = await pb.collection("ssl_certificates").getList(1, 200);
+    const response = await pb.collection("ssl_certificates").getList(1, 100);
     const certificates = response.items as unknown as SSLCertificate[];
 
-   // console.log(`Refreshing ${certificates.length} certificates...`);
+    console.log(`Refreshing ${certificates.length} certificates...`);
 
     let success = 0;
     let failed = 0;
@@ -125,14 +128,14 @@ export const refreshAllCertificates = async (): Promise<{ success: number; faile
         await checkCertificateAndNotify(cert);
         success++;
       } catch (error) {
-     //   console.error(`Failed to refresh certificate ${cert.domain}:`, error);
+        console.error(`Failed to refresh certificate ${cert.domain}:`, error);
         failed++;
       }
     }
 
     return { success, failed };
   } catch (error) {
-  //  console.error("Error refreshing certificates:", error);
+    console.error("Error refreshing certificates:", error);
     throw error;
   }
 };

@@ -1,18 +1,14 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '@/services/authService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Mail, LogIn, Settings, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, Mail, LogIn, AlertCircle, Github } from "lucide-react";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { API_ENDPOINTS, getCurrentEndpoint, setApiEndpoint } from '@/lib/pocketbase';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
 
 const Login = () => {
@@ -20,30 +16,13 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [currentEndpoint, setCurrentEndpoint] = useState(getCurrentEndpoint());
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { theme } = useTheme();
 
-  // Add responsiveness check
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    
-    return () => {
-      window.removeEventListener('resize', checkScreenSize);
-    };
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setLoginError(''); // Clear previous errors
@@ -69,7 +48,7 @@ const Login = () => {
           setLoginError(error.message);
         }
       } else {
-        setLoginError(`${t("authenticationFailed")}. Server: ${currentEndpoint}`);
+        setLoginError(t("authenticationFailed"));
       }
       
       toast({
@@ -82,60 +61,35 @@ const Login = () => {
              error.message.includes('invalid email or password')) 
             ? t("invalidCredentials")
             : error.message
-          : `${t("authenticationFailed")}. Server: ${currentEndpoint}`,
+          : t("authenticationFailed"),
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [email, password, navigate, t]);
 
-  const handleEndpointChange = (value: string) => {
-    setCurrentEndpoint(value);
-    setApiEndpoint(value);
-  };
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    setLoginError(''); // Clear error when user starts typing
+  }, []);
+
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    setLoginError(''); // Clear error when user starts typing
+  }, []);
+
+  const openExternalLink = useCallback((url: string) => {
+    window.open(url, '_blank');
+  }, []);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-md p-4 sm:p-8 space-y-6 rounded-xl bg-card shadow-xl border border-border/20">
-        <div className="text-center relative">
-          {/* Commented out API Endpoint Settings button
-          <div className="absolute right-0 top-0">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" aria-label="API Settings">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[260px] sm:w-80">
-                <div className="space-y-4">
-                  <h4 className="font-medium">API Endpoint Settings</h4>
-                  <RadioGroup 
-                    value={currentEndpoint} 
-                    onValueChange={handleEndpointChange}
-                    className="gap-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value={API_ENDPOINTS.LOCAL} id="local" />
-                      <Label htmlFor="local" className="truncate text-sm">Local: {API_ENDPOINTS.LOCAL}</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value={API_ENDPOINTS.REMOTE} id="remote" />
-                      <Label htmlFor="remote" className="truncate text-sm">Remote: {API_ENDPOINTS.REMOTE}</Label>
-                    </div>
-                  </RadioGroup>
-                  <div className="text-xs text-muted-foreground truncate">
-                    Current endpoint: {currentEndpoint}
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-          */}
-          
+        <div className="text-center">
           {/* Logo */}
           <div className="mb-4">
             <img 
@@ -146,10 +100,7 @@ const Login = () => {
           </div>
           
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{t("signInToYourAccount")}</h1>
-          {/* Removed "Don't have an account? Create one" text */}
         </div>
-
-        {/* Removed Google Sign in button section */}
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Error Alert */}
@@ -171,10 +122,7 @@ const Login = () => {
                 placeholder="your.email@provider.com"
                 type="email"
                 value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setLoginError(''); // Clear error when user starts typing
-                }}
+                onChange={handleEmailChange}
                 required
                 className="pl-10 text-sm sm:text-base h-9 sm:h-10"
               />
@@ -204,10 +152,7 @@ const Login = () => {
                 placeholder="••••••••••••"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setLoginError(''); // Clear error when user starts typing
-                }}
+                onChange={handlePasswordChange}
                 required
                 className="pl-10 text-sm sm:text-base h-9 sm:h-10"
               />
@@ -234,11 +179,36 @@ const Login = () => {
             {loading ? t("signingIn") : t("signIn")}
             {!loading && <LogIn className="ml-2 h-4 w-4" />}
           </Button>
-
-          <p className="text-xxs sm:text-xs text-center text-muted-foreground">
-            {t("bySigningIn")} <a href="#" className="text-emerald-500">{t("termsAndConditions")}</a> {t("and")} <a href="#" className="text-emerald-500">{t("privacyPolicy")}</a>.
-          </p>
         </form>
+      </div>
+
+      {/* Footer with Social Media Icons */}
+      <div className="mt-8 flex items-center justify-center space-x-6">
+        <button
+          onClick={() => openExternalLink('https://github.com/operacle/checkcle')}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="GitHub"
+        >
+          <Github className="h-5 w-5" />
+        </button>
+        <button
+          onClick={() => openExternalLink('https://x.com/checkcle_oss')}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="X (Twitter)"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </button>
+        <button
+          onClick={() => openExternalLink('https://discord.gg/xs9gbubGwX')}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Discord"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.010c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
+        </button>
       </div>
 
       <ForgotPasswordDialog 

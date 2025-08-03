@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { pb } from "@/lib/pocketbase";
 import { Server } from "@/types/server.types";
 import { RefreshCw, X } from "lucide-react";
 import { alertConfigService, AlertConfiguration } from "@/services/alertConfigService";
-import { templateService, NotificationTemplate } from "@/services/templateService";
+import { templateService, ServerNotificationTemplate } from "@/services/templateService";
 import { serverThresholdService, ServerThreshold } from "@/services/serverThresholdService";
 
 interface EditServerDialogProps {
@@ -66,9 +67,9 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertConfigs, setAlertConfigs] = useState<AlertConfiguration[]>([]);
-  const [templates, setTemplates] = useState<NotificationTemplate[]>([]);
+  const [templates, setTemplates] = useState<ServerNotificationTemplate[]>([]);
   const [thresholds, setThresholds] = useState<ServerThreshold[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<NotificationTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<ServerNotificationTemplate | null>(null);
   const [selectedThreshold, setSelectedThreshold] = useState<ServerThreshold | null>(null);
   const [loadingAlertConfigs, setLoadingAlertConfigs] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
@@ -78,7 +79,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   // Initialize form data when server changes
   useEffect(() => {
     if (server) {
-    //  console.log("Setting form data for server:", server);
+     // console.log("Setting form data for server:", server);
       // Parse comma-separated notification_id into array
       const notificationChannels = server.notification_id 
         ? server.notification_id.split(',').map(id => id.trim()).filter(id => id)
@@ -180,8 +181,9 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   const loadTemplates = async () => {
     try {
       setLoadingTemplates(true);
-      const templateList = await templateService.getTemplates();
-      setTemplates(templateList);
+      const templateList = await templateService.getTemplates('server');
+      // Cast to ServerNotificationTemplate[] since we know we're getting server templates
+      setTemplates(templateList as ServerNotificationTemplate[]);
     } catch (error) {
     //  console.error('Error loading templates:', error);
       toast({
@@ -621,27 +623,39 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
                       <CardContent className="space-y-3">
                         <div className="grid grid-cols-1 gap-3 text-sm">
                           <div>
-                            <Label className="text-xs font-medium text-muted-foreground">RAM Threshold Message</Label>
+                            <Label className="text-xs font-medium text-muted-foreground">RAM Message</Label>
                             <p className="text-sm bg-background p-2 rounded border">
-                              {selectedTemplate.up_message || "No RAM threshold message defined"}
+                              {selectedTemplate.ram_message || "No RAM message defined"}
                             </p>
                           </div>
                           <div>
-                            <Label className="text-xs font-medium text-muted-foreground">CPU Threshold Message</Label>
+                            <Label className="text-xs font-medium text-muted-foreground">CPU Message</Label>
                             <p className="text-sm bg-background p-2 rounded border">
-                              {selectedTemplate.down_message || "No CPU threshold message defined"}
+                              {selectedTemplate.cpu_message || "No CPU message defined"}
                             </p>
                           </div>
                           <div>
-                            <Label className="text-xs font-medium text-muted-foreground">Disk Threshold Message</Label>
+                            <Label className="text-xs font-medium text-muted-foreground">Disk Message</Label>
                             <p className="text-sm bg-background p-2 rounded border">
-                              {selectedTemplate.incident_message || "No disk threshold message defined"}
+                              {selectedTemplate.disk_message || "No disk message defined"}
                             </p>
                           </div>
                           <div>
-                            <Label className="text-xs font-medium text-muted-foreground">Network Threshold Message</Label>
+                            <Label className="text-xs font-medium text-muted-foreground">Network Message</Label>
                             <p className="text-sm bg-background p-2 rounded border">
-                              {selectedTemplate.maintenance_message || "No network threshold message defined"}
+                              {selectedTemplate.network_message || "No network message defined"}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-muted-foreground">Up Message</Label>
+                            <p className="text-sm bg-background p-2 rounded border">
+                              {selectedTemplate.up_message || "No up message defined"}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-muted-foreground">Down Message</Label>
+                            <p className="text-sm bg-background p-2 rounded border">
+                              {selectedTemplate.down_message || "No down message defined"}
                             </p>
                           </div>
                         </div>

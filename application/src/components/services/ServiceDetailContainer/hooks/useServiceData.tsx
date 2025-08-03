@@ -125,7 +125,7 @@ export const useServiceData = (serviceId: string | undefined, startDate: Date, e
       } else {
         // Fetch regional agent specific data
         const [regionName, agentId] = currentAgent.split("|");
-        console.log(`Fetching regional agent data for region: ${regionName}, agent: ${agentId} from ${service.type} collection`);
+       // console.log(`Fetching regional agent data for region: ${regionName}, agent: ${agentId} from ${service.type} collection`);
         history = await uptimeService.getUptimeHistoryByRegionalAgent(serviceId, limit, start, end, service.type, regionName, agentId);
        // console.log(`Retrieved ${history.length} regional monitoring records`);
       }

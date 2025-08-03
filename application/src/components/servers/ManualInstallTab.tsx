@@ -25,7 +25,7 @@ export const ManualInstallTab: React.FC<ManualInstallTabProps> = ({
   onDialogClose,
 }) => {
   const getManualInstallSteps = () => {
-    const scriptUrl = "https://raw.githubusercontent.com/operacle/checkcle/refs/heads/main/scripts/server-agent.sh";
+    const scriptUrl = "https://cdn.checkcle.io/scripts/server-agent.sh";
     
     return [
       {

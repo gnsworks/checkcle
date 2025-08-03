@@ -8,12 +8,14 @@ import {
   DialogFooter 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertConfiguration, alertConfigService } from "@/services/alertConfigService";
+import { WebhookConfiguration, webhookService } from "@/services/webhookService";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -24,7 +26,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
-import { Loader2 } from "lucide-react";
+import { Loader2, Copy } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
 
 interface NotificationChannelDialogProps {
   open: boolean;
@@ -36,7 +40,7 @@ const baseSchema = z.object({
   notify_name: z.string().min(1, "Name is required"),
   notification_type: z.enum(["telegram", "discord", "slack", "signal", "email"]),
   enabled: z.boolean().default(true),
-  service_id: z.string().default("global"), // Assuming global for now, could be linked to specific services
+  service_id: z.string().default("global"),
   template_id: z.string().optional(),
 });
 
@@ -63,7 +67,22 @@ const signalSchema = baseSchema.extend({
 
 const emailSchema = baseSchema.extend({
   notification_type: z.literal("email"),
-  // Email specific fields could be added here
+  email_address: z.string().email("Valid email is required"),
+  email_sender_name: z.string().min(1, "Sender name is required"),
+  smtp_server: z.string().min(1, "SMTP server is required"),
+  smtp_port: z.string().min(1, "SMTP port is required"),
+});
+
+const webhookSchema = baseSchema.extend({
+  notification_type: z.literal("webhook"),
+  webhook_url: z.string().url("Must be a valid URL"),
+  webhook_method: z.enum(["GET", "POST", "PUT", "PATCH"]).default("POST"),
+  webhook_secret: z.string().optional(),
+  webhook_headers: z.string().optional(),
+  webhook_description: z.string().optional(),
+  webhook_payload_template: z.string().optional(),
+  webhook_retry_count: z.string().optional(),
+  webhook_trigger_events: z.string().optional(),
 });
 
 const formSchema = z.discriminatedUnion("notification_type", [
@@ -71,10 +90,67 @@ const formSchema = z.discriminatedUnion("notification_type", [
   discordSchema,
   slackSchema,
   signalSchema,
-  emailSchema
+  emailSchema,
+  webhookSchema
 ]);
 
 type FormValues = z.infer<typeof formSchema>;
+
+const notificationTypeOptions = [
+  { value: "telegram", label: "Telegram", description: "Send notifications via Telegram bot" },
+  { value: "discord", label: "Discord", description: "Send notifications to Discord webhook" },
+  { value: "slack", label: "Slack", description: "Send notifications to Slack webhook" },
+  { value: "signal", label: "Signal", description: "Send notifications via Signal" },
+  { value: "email", label: "Email", description: "Send notifications via email" },
+  { value: "webhook", label: "Webhook", description: "Send notifications to custom webhook" },
+];
+
+const webhookPayloadTemplates = {
+  server: `{
+  "alert_type": "server",
+  "server_name": "\${server_name}",
+  "status": "\${status}",
+  "cpu_usage": "\${cpu_usage}",
+  "ram_usage": "\${ram_usage}",
+  "disk_usage": "\${disk_usage}",
+  "network_usage": "\${network_usage}",
+  "cpu_temp": "\${cpu_temp}",
+  "disk_io": "\${disk_io}",
+  "threshold": "\${threshold}",
+  "timestamp": "\${time}",
+  "message": "Server \${server_name} alert: \${status}"
+}`,
+  service: `{
+  "alert_type": "service",
+  "service_name": "\${service_name}",
+  "status": "\${status}",
+  "response_time": "\${response_time}",
+  "url": "\${url}",
+  "uptime": "\${uptime}",
+  "downtime": "\${downtime}",
+  "timestamp": "\${time}",
+  "message": "Service \${service_name} is \${status}"
+}`,
+  ssl: `{
+  "alert_type": "ssl",
+  "domain": "\${domain}",
+  "certificate_name": "\${certificate_name}",
+  "expiry_date": "\${expiry_date}",
+  "days_left": "\${days_left}",
+  "issuer": "\${issuer}",
+  "serial_number": "\${serial_number}",
+  "timestamp": "\${time}",
+  "message": "SSL certificate for \${domain} expires in \${days_left} days"
+}`
+};
+
+const defaultPayloadTemplate = `{
+  "alert_type": "general",
+  "service_name": "\${service_name}",
+  "status": "\${status}",
+  "message": "\${message}",
+  "timestamp": "\${time}"
+}`;
 
 export const NotificationChannelDialog = ({ 
   open, 
@@ -93,7 +169,7 @@ export const NotificationChannelDialog = ({
     },
   });
 
-  const { watch, reset } = form;
+  const { watch, reset, setValue } = form;
   const notificationType = watch("notification_type");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
@@ -123,19 +199,54 @@ export const NotificationChannelDialog = ({
     onClose(false);
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied",
+      description: "Template copied to clipboard",
+    });
+  };
+
+  const insertTemplate = (template: string) => {
+    setValue("webhook_payload_template", template);
+  };
+
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
-      // Ensure service_id is always present
-      const configData = {
-        ...values,
-        service_id: values.service_id || "global",
-      };
-      
-      if (isEditing && editingConfig?.id) {
-        await alertConfigService.updateAlertConfiguration(editingConfig.id, configData);
+      if (values.notification_type === "webhook") {
+        // Handle webhook creation/update separately
+        const webhookData: Omit<WebhookConfiguration, 'id' | 'collectionId' | 'collectionName' | 'created' | 'updated'> = {
+          name: values.notify_name,
+          url: values.webhook_url,
+          enabled: values.enabled ? "on" : "off",
+          method: values.webhook_method || "POST",
+          secret: values.webhook_secret || "",
+          headers: values.webhook_headers || "",
+          description: values.webhook_description || "",
+          payload_template: values.webhook_payload_template || "",
+          retry_count: values.webhook_retry_count || "3",
+          trigger_events: values.webhook_trigger_events || "all",
+          user_id: "global", // or get current user id
+        };
+
+        if (isEditing && editingConfig?.id) {
+          await webhookService.updateWebhook(editingConfig.id, webhookData);
+        } else {
+          await webhookService.createWebhook(webhookData);
+        }
       } else {
-        await alertConfigService.createAlertConfiguration(configData as any);
+        // Handle other notification types with existing service
+        const configData = {
+          ...values,
+          service_id: values.service_id || "global",
+        };
+        
+        if (isEditing && editingConfig?.id) {
+          await alertConfigService.updateAlertConfiguration(editingConfig.id, configData);
+        } else {
+          await alertConfigService.createAlertConfiguration(configData as any);
+        }
       }
       onClose(true); // Close with refresh
     } finally {
@@ -145,7 +256,7 @@ export const NotificationChannelDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={() => handleClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Edit Notification Channel" : "Add Notification Channel"}
@@ -159,7 +270,7 @@ export const NotificationChannelDialog = ({
               name="notify_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Channel Name</FormLabel>
                   <FormControl>
                     <Input placeholder="My Notification Channel" {...field} />
                   </FormControl>
@@ -175,57 +286,25 @@ export const NotificationChannelDialog = ({
               control={form.control}
               name="notification_type"
               render={({ field }) => (
-                <FormItem className="space-y-3">
+                <FormItem>
                   <FormLabel>Channel Type</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="telegram" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Telegram
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="discord" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Discord
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="slack" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Slack
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="signal" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Signal
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="email" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Email
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select notification type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {notificationTypeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{option.label}</span>
+                            <span className="text-xs text-muted-foreground">{option.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -243,6 +322,9 @@ export const NotificationChannelDialog = ({
                       <FormControl>
                         <Input placeholder="Telegram Chat ID" {...field} />
                       </FormControl>
+                      <FormDescription>
+                        The Telegram chat ID to send notifications to
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -256,6 +338,9 @@ export const NotificationChannelDialog = ({
                       <FormControl>
                         <Input placeholder="Telegram Bot Token" {...field} type="password" />
                       </FormControl>
+                      <FormDescription>
+                        Your Telegram bot token from @BotFather
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -271,8 +356,11 @@ export const NotificationChannelDialog = ({
                   <FormItem>
                     <FormLabel>Webhook URL</FormLabel>
                     <FormControl>
-                      <Input placeholder="Discord Webhook URL" {...field} />
+                      <Input placeholder="https://discord.com/api/webhooks/..." {...field} />
                     </FormControl>
+                    <FormDescription>
+                      Discord webhook URL from your server settings
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -287,8 +375,11 @@ export const NotificationChannelDialog = ({
                   <FormItem>
                     <FormLabel>Webhook URL</FormLabel>
                     <FormControl>
-                      <Input placeholder="Slack Webhook URL" {...field} />
+                      <Input placeholder="https://hooks.slack.com/services/..." {...field} />
                     </FormControl>
+                    <FormDescription>
+                      Slack incoming webhook URL
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -305,10 +396,312 @@ export const NotificationChannelDialog = ({
                     <FormControl>
                       <Input placeholder="+1234567890" {...field} />
                     </FormControl>
+                    <FormDescription>
+                      Signal phone number to send notifications to
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            )}
+
+            {notificationType === "email" && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="email_address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl>
+                        <Input placeholder="notifications@example.com" {...field} type="email" />
+                      </FormControl>
+                      <FormDescription>
+                        Email address to send notifications to
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email_sender_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sender Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Alert System" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Display name for outgoing emails
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="smtp_server"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SMTP Server</FormLabel>
+                        <FormControl>
+                          <Input placeholder="smtp.gmail.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="smtp_port"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SMTP Port</FormLabel>
+                        <FormControl>
+                          <Input placeholder="587" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </>
+            )}
+
+            {notificationType === "webhook" && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="webhook_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Webhook URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://api.example.com/webhook" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The URL where webhook notifications will be sent
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="webhook_method"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>HTTP Method</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select method" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="GET">GET</SelectItem>
+                            <SelectItem value="POST">POST</SelectItem>
+                            <SelectItem value="PUT">PUT</SelectItem>
+                            <SelectItem value="PATCH">PATCH</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="webhook_secret"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Secret (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="webhook_secret_key" {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="webhook_retry_count"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Retry Count</FormLabel>
+                        <FormControl>
+                          <Input placeholder="3" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Number of retry attempts on failure
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="webhook_trigger_events"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Trigger Events</FormLabel>
+                        <FormControl>
+                          <Input placeholder="all" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Events that trigger this webhook (comma-separated)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="webhook_headers"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Custom Headers (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder='{"Authorization": "Bearer token", "Content-Type": "application/json"}' 
+                          className="min-h-20"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        JSON format for additional headers
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="webhook_description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Description of this webhook" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Payload Template Section */}
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="webhook_payload_template"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Payload Template</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder={defaultPayloadTemplate}
+                            className="min-h-32 font-mono text-sm"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          JSON template for the webhook payload. Use placeholders like ${'{service_name}'}, ${'{status}'}, etc.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium">Payload Templates</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => insertTemplate(webhookPayloadTemplates.server)}
+                            className="justify-start"
+                          >
+                            Server Monitoring
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => insertTemplate(webhookPayloadTemplates.service)}
+                            className="justify-start"
+                          >
+                            Service Uptime
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => insertTemplate(webhookPayloadTemplates.ssl)}
+                            className="justify-start"
+                          >
+                            SSL Certificate
+                          </Button>
+                        </div>
+                        
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium mb-2">Available Placeholders:</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                            <div className="space-y-1">
+                              <p className="font-medium text-muted-foreground">Server:</p>
+                              <div className="space-y-0.5">
+                                <code className="bg-muted px-1 rounded">${'{server_name}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{cpu_usage}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{ram_usage}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{disk_usage}'}</code>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-medium text-muted-foreground">Service:</p>
+                              <div className="space-y-0.5">
+                                <code className="bg-muted px-1 rounded">${'{service_name}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{response_time}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{url}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{uptime}'}</code>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-medium text-muted-foreground">SSL:</p>
+                              <div className="space-y-0.5">
+                                <code className="bg-muted px-1 rounded">${'{domain}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{expiry_date}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{days_left}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{issuer}'}</code>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-medium text-muted-foreground">Common:</p>
+                              <div className="space-y-0.5">
+                                <code className="bg-muted px-1 rounded">${'{status}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{time}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{message}'}</code><br/>
+                                <code className="bg-muted px-1 rounded">${'{threshold}'}</code>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
             )}
             
             <FormField
@@ -319,7 +712,7 @@ export const NotificationChannelDialog = ({
                   <div className="space-y-0.5">
                     <FormLabel>Enabled</FormLabel>
                     <FormDescription>
-                      Turn notifications on or off
+                      Enable or disable this notification channel
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -338,7 +731,7 @@ export const NotificationChannelDialog = ({
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isEditing ? "Update" : "Create"}
+                {isEditing ? "Update Channel" : "Create Channel"}
               </Button>
             </DialogFooter>
           </form>

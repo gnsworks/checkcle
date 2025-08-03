@@ -1,42 +1,42 @@
 
-import { NotificationTemplate } from "../templateService";
+import { AnyTemplate } from "../templateService";
 
 /**
  * Process a notification template with service data
  */
 export function processTemplate(
-  template: NotificationTemplate,
+  template: AnyTemplate,
   service: any,
   status: string,
   responseTime?: number
 ): string {
   try {
-    console.log(`Processing template for status: ${status}`);
+   // console.log(`Processing template for status: ${status}`);
     
     let templateText = "";
     
     // Select the appropriate message template based on status
     if (status === "up") {
-      templateText = template.up_message || `Service ${service.name} is now UP`;
+      templateText = (template as any).up_message || `Service ${service.name} is now UP`;
     } else if (status === "down") {
-      templateText = template.down_message || `Service ${service.name} is DOWN`;
+      templateText = (template as any).down_message || `Service ${service.name} is DOWN`;
     } else if (status === "warning") {
-      templateText = template.incident_message || `Warning: Service ${service.name} has an incident`;
+      templateText = (template as any).incident_message || `Warning: Service ${service.name} has an incident`;
     } else if (status === "maintenance" || status === "paused") {
-      templateText = template.maintenance_message || `Service ${service.name} is in maintenance mode`;
+      templateText = (template as any).maintenance_message || `Service ${service.name} is in maintenance mode`;
     } else if (status === "resolved") {
-      templateText = template.resolved_message || `Issue with service ${service.name} has been resolved`;
+      templateText = (template as any).resolved_message || `Issue with service ${service.name} has been resolved`;
     } else {
       templateText = `Service ${service.name} status changed to: ${status}`;
     }
     
     // Skip replacement if template is empty
     if (!templateText) {
-      console.log("Empty template for status:", status);
+     // console.log("Empty template for status:", status);
       return generateDefaultMessage(service.name, status, responseTime);
     }
     
-    console.log("Using template text:", templateText);
+   // console.log("Using template text:", templateText);
     
     // Replace placeholders with actual values
     let message = templateText
@@ -56,10 +56,10 @@ export function processTemplate(
       .replace(/\${url}/g, service.url || 'N/A')
       .replace(/\${time}/g, new Date().toLocaleString());
       
-    console.log("Processed template message:", message);
+   // console.log("Processed template message:", message);
     return message;
   } catch (error) {
-    console.error("Error processing template:", error);
+   // console.error("Error processing template:", error);
     return generateDefaultMessage(service.name, status, responseTime);
   }
 }

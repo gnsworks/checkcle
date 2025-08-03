@@ -18,6 +18,13 @@ export interface AlertConfiguration {
   enabled: boolean;
   created?: string;
   updated?: string;
+  // Email specific fields
+  email_address?: string;
+  email_sender_name?: string;
+  smtp_server?: string;
+  smtp_port?: string;
+  webhook_id?: string;
+  channel_id?: string;
 }
 
 export const alertConfigService = {
@@ -25,7 +32,7 @@ export const alertConfigService = {
    // console.info("Fetching alert configurations");
     try {
       const response = await pb.collection('alert_configurations').getList(1, 50);
-    //  console.info("Alert configurations response:", response);
+     // console.info("Alert configurations response:", response);
       return response.items as AlertConfiguration[];
     } catch (error) {
      // console.error("Error fetching alert configurations:", error);
@@ -42,17 +49,17 @@ export const alertConfigService = {
    // console.info("Creating alert configuration:", config);
     try {
       const result = await pb.collection('alert_configurations').create(config);
-    //  console.info("Alert configuration created:", result);
+     // console.info("Alert configuration created:", result);
       toast({
         title: "Success",
-        description: "Notification settings saved successfully",
+        description: "Notification channel created successfully",
       });
       return result as AlertConfiguration;
     } catch (error) {
     //  console.error("Error creating alert configuration:", error);
       toast({
         title: "Error",
-        description: "Failed to save notification settings",
+        description: "Failed to create notification channel",
         variant: "destructive"
       });
       return null;
@@ -60,20 +67,20 @@ export const alertConfigService = {
   },
 
   async updateAlertConfiguration(id: string, config: Partial<AlertConfiguration>): Promise<AlertConfiguration | null> {
-  //  console.info(`Updating alert configuration ${id}:`, config);
+   // console.info(`Updating alert configuration ${id}:`, config);
     try {
       const result = await pb.collection('alert_configurations').update(id, config);
-    //  console.info("Alert configuration updated:", result);
+     // console.info("Alert configuration updated:", result);
       toast({
         title: "Success",
-        description: "Notification settings updated successfully",
+        description: "Notification channel updated successfully",
       });
       return result as AlertConfiguration;
     } catch (error) {
-   //   console.error("Error updating alert configuration:", error);
+     // console.error("Error updating alert configuration:", error);
       toast({
         title: "Error",
-        description: "Failed to update notification settings",
+        description: "Failed to update notification channel",
         variant: "destructive"
       });
       return null;
@@ -81,17 +88,17 @@ export const alertConfigService = {
   },
 
   async deleteAlertConfiguration(id: string): Promise<boolean> {
-  //  console.info(`Deleting alert configuration ${id}`);
+   // console.info(`Deleting alert configuration ${id}`);
     try {
       await pb.collection('alert_configurations').delete(id);
-    //  console.info("Alert configuration deleted");
+     // console.info("Alert configuration deleted");
       toast({
         title: "Success",
         description: "Notification channel removed",
       });
       return true;
     } catch (error) {
-    //  console.error("Error deleting alert configuration:", error);
+     // console.error("Error deleting alert configuration:", error);
       toast({
         title: "Error",
         description: "Failed to remove notification channel",

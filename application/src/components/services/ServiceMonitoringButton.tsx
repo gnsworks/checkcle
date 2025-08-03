@@ -5,7 +5,6 @@ import { Play, Pause } from "lucide-react";
 import { Service } from "@/types/service.types";
 import { serviceService } from "@/services/serviceService"; 
 import { useToast } from "@/hooks/use-toast";
-import { notificationService } from "@/services/notificationService";
 
 interface ServiceMonitoringButtonProps {
   service: Service;
@@ -34,16 +33,8 @@ export function ServiceMonitoringButton({ service, onStatusChange }: ServiceMoni
         
         if (onStatusChange) onStatusChange("paused");
         
-        // Send notification for paused status (only here, not in pauseMonitoring.ts)
-        if (service.alerts !== "muted") {
-         // console.log("Sending pause notification from UI component");
-          // IMPORTANT: Direct call to the notification service to ensure a message is sent
-          await notificationService.sendNotification({
-            service: service,
-            status: "paused",
-            timestamp: new Date().toISOString(),
-          });
-        }
+        // Notification handling removed - will be handled by backend
+       // console.log("Service paused - notifications will be handled by backend");
         
         toast({
           title: "Monitoring paused",
@@ -51,7 +42,7 @@ export function ServiceMonitoringButton({ service, onStatusChange }: ServiceMoni
         });
       } else {
         // Start/resume monitoring
-       // console.log(`Starting monitoring for service ${service.id} (${service.name})`);
+      //  console.log(`Starting monitoring for service ${service.id} (${service.name})`);
         
         // First ensure we update the status in the database to not be paused anymore
         await serviceService.resumeMonitoring(service.id);

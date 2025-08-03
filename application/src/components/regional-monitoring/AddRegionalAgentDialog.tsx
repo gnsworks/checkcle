@@ -114,7 +114,7 @@ export const AddRegionalAgentDialog: React.FC<AddRegionalAgentDialogProps> = ({
           textarea.setSelectionRange(0, 99999); // For mobile devices
         }
       } catch (selectError) {
-        console.error('Failed to select text:', selectError);
+      //  console.error('Failed to select text:', selectError);
       }
     }
   };
