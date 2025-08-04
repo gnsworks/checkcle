@@ -1,3 +1,4 @@
+
 export interface SSLCertificate {
   id: string;
   domain: string;
@@ -15,6 +16,10 @@ export interface SSLCertificate {
   warning_threshold: number;
   expiry_threshold: number;
   notification_channel: string;
+  alert_template?: string; // New field for SSL alert template
+  // PocketBase specific fields
+  notification_id?: string; // Multi notification channels as comma-separated string
+  template_id?: string; // Alert template ID for PocketBase
   last_notified?: string;
   created?: string;
   updated?: string;
@@ -33,5 +38,8 @@ export interface AddSSLCertificateDto {
   warning_threshold: number;
   expiry_threshold: number;
   notification_channel: string;
+  alert_template?: string; // New field for SSL alert template
+  notification_id?: string; // Multi notification channels as comma-separated string
+  template_id?: string; // Alert template ID for PocketBase
   check_interval?: number; // New field for check interval in days
 }
