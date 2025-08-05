@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { 
   Dialog, 
@@ -38,7 +37,7 @@ interface NotificationChannelDialogProps {
 
 const baseSchema = z.object({
   notify_name: z.string().min(1, "Name is required"),
-  notification_type: z.enum(["telegram", "discord", "slack", "signal", "email"]),
+  notification_type: z.enum(["telegram", "discord", "slack", "signal", "google_chat", "email", "webhook"]),
   enabled: z.boolean().default(true),
   service_id: z.string().default("global"),
   template_id: z.string().optional(),
@@ -63,6 +62,11 @@ const slackSchema = baseSchema.extend({
 const signalSchema = baseSchema.extend({
   notification_type: z.literal("signal"),
   signal_number: z.string().min(1, "Signal number is required"),
+});
+
+const googleChatSchema = baseSchema.extend({
+  notification_type: z.literal("google_chat"),
+  google_chat_webhook_url: z.string().url("Must be a valid URL"),
 });
 
 const emailSchema = baseSchema.extend({
@@ -90,6 +94,7 @@ const formSchema = z.discriminatedUnion("notification_type", [
   discordSchema,
   slackSchema,
   signalSchema,
+  googleChatSchema,
   emailSchema,
   webhookSchema
 ]);
@@ -101,6 +106,7 @@ const notificationTypeOptions = [
   { value: "discord", label: "Discord", description: "Send notifications to Discord webhook" },
   { value: "slack", label: "Slack", description: "Send notifications to Slack webhook" },
   { value: "signal", label: "Signal", description: "Send notifications via Signal" },
+  { value: "google_chat", label: "Google Chat", description: "Send notifications to Google Chat webhook" },
   { value: "email", label: "Email", description: "Send notifications via email" },
   { value: "webhook", label: "Webhook", description: "Send notifications to custom webhook" },
 ];
@@ -236,7 +242,7 @@ export const NotificationChannelDialog = ({
           await webhookService.createWebhook(webhookData);
         }
       } else {
-        // Handle other notification types with existing service
+        // Handle all other notification types including Google Chat and Email
         const configData = {
           ...values,
           service_id: values.service_id || "global",
@@ -248,7 +254,14 @@ export const NotificationChannelDialog = ({
           await alertConfigService.createAlertConfiguration(configData as any);
         }
       }
+      
       onClose(true); // Close with refresh
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save notification channel",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -310,7 +323,6 @@ export const NotificationChannelDialog = ({
               )}
             />
             
-            {/* Show different fields based on notification type */}
             {notificationType === "telegram" && (
               <>
                 <FormField
@@ -398,6 +410,25 @@ export const NotificationChannelDialog = ({
                     </FormControl>
                     <FormDescription>
                       Signal phone number to send notifications to
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {notificationType === "google_chat" && (
+              <FormField
+                control={form.control}
+                name="google_chat_webhook_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Google Chat Webhook URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://chat.googleapis.com/v1/spaces/..." {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Google Chat webhook URL from your Google Chat space
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -597,7 +628,6 @@ export const NotificationChannelDialog = ({
                   )}
                 />
 
-                {/* Payload Template Section */}
                 <div className="space-y-4">
                   <FormField
                     control={form.control}
