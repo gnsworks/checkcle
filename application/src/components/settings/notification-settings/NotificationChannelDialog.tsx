@@ -102,13 +102,48 @@ const formSchema = z.discriminatedUnion("notification_type", [
 type FormValues = z.infer<typeof formSchema>;
 
 const notificationTypeOptions = [
-  { value: "telegram", label: "Telegram", description: "Send notifications via Telegram bot" },
-  { value: "discord", label: "Discord", description: "Send notifications to Discord webhook" },
-  { value: "slack", label: "Slack", description: "Send notifications to Slack webhook" },
-  { value: "signal", label: "Signal", description: "Send notifications via Signal" },
-  { value: "google_chat", label: "Google Chat", description: "Send notifications to Google Chat webhook" },
-  { value: "email", label: "Email", description: "Send notifications via email" },
-  { value: "webhook", label: "Webhook", description: "Send notifications to custom webhook" },
+  { 
+    value: "telegram", 
+    label: "Telegram", 
+    description: "Send notifications via Telegram bot",
+    icon: "/upload/notification/telegram.png" 
+  },
+  { 
+    value: "discord", 
+    label: "Discord", 
+    description: "Send notifications to Discord webhook",
+    icon: "/upload/notification/discord.png" 
+  },
+  { 
+    value: "slack", 
+    label: "Slack", 
+    description: "Send notifications to Slack webhook",
+    icon: "/upload/notification/slack.png" 
+  },
+  { 
+    value: "signal", 
+    label: "Signal", 
+    description: "Send notifications via Signal",
+    icon: "/upload/notification/signal.png" 
+  },
+  { 
+    value: "google_chat", 
+    label: "Google Chat", 
+    description: "Send notifications to Google Chat webhook",
+    icon: "/upload/notification/google.png" 
+  },
+  { 
+    value: "email", 
+    label: "Email", 
+    description: "Send notifications via email",
+    icon: "/upload/notification/email.png" 
+  },
+  { 
+    value: "webhook", 
+    label: "Webhook", 
+    description: "Send notifications to custom webhook",
+    icon: "/upload/notification/webhook.png"
+  },
 ];
 
 const webhookPayloadTemplates = {
@@ -310,9 +345,16 @@ export const NotificationChannelDialog = ({
                     <SelectContent>
                       {notificationTypeOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{option.label}</span>
-                            <span className="text-xs text-muted-foreground">{option.description}</span>
+                          <div className="flex items-center space-x-3">
+                            <img 
+                              src={option.icon} 
+                              alt={`${option.label} icon`}
+                              className="w-5 h-5 object-contain"
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-medium">{option.label}</span>
+                              <span className="text-xs text-muted-foreground">{option.description}</span>
+                            </div>
                           </div>
                         </SelectItem>
                       ))}
