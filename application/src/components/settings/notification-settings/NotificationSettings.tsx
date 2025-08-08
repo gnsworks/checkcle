@@ -5,28 +5,47 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { AlertConfiguration, alertConfigService } from "@/services/alertConfigService";
+import { WebhookConfiguration, webhookService } from "@/services/webhookService";
 import { NotificationChannelDialog } from "./NotificationChannelDialog";
 import { NotificationChannelList } from "./NotificationChannelList";
+import { pb } from "@/lib/pocketbase";
+
+interface CombinedChannel extends Partial<AlertConfiguration> {
+  isWebhook?: boolean;
+  url?: string;
+  method?: string;
+  description?: string;
+}
 
 const NotificationSettings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [alertConfigs, setAlertConfigs] = useState<AlertConfiguration[]>([]);
+  const [webhookConfigs, setWebhookConfigs] = useState<WebhookConfiguration[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState<string>("all");
   const [editingConfig, setEditingConfig] = useState<AlertConfiguration | null>(null);
 
-  const fetchAlertConfigurations = async () => {
+  const fetchNotificationChannels = async () => {
     setIsLoading(true);
     try {
+      // Fetch alert configurations
       const configs = await alertConfigService.getAlertConfigurations();
       setAlertConfigs(configs);
+
+      // Fetch webhooks
+      try {
+        const webhookResponse = await pb.collection('webhook').getList(1, 50);
+        setWebhookConfigs(webhookResponse.items as WebhookConfiguration[]);
+      } catch (webhookError) {
+        setWebhookConfigs([]);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchAlertConfigurations();
+    fetchNotificationChannels();
   }, []);
 
   const handleAddNew = () => {
@@ -40,22 +59,66 @@ const NotificationSettings = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const success = await alertConfigService.deleteAlertConfiguration(id);
-    if (success) {
-      fetchAlertConfigurations();
+    // Check if it's a webhook first
+    const isWebhook = webhookConfigs.find(w => w.id === id);
+    
+    if (isWebhook) {
+      // Handle webhook deletion
+      if (confirm("Are you sure you want to delete this webhook?")) {
+        try {
+          await pb.collection('webhook').delete(id);
+          fetchNotificationChannels();
+        } catch (error) {
+          console.error("Error deleting webhook:", error);
+        }
+      }
+    } else {
+      // Handle alert config deletion
+      const success = await alertConfigService.deleteAlertConfiguration(id);
+      if (success) {
+        fetchNotificationChannels();
+      }
     }
   };
 
   const handleDialogClose = (refreshList: boolean) => {
     setDialogOpen(false);
     if (refreshList) {
-      fetchAlertConfigurations();
+      fetchNotificationChannels();
     }
   };
 
+  const getCombinedChannels = (): CombinedChannel[] => {
+    const combined: CombinedChannel[] = [];
+    
+    // Add alert configurations
+    alertConfigs.forEach(config => {
+      combined.push(config);
+    });
+    
+    // Add webhooks as notification channels
+    webhookConfigs.forEach(webhook => {
+      combined.push({
+        id: webhook.id,
+        notify_name: webhook.name,
+        notification_type: "webhook" as const,
+        enabled: webhook.enabled === "on",
+        created: webhook.created,
+        updated: webhook.updated,
+        isWebhook: true,
+        url: webhook.url,
+        method: webhook.method,
+        description: webhook.description
+      });
+    });
+    
+    return combined;
+  };
+
   const getFilteredConfigs = () => {
-    if (currentTab === "all") return alertConfigs;
-    return alertConfigs.filter(config => config.notification_type === currentTab);
+    const combined = getCombinedChannels();
+    if (currentTab === "all") return combined;
+    return combined.filter(config => config.notification_type === currentTab);
   };
 
   return (
@@ -86,6 +149,7 @@ const NotificationSettings = () => {
             <TabsTrigger value="discord">Discord</TabsTrigger>
             <TabsTrigger value="slack">Slack</TabsTrigger>
             <TabsTrigger value="signal">Signal</TabsTrigger>
+            <TabsTrigger value="google_chat">Google Chat</TabsTrigger>
             <TabsTrigger value="email">Email</TabsTrigger>
             <TabsTrigger value="webhook">Webhook</TabsTrigger>
           </TabsList>

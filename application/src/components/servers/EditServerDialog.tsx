@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -79,7 +78,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   // Initialize form data when server changes
   useEffect(() => {
     if (server) {
-     // console.log("Setting form data for server:", server);
       // Parse comma-separated notification_id into array
       const notificationChannels = server.notification_id 
         ? server.notification_id.split(',').map(id => id.trim()).filter(id => id)
@@ -110,10 +108,8 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   // Load existing threshold data when thresholds are loaded and we have a server with threshold_id
   useEffect(() => {
     if (server && server.threshold_id && thresholds.length > 0) {
-    //  console.log("Loading existing threshold data for server:", server.threshold_id);
       const existingThreshold = thresholds.find(t => t.id === server.threshold_id);
       if (existingThreshold) {
-      //  console.log("Found existing threshold:", existingThreshold);
         setSelectedThreshold(existingThreshold);
         // Handle the API response format with proper field names and type conversion
         setThresholdFormData({
@@ -167,7 +163,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       const configs = await alertConfigService.getAlertConfigurations();
       setAlertConfigs(configs);
     } catch (error) {
-    //  console.error('Error loading alert configurations:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -185,7 +180,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       // Cast to ServerNotificationTemplate[] since we know we're getting server templates
       setTemplates(templateList as ServerNotificationTemplate[]);
     } catch (error) {
-    //  console.error('Error loading templates:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -202,7 +196,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       const thresholdList = await serverThresholdService.getServerThresholds();
       setThresholds(thresholdList);
     } catch (error) {
-     // console.error('Error loading server thresholds:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -210,47 +203,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       });
     } finally {
       setLoadingThresholds(false);
-    }
-  };
-
-  const handleThresholdUpdate = async () => {
-    if (!selectedThreshold) return;
-
-    try {
-      // Use the correct field name for RAM threshold
-      const updateData = {
-        cpu_threshold: thresholdFormData.cpu_threshold,
-        ram_threshold_message: thresholdFormData.ram_threshold, // Use the correct field name
-        disk_threshold: thresholdFormData.disk_threshold,
-        network_threshold: thresholdFormData.network_threshold,
-      };
-
-      await serverThresholdService.updateServerThreshold(selectedThreshold.id, updateData);
-      
-      // Update local state
-      setSelectedThreshold({
-        ...selectedThreshold,
-        ...thresholdFormData,
-      });
-
-      // Update thresholds list
-      setThresholds(prev => prev.map(t => 
-        t.id === selectedThreshold.id 
-          ? { ...t, ...thresholdFormData }
-          : t
-      ));
-
-      toast({
-        title: "Threshold updated",
-        description: "Server threshold values have been updated successfully.",
-      });
-    } catch (error) {
-    //  console.error('Error updating threshold:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update threshold values.",
-      });
     }
   };
 
@@ -294,6 +246,40 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
 
       await pb.collection('servers').update(server.id, updateData);
 
+      // Update threshold if a threshold is selected and values have been modified
+      if (selectedThreshold && formData.threshold_id !== "none") {
+        try {
+          const updateThresholdData = {
+            cpu_threshold: thresholdFormData.cpu_threshold,
+            ram_threshold_message: thresholdFormData.ram_threshold, // Use the correct field name
+            disk_threshold: thresholdFormData.disk_threshold,
+            network_threshold: thresholdFormData.network_threshold,
+          };
+
+          await serverThresholdService.updateServerThreshold(selectedThreshold.id, updateThresholdData);
+          
+          // Update local state
+          setSelectedThreshold({
+            ...selectedThreshold,
+            ...thresholdFormData,
+          });
+
+          // Update thresholds list
+          setThresholds(prev => prev.map(t => 
+            t.id === selectedThreshold.id 
+              ? { ...t, ...thresholdFormData }
+              : t
+          ));
+
+        } catch (error) {
+          toast({
+            variant: "destructive",
+            title: "Warning",
+            description: "Server updated but failed to update threshold values.",
+          });
+        }
+      }
+
       toast({
         title: "Server updated",
         description: `${formData.name} has been updated successfully.`,
@@ -303,7 +289,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       onOpenChange(false);
       
     } catch (error) {
-    //  console.error('Error updating server:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -518,16 +503,8 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
                   {/* Editable Threshold Details */}
                   {selectedThreshold && (
                     <Card className="bg-muted/50">
-                      <CardHeader className="flex flex-row items-center justify-between">
+                      <CardHeader>
                         <CardTitle className="text-base">Threshold Details: {selectedThreshold.name}</CardTitle>
-                        <Button 
-                          type="button"
-                          onClick={handleThresholdUpdate}
-                          size="sm"
-                          variant="outline"
-                        >
-                          Update Thresholds
-                        </Button>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="grid grid-cols-2 gap-3 text-sm">
