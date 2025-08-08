@@ -1,15 +1,13 @@
-
 import { Button } from "@/components/ui/button";
 import { AuthUser } from "@/services/authService";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Moon, PanelLeft, PanelLeftClose, Sun, Globe, FileText, Github, Twitter, MessageSquare, Bell, User, Settings, LogOut, Grid3x3 } from "lucide-react";
+import { Moon, PanelLeft, PanelLeftClose, Sun, Globe, FileText, Github, Twitter, MessageSquare, Bell, User, Settings, LogOut } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { useSystemSettings } from "@/hooks/useSystemSettings";
-import QuickActionsDialog from "./QuickActionsDialog";
 
 interface HeaderProps {
   currentUser: AuthUser | null;
@@ -29,7 +27,6 @@ export const Header = ({
   const [greeting, setGreeting] = useState<string>("");
   const { systemName } = useSystemSettings();
   const navigate = useNavigate();
-  const [quickActionsOpen, setQuickActionsOpen] = useState(false);
 
   // Set greeting based on time of day
   useEffect(() => {
@@ -53,7 +50,7 @@ export const Header = ({
   // Log avatar data for debugging
   useEffect(() => {
     if (currentUser) {
-    //  console.log("Avatar URL in Header:", currentUser.avatar);
+      //console.log("Avatar URL in Header:", currentUser.avatar);
     }
   }, [currentUser]);
 
@@ -66,7 +63,7 @@ export const Header = ({
     } else {
       avatarUrl = currentUser.avatar;
     }
-   // console.log("Final avatar URL:", avatarUrl);
+    console.log("Final avatar URL:", avatarUrl);
   }
 
   return (
@@ -89,16 +86,6 @@ export const Header = ({
       <div className="flex items-center gap-4 z-10">
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-2">
           {sidebarCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
-        </Button>
-        
-        {/* Quick Actions Button */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setQuickActionsOpen(true)} 
-          className="mr-2"
-        >
-          <Grid3x3 className="h-5 w-5 text-green-500" />
         </Button>
         
         <div className="flex items-center space-x-2">
@@ -162,7 +149,7 @@ export const Header = ({
           variant="outline" 
           size="icon" 
           className="rounded-full w-8 h-8 border-border"
-          onClick={() => window.open("https://x.com/checkcle_oss", "_blank")}
+          onClick={() => window.open("https://x.com/checkcle_oss)", "_blank")}
         >
           <span className="sr-only">X (Twitter)</span>
           <Twitter className="w-4 h-4" />
@@ -223,9 +210,6 @@ export const Header = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      
-      {/* Quick Actions Dialog */}
-      <QuickActionsDialog isOpen={quickActionsOpen} setIsOpen={setQuickActionsOpen} />
     </header>
   );
 };
