@@ -10,7 +10,7 @@ import { useEffect } from "react";
 // Base schema
 const baseSchema = {
   name: z.string().min(2, "Name is required and must be at least 2 characters"),
-  templateType: z.enum(['server', 'service', 'ssl'] as const),
+  templateType: z.enum(['server', 'service', 'ssl', 'server_threshold'] as const),
   placeholder: z.string().optional(),
 };
 
@@ -52,11 +52,24 @@ const sslTemplateSchema = z.object({
   warning: z.string().min(1, "Warning message is required"),
 });
 
+// Server threshold schema
+const serverThresholdSchema = z.object({
+  ...baseSchema,
+  templateType: z.literal('server_threshold'),
+  cpu_threshold: z.number().min(0).max(100, "CPU threshold must be between 0-100"),
+  ram_threshold: z.number().min(0).max(100, "RAM threshold must be between 0-100"),
+  disk_threshold: z.number().min(0).max(100, "Disk threshold must be between 0-100"),
+  network_threshold: z.number().min(0).max(100, "Network threshold must be between 0-100"),
+  notification_id: z.string().optional(),
+  server_template_id: z.string().optional(),
+});
+
 // Combined schema
 export const templateFormSchema = z.discriminatedUnion("templateType", [
   serverTemplateSchema,
   serviceTemplateSchema,
   sslTemplateSchema,
+  serverThresholdSchema,
 ]);
 
 export type TemplateFormData = z.infer<typeof templateFormSchema>;
@@ -107,6 +120,18 @@ const getDefaultValues = (templateType: TemplateType): TemplateFormData => {
         exiring_soon: "SSL certificate for ${domain} will expire in ${days_left} days on ${expiry_date}",
         warning: "Warning: SSL certificate for ${domain} requires attention",
       };
+
+    case 'server_threshold':
+      return {
+        ...base,
+        templateType: 'server_threshold' as const,
+        cpu_threshold: 85,
+        ram_threshold: 80,
+        disk_threshold: 90,
+        network_threshold: 75,
+        notification_id: "",
+        server_template_id: "",
+      };
     
     default:
       throw new Error(`Unknown template type: ${templateType}`);
@@ -125,9 +150,7 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditMode = !!templateId;
-
- // console.log("Template form initialized with templateId:", templateId, "templateType:", templateType, "isEditMode:", isEditMode);
-
+ 
   const form = useForm<TemplateFormData>({
     resolver: zodResolver(templateFormSchema),
     defaultValues: getDefaultValues(templateType),
@@ -139,7 +162,6 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
     queryKey: ['template', templateId, templateType],
     queryFn: () => {
       if (!templateId) return null;
-    //  console.log("Fetching template data for ID:", templateId, "type:", templateType);
       return templateService.getTemplate(templateId, templateType);
     },
     enabled: !!templateId && open,
@@ -148,7 +170,6 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
   // Set form values when template data is loaded
   useEffect(() => {
     if (templateData && open) {
-    //  console.log("Setting form values with template data:", templateData);
       
       const formData: any = {
         name: templateData.name || "",
@@ -156,10 +177,23 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
         placeholder: (templateData as any).placeholder || "",
       };
 
-      // Add template-specific fields
+      // Add template-specific fields with proper type conversion for server_threshold
       Object.keys(templateData).forEach(key => {
         if (!['id', 'collectionId', 'collectionName', 'created', 'updated', 'name'].includes(key)) {
-          formData[key] = (templateData as any)[key] || "";
+          let value = (templateData as any)[key];
+          
+          // Convert string values to numbers for server threshold fields
+          if (templateType === 'server_threshold' && 
+              ['cpu_threshold', 'ram_threshold', 'disk_threshold', 'network_threshold'].includes(key)) {
+            value = typeof value === 'string' ? Number(value) : value;
+            // Ensure valid number, fallback to default if invalid
+            if (isNaN(value)) {
+              const defaults = getDefaultValues(templateType) as any;
+              value = defaults[key] || 0;
+            }
+          }
+          
+          formData[key] = value || "";
         }
       });
 
@@ -179,7 +213,6 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
       onSuccess();
     },
     onError: (error) => {
-    //  console.error("Error creating template:", error);
       toast({
         title: "Error",
         description: "Failed to create template. Please check your inputs and try again.",
@@ -201,7 +234,6 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
       onSuccess();
     },
     onError: (error) => {
-    //  console.error("Error updating template:", error);
       toast({
         title: "Error",
         description: "Failed to update template. Please check your inputs and try again.",
@@ -214,17 +246,14 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
 
   // Handle form submission
   const onSubmit = (formData: TemplateFormData) => {
-   // console.log("Submitting form data:", formData);
     
     // Remove templateType from the data before sending to API
     const { templateType: _, ...templateDataWithoutType } = formData;
     const completeData = templateDataWithoutType as AnyTemplateData;
     
     if (isEditMode && templateId) {
-    //  console.log("Updating template with ID:", templateId);
       updateMutation.mutate({ id: templateId, data: completeData });
     } else {
-    //  console.log("Creating new template");
       createMutation.mutate(completeData);
     }
   };
@@ -232,7 +261,6 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
   // Reset form when dialog closes or template type changes
   useEffect(() => {
     if (!open) {
-    //  console.log("Dialog closed, resetting form");
       form.reset(getDefaultValues(templateType));
     }
   }, [open, form, templateType]);

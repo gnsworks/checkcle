@@ -64,10 +64,11 @@ export const AlertsTemplates = () => {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TemplateType)}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="service">Service Uptime</TabsTrigger>
             <TabsTrigger value="server">Server Monitoring</TabsTrigger>
             <TabsTrigger value="ssl">SSL Certificate</TabsTrigger>
+            <TabsTrigger value="server_threshold">Server Threshold</TabsTrigger>
           </TabsList>
           
           <TabsContent value="service" className="mt-4">
@@ -123,6 +124,25 @@ export const AlertsTemplates = () => {
                 onEdit={(id) => handleEditTemplate(id, 'ssl')}
                 refetchTemplates={refetch}
                 templateType="ssl"
+              />
+            )}
+          </TabsContent>
+          
+          <TabsContent value="server_threshold" className="mt-4">
+            {error ? (
+              <div className="text-center p-6">
+                <p className="text-destructive mb-4">Error loading server threshold templates</p>
+                <Button variant="outline" onClick={() => refetch()}>
+                  Try Again
+                </Button>
+              </div>
+            ) : (
+              <TemplateList 
+                templates={templates} 
+                isLoading={isLoading} 
+                onEdit={(id) => handleEditTemplate(id, 'server_threshold')}
+                refetchTemplates={refetch}
+                templateType="server_threshold"
               />
             )}
           </TabsContent>

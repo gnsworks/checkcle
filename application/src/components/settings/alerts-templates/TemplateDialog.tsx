@@ -10,6 +10,7 @@ import { useTemplateForm } from "./hooks/useTemplateForm";
 import { ServerTemplateFields } from "./form/ServerTemplateFields";
 import { ServiceTemplateFields } from "./form/ServiceTemplateFields";
 import { SslTemplateFields } from "./form/SslTemplateFields";
+import { ServerThresholdFields } from "./form/ServerThresholdFields";
 import { Loader2, ChevronDown } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TemplateType, templateTypeConfigs } from "@/services/templateService";
@@ -72,6 +73,8 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
         return <ServiceTemplateFields control={form.control} />;
       case 'ssl':
         return <SslTemplateFields control={form.control} />;
+      case 'server_threshold':
+        return <ServerThresholdFields control={form.control} />;
       default:
         return null;
     }
@@ -158,6 +161,7 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
                                   <SelectItem value="server">Server Monitoring</SelectItem>
                                   <SelectItem value="service">Service Uptime</SelectItem>
                                   <SelectItem value="ssl">SSL Certificate</SelectItem>
+                                  <SelectItem value="server_threshold">Server Threshold</SelectItem>
                                 </SelectContent>
                               </Select>
                             </FormControl>
@@ -166,27 +170,29 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
                         )}
                       />
                       
-                      <FormField
-                        control={form.control}
-                        name="placeholder"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Custom Placeholder</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Optional custom placeholder"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      {selectedTemplateType !== 'server_threshold' && (
+                        <FormField
+                          control={form.control}
+                          name="placeholder"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Custom Placeholder</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  placeholder="Optional custom placeholder"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                     </div>
                     
                     <Tabs defaultValue="messages">
                       <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="messages">Messages</TabsTrigger>
+                        <TabsTrigger value="messages">{selectedTemplateType === 'server_threshold' ? 'Thresholds' : 'Messages'}</TabsTrigger>
                         <TabsTrigger value="placeholders">Placeholders</TabsTrigger>
                       </TabsList>
                       
