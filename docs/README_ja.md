@@ -39,8 +39,10 @@ CheckCleは、フルスタックシステム、アプリケーション、イン
 
 ## 🎯 ライブデモ  
 👉 **今すぐ試す:** [CheckCle ライブデモ](https://demo.checkcle.io)
+    ユーザー: admin@example.com | パスワード: Admin123456
 
 ## 🌟 主要機能
+### 📝 ロードマップ : [DEVELOPMENT_ROADMAP](DEVELOPMENT_ROADMAP.md)
 
 ### アップタイムサービス & インフラストラクチャサーバー監視
 - HTTP、DNS、Pingプロトコルの監視
@@ -144,6 +146,37 @@ services:
 
 ---
 
+## スポンサー
+🙏 スポンサーの皆様には心より感謝しております。皆様のご貢献により、インフラストラクチャ（ホスティング、ドメイン）の維持、テストの実行、価値ある機能の継続的な開発が可能になっています。
+
+### 🥈 シルバー・アップタイム・アライ
+
+<a href="https://github.com/michaelortnerit">
+  <img src="https://avatars.githubusercontent.com/u/135371107?v=4" width="75" height="75" style="border-radius: 50%; display: block;" />
+</a>
+
+### 🧡 Ping サポーター
+
+<a href="https://github.com/samang-dauth">
+  <img src="https://avatars.githubusercontent.com/u/4575656?v=4" width="75" height="75" style="border-radius: 50%; display: block;" />
+</a>
+
+### 🤝 エコシステム & コミュニティパートナー
+<a href="https://github.com/gitbookio">
+  <img src="https://avatars.githubusercontent.com/u/7111340?s=200&v=4" 
+       width="75" height="75" 
+       style="border-radius: 50%; display: block;" />
+</a>
+
+---
+
+## 👥 貢献者
+CheckCleの継続的な改善にご貢献いただき、ありがとうございます。皆様は素晴らしいです 🫶
+
+[![](https://contrib.rocks/image?repo=operacle/checkcle)](https://github.com/operacle/checkcle/graphs/contributors)
+
+---
+
 ## 🤝 貢献の方法
 
 CheckCleの改善にご協力いただける方法をご紹介します：
@@ -158,7 +191,7 @@ CheckCleの改善にご協力いただける方法をご紹介します：
 
 ## 🌍 つながりを保つ
 - ウェブサイト: [checkcle.io](https://checkcle.io)
-- ドキュメント: [docs.checkcle.io](https://docs.checkcle.io)
+- ドキュメント: [docs.checkcle.io](https://docs.checkcle.io) | CheckCle OSS サイトプランをスポンサーしてくださった[GitBook](https://github.com/gitbookio)に特別な感謝を！
 - GitHubリポジトリ: ⭐ [CheckCle](https://github.com/operacle/checkcle.git)
 - コミュニティチャンネル: ディスカッションやissuesで参加してください！
 - Discord: コミュニティに参加 [@discord](https://discord.gg/xs9gbubGwX)
@@ -169,9 +202,6 @@ CheckCleの改善にご協力いただける方法をご紹介します：
 CheckCleはMITライセンスの下でリリースされています。
 
 ---
-## 👥 貢献者
-
-[![](https://contrib.rocks/image?repo=operacle/checkcle)](https://github.com/operacle/checkcle/graphs/contributors)
 
 
 ## スター履歴

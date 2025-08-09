@@ -94,7 +94,37 @@ npm install && npm run dev
 
 #サーバーバックエンド
 cd server
-./pocketbase serve --dir pb_data
+./pocketbase serve --dir pb_data 
+
+localhostを使用していない場合は、次のコマンドで実行してください (./pocketbase serve --http=0.0.0.0:8090 --dir pb_data)
+```
+
+### 5. サービスチェック操作の開始
+
+```bash
+#サーバーバックエンド 
+サービス操作を開始 (PING、HTTP、TCP、DNSのサービスチェック)
+
+cd server/service-operation
+
+go run main.go (localhost接続の場合、.envを変更する必要はありません)
+```
+
+### 6. 分散地域エージェントの開始
+```bash
+#### 1. リポジトリをフォーク
+[GitHub](https://github.com/operacle/Distributed-Regional-Monitoring)で「Fork」をクリックして、自分のコピーを作成してください。
+
+#### 2. フォークをクローン
+git clone --branch main https://github.com/operacle/Distributed-Regional-Monitoring.git
+cd Distributed-Regional-Monitoring
+
+#### 3. Goサービスのインストール（Goサービスがインストールされていることを確認してください）
+
+.env.example -> .envにコピー
+.envファイルで地域エージェント設定を変更
+そして実行: go run main.go
+
 ```
 
 ---
@@ -103,7 +133,7 @@ cd server
 
 1. コードが既存のスタイルと命名規則に従っていることを確認してください。
 2. 明確で簡潔なコミットメッセージを書いてください。
-3. ブランチをプッシュし、`main`ブランチにプルリクエスト（PR）を開いてください。
+3. ブランチをプッシュし、`develop`ブランチにプルリクエスト（PR）を開いてください。
 4. 意味のあるPRの説明を提供してください（何を/なぜ/どのように）。
 5. 関連するissueがある場合はリンクしてください（例：`Closes #12`）。
 6. すべてのチェックが通ることを確認してください（例：リンティング、テスト）。
