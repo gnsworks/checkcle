@@ -29,6 +29,21 @@ export const SSLCertificateDetailDialog = ({
 
   if (!certificate) return null;
 
+  // Parse Subject Alternative Names for better display
+  const formatSANs = (sans: string): string[] => {
+    if (!sans) return [];
+    
+    // Split by common delimiters and clean up
+    const sansList = sans
+      .split(/[,;\n]/)
+      .map(san => san.trim())
+      .filter(san => san.length > 0);
+    
+    return sansList;
+  };
+
+  const sansList = certificate.cert_sans ? formatSANs(certificate.cert_sans) : [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -135,7 +150,17 @@ export const SSLCertificateDetailDialog = ({
                 <div className="mt-4">
                   <p className="text-sm font-medium text-muted-foreground mb-2">{t('subjectAlternativeNames')}</p>
                   <div className="bg-muted px-3 py-2 rounded">
-                    <p className="text-sm whitespace-pre-wrap">{certificate.cert_sans}</p>
+                    {sansList.length > 0 ? (
+                      <div className="space-y-1">
+                        {sansList.map((san, index) => (
+                          <div key={index} className="text-sm font-mono break-all">
+                            {san}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm">N/A</p>
+                    )}
                   </div>
                 </div>
               )}
