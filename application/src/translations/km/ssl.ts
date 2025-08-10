@@ -9,7 +9,8 @@ export const sslTranslations: SSLTranslations = {
   editSSLCertificate: "កែសម្រួលវិញ្ញាបនបត្រ SSL",
   deleteSSLCertificate: "លុបវិញ្ញាបនបត្រ SSL",
   sslCertificateDetails: "ព័ត៌មានលម្អិតនៃវិញ្ញាបនបត្រ SSL",
-  detailedInfo: "ព័ត៌មានលម្អិតសម្រាប់",
+  detailedInfo: "ព័ត៌មានលម្អិត",
+  viewDetailedInformation: "មើលព័ត៌មានលម្អិត",
 
   // Status related
   valid: "មានសុពលភាព",
@@ -48,11 +49,16 @@ export const sslTranslations: SSLTranslations = {
   validFrom: "មានសុពលភាពចាប់ពី",
   validUntil: "មានសុពលភាពរហូតដល់",
   validityDays: "ថ្ងៃសុពលភាព",
+  validityPeriod: "រយៈពេលសុពលភាព",
   organization: "អង្គការ",
   commonName: "ឈ្មោះទូទៅ",
   serialNumber: "លេខសៀរៀល",
   algorithm: "អាល់ហ្គោរីត",
   subjectAltNames: "ឈ្មោះផ្សេងៗដែលអាចប្រើបាន",
+   subjectAlternativeNames: "ឈ្មោះជំនួសផ្សេងៗ",
+  resolvedIP: "IP របស់ដូមែន",
+  issuedTo: "ចេញសម្រាប់",
+  days: "ថ្ងៃ",
   
   // Buttons and actions
   addDomain: "បន្ថែមដូមេន",
@@ -72,8 +78,11 @@ export const sslTranslations: SSLTranslations = {
   validity: "សុពលភាព",
   issuerInfo: "ព័ត៌មានអ្នកចេញផ្សាយ",
   technicalDetails: "ព័ត៌មានបច្ចេកទេស",
+  technicalInformation: "ព័ត៌មានបច្ចេកទេស",
   monitoringConfig: "ការកំណត់រចនាសម្ព័ន្ធការតាមដាន",
+  monitoringConfiguration: "ការកំណត់រចនាសម្ព័ន្ធការតាមដាន",
   recordInfo: "ព័ត៌មានកំណត់ត្រា",
+  certificateDetails: "ព័ត៌មានលម្អិតវិញ្ញាបនបត្រ",
   
   // Notifications and messages
   sslCertificateAdded: "វិញ្ញាបនបត្រ SSL បានបន្ថែមដោយជោគជ័យ",
