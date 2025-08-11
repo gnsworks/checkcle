@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -231,9 +230,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       setIsSubmitting(true);
 
       // Convert notification channels array to comma-separated string
-      const notificationChannelsString = formData.notification_enabled 
-        ? formData.notification_channels.join(',')
-        : "";
+      const notificationChannelsString = formData.notification_channels.join(',');
 
       const updateData = {
         name: formData.name,
@@ -242,8 +239,8 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
         docker: formData.docker_monitoring ? "true" : "false",
         notification_status: formData.notification_enabled,
         notification_id: notificationChannelsString,
-        threshold_id: formData.notification_enabled && formData.threshold_id !== "none" ? formData.threshold_id : "",
-        template_id: formData.notification_enabled && formData.template_id !== "none" ? formData.template_id : "",
+        threshold_id: formData.threshold_id !== "none" ? formData.threshold_id : "",
+        template_id: formData.template_id !== "none" ? formData.template_id : "",
         updated: new Date().toISOString(),
       };
 
@@ -406,10 +403,8 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
                 checked={formData.notification_enabled}
                 onCheckedChange={(checked) => setFormData(prev => ({ 
                   ...prev, 
-                  notification_enabled: checked,
-                  notification_channels: checked ? prev.notification_channels : [],
-                  threshold_id: checked ? prev.threshold_id : "none",
-                  template_id: checked ? prev.template_id : "none"
+                  notification_enabled: checked
+                  // Remove the automatic clearing of notification_channels, threshold_id, and template_id
                 }))}
               />
               <Label htmlFor="notificationEnabled">Enable Notifications</Label>
