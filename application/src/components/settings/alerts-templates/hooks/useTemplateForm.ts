@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,6 +28,12 @@ const serverTemplateSchema = z.object({
   paused_message: z.string().min(1, "Paused message is required"),
   cpu_temp_message: z.string().min(1, "CPU temperature message is required"),
   disk_io_message: z.string().min(1, "Disk I/O message is required"),
+  restore_ram_message: z.string().optional(),
+  restore_cpu_message: z.string().optional(),
+  restore_disk_message: z.string().optional(),
+  restore_network_message: z.string().optional(),
+  restore_cpu_temp_message: z.string().optional(),
+  restore_disk_io_message: z.string().optional(),
 });
 
 // Service template schema
@@ -98,6 +103,12 @@ const getDefaultValues = (templateType: TemplateType): TemplateFormData => {
         paused_message: "Monitoring for server ${server_name} is paused",
         cpu_temp_message: "CPU temperature on ${server_name} is ${cpu_temp}°C",
         disk_io_message: "Disk I/O on ${server_name} is ${disk_io} MB/s",
+        restore_ram_message: "Memory usage on ${server_name} has returned to normal: ${ram_usage}%",
+        restore_cpu_message: "CPU usage on ${server_name} has returned to normal: ${cpu_usage}%",
+        restore_disk_message: "Disk usage on ${server_name} has returned to normal: ${disk_usage}%",
+        restore_network_message: "Network usage on ${server_name} has returned to normal: ${network_usage}%",
+        restore_cpu_temp_message: "CPU temperature on ${server_name} has returned to normal: ${cpu_temp}°C",
+        restore_disk_io_message: "Disk I/O on ${server_name} has returned to normal: ${disk_io} MB/s",
       };
     
     case 'service':
@@ -150,7 +161,7 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditMode = !!templateId;
- 
+  
   const form = useForm<TemplateFormData>({
     resolver: zodResolver(templateFormSchema),
     defaultValues: getDefaultValues(templateType),
@@ -162,6 +173,7 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
     queryKey: ['template', templateId, templateType],
     queryFn: () => {
       if (!templateId) return null;
+      
       return templateService.getTemplate(templateId, templateType);
     },
     enabled: !!templateId && open,
@@ -170,33 +182,54 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
   // Set form values when template data is loaded
   useEffect(() => {
     if (templateData && open) {
-      
+           
       const formData: any = {
         name: templateData.name || "",
         templateType: templateType,
         placeholder: (templateData as any).placeholder || "",
       };
 
-      // Add template-specific fields with proper type conversion for server_threshold
-      Object.keys(templateData).forEach(key => {
-        if (!['id', 'collectionId', 'collectionName', 'created', 'updated', 'name'].includes(key)) {
-          let value = (templateData as any)[key];
-          
-          // Convert string values to numbers for server threshold fields
-          if (templateType === 'server_threshold' && 
-              ['cpu_threshold', 'ram_threshold', 'disk_threshold', 'network_threshold'].includes(key)) {
-            value = typeof value === 'string' ? Number(value) : value;
-            // Ensure valid number, fallback to default if invalid
-            if (isNaN(value)) {
-              const defaults = getDefaultValues(templateType) as any;
-              value = defaults[key] || 0;
-            }
+      // Define the expected fields for each template type
+      const expectedFields = {
+        server: [
+          'ram_message', 'cpu_message', 'disk_message', 'network_message',
+          'up_message', 'down_message', 'notification_id', 'warning_message',
+          'paused_message', 'cpu_temp_message', 'disk_io_message',
+          'restore_ram_message', 'restore_cpu_message', 'restore_disk_message',
+          'restore_network_message', 'restore_cpu_temp_message', 'restore_disk_io_message'
+        ],
+        service: [
+          'up_message', 'down_message', 'maintenance_message', 'incident_message',
+          'resolved_message', 'warning_message'
+        ],
+        ssl: ['expired', 'exiring_soon', 'warning'],
+        server_threshold: [
+          'cpu_threshold', 'ram_threshold', 'disk_threshold', 'network_threshold',
+          'notification_id', 'server_template_id'
+        ]
+      };
+
+      // Add template-specific fields
+      const fieldsToProcess = expectedFields[templateType] || [];
+      fieldsToProcess.forEach(key => {
+        let value = (templateData as any)[key];
+        
+        // Convert string values to numbers for server threshold fields
+        if (templateType === 'server_threshold' && 
+            ['cpu_threshold', 'ram_threshold', 'disk_threshold', 'network_threshold'].includes(key)) {
+          value = typeof value === 'string' ? Number(value) : value;
+          // Ensure valid number, fallback to default if invalid
+          if (isNaN(value)) {
+            const defaults = getDefaultValues(templateType) as any;
+            value = defaults[key] || 0;
           }
-          
-          formData[key] = value || "";
         }
+        
+        // Set the value, using empty string as fallback for string fields
+        formData[key] = value !== undefined && value !== null ? value : "";
       });
 
+      console.log("Final form data being set:", formData);
       form.reset(formData);
     }
   }, [templateData, open, form, templateType]);
@@ -213,6 +246,7 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
       onSuccess();
     },
     onError: (error) => {
+
       toast({
         title: "Error",
         description: "Failed to create template. Please check your inputs and try again.",
@@ -234,6 +268,7 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
       onSuccess();
     },
     onError: (error) => {
+ 
       toast({
         title: "Error",
         description: "Failed to update template. Please check your inputs and try again.",
@@ -246,14 +281,17 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
 
   // Handle form submission
   const onSubmit = (formData: TemplateFormData) => {
+   
     
     // Remove templateType from the data before sending to API
     const { templateType: _, ...templateDataWithoutType } = formData;
     const completeData = templateDataWithoutType as AnyTemplateData;
     
     if (isEditMode && templateId) {
+
       updateMutation.mutate({ id: templateId, data: completeData });
     } else {
+
       createMutation.mutate(completeData);
     }
   };
@@ -261,6 +299,7 @@ export const useTemplateForm = ({ templateId, templateType, open, onOpenChange, 
   // Reset form when dialog closes or template type changes
   useEffect(() => {
     if (!open) {
+      console.log("Dialog closed, resetting form");
       form.reset(getDefaultValues(templateType));
     }
   }, [open, form, templateType]);
