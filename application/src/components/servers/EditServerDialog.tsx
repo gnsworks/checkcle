@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ interface EditServerDialogProps {
 interface ServerFormData {
   name: string;
   check_interval: number;
-  retry_attempts: number;
+  max_retries: number;
   docker_monitoring: boolean;
   notification_enabled: boolean;
   notification_channels: string[]; // Changed to array for multiple selections
@@ -49,7 +50,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   const [formData, setFormData] = useState<ServerFormData>({
     name: "",
     check_interval: 60,
-    retry_attempts: 3,
+    max_retries: 3,
     docker_monitoring: false,
     notification_enabled: false,
     notification_channels: [], // Changed to array
@@ -86,9 +87,9 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       setFormData({
         name: server.name || "",
         check_interval: server.check_interval || 60,
-        retry_attempts: 3,
+        max_retries: server.max_retries || 3,
         docker_monitoring: server.docker === "true",
-        notification_enabled: notificationChannels.length > 0,
+        notification_enabled: server.notification_status === true,
         notification_channels: notificationChannels,
         threshold_id: server.threshold_id || "none",
         template_id: server.template_id || "none",
@@ -237,7 +238,9 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       const updateData = {
         name: formData.name,
         check_interval: formData.check_interval,
+        max_retries: formData.max_retries,
         docker: formData.docker_monitoring ? "true" : "false",
+        notification_status: formData.notification_enabled,
         notification_id: notificationChannelsString,
         threshold_id: formData.notification_enabled && formData.threshold_id !== "none" ? formData.threshold_id : "",
         template_id: formData.notification_enabled && formData.template_id !== "none" ? formData.template_id : "",
@@ -251,7 +254,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
         try {
           const updateThresholdData = {
             cpu_threshold: thresholdFormData.cpu_threshold,
-            ram_threshold_message: thresholdFormData.ram_threshold, // Use the correct field name
+            ram_threshold_message: thresholdFormData.ram_threshold,
             disk_threshold: thresholdFormData.disk_threshold,
             network_threshold: thresholdFormData.network_threshold,
           };
@@ -308,9 +311,9 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       setFormData({
         name: server.name || "",
         check_interval: server.check_interval || 60,
-        retry_attempts: 3,
+        max_retries: server.max_retries || 3,
         docker_monitoring: server.docker === "true",
-        notification_enabled: notificationChannels.length > 0,
+        notification_enabled: server.notification_status === true,
         notification_channels: notificationChannels,
         threshold_id: server.threshold_id || "none",
         template_id: server.template_id || "none",
@@ -359,20 +362,20 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="retryAttempts">Retry Attempts</Label>
+              <Label htmlFor="maxRetries">Max Retries</Label>
               <Select
-                value={formData.retry_attempts.toString()}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, retry_attempts: parseInt(value) }))}
+                value={formData.max_retries.toString()}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, max_retries: parseInt(value) }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select retry attempts" />
+                  <SelectValue placeholder="Select max retries" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">1 attempt</SelectItem>
-                  <SelectItem value="2">2 attempts</SelectItem>
-                  <SelectItem value="3">3 attempts</SelectItem>
-                  <SelectItem value="5">5 attempts</SelectItem>
-                  <SelectItem value="10">10 attempts</SelectItem>
+                  <SelectItem value="1">1 retry</SelectItem>
+                  <SelectItem value="2">2 retries</SelectItem>
+                  <SelectItem value="3">3 retries</SelectItem>
+                  <SelectItem value="5">5 retries</SelectItem>
+                  <SelectItem value="10">10 retries</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -669,3 +672,5 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
     </Dialog>
   );
 };
+
+export default EditServerDialog;
