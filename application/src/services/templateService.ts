@@ -1,4 +1,3 @@
-
 import { pb } from "@/lib/pocketbase";
 import { 
   serverNotificationTemplateService, 
@@ -122,7 +121,8 @@ export const templateTypeConfigs = {
     description: 'Templates for service uptime monitoring alerts',
     placeholders: [
       '${service_name}', '${status}', '${response_time}', '${url}', 
-      '${uptime}', '${downtime}', '${time}'
+      '${host}', '${service_type}', '${port}', '${domain}', 
+      '${region_name}', '${agent_id}', '${uptime}', '${time}'
     ]
   },
   ssl: {

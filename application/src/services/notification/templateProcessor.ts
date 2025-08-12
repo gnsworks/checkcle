@@ -32,12 +32,9 @@ export function processTemplate(
     
     // Skip replacement if template is empty
     if (!templateText) {
-     // console.log("Empty template for status:", status);
       return generateDefaultMessage(service.name, status, responseTime);
     }
-    
-   // console.log("Using template text:", templateText);
-    
+        
     // Replace placeholders with actual values
     let message = templateText
       .replace(/\${service_name}/g, service.name || 'Unknown Service')
@@ -50,16 +47,20 @@ export function processTemplate(
       message = message.replace(/\${response_time}/g, 'N/A');
     }
     
-    // Replace any other placeholders
+    // Replace service-specific placeholders
     message = message
-      .replace(/\${threshold}/g, service.threshold || 'N/A')
       .replace(/\${url}/g, service.url || 'N/A')
+      .replace(/\${host}/g, service.host || 'N/A')
+      .replace(/\${service_type}/g, service.type?.toUpperCase() || 'N/A')
+      .replace(/\${port}/g, service.port ? service.port.toString() : 'N/A')
+      .replace(/\${domain}/g, service.domain || 'N/A')
+      .replace(/\${region_name}/g, service.region_name || 'Default')
+      .replace(/\${agent_id}/g, service.agent_id ? service.agent_id.toString() : '1')
+      .replace(/\${uptime}/g, service.uptime ? `${service.uptime}%` : 'N/A')
       .replace(/\${time}/g, new Date().toLocaleString());
-      
-   // console.log("Processed template message:", message);
+      ;
     return message;
   } catch (error) {
-   // console.error("Error processing template:", error);
     return generateDefaultMessage(service.name, status, responseTime);
   }
 }
