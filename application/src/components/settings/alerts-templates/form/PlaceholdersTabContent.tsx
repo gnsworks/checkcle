@@ -221,6 +221,23 @@ export const PlaceholdersTabContent: React.FC<PlaceholdersTabContentProps> = ({ 
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={control}
+              name="error_message_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Error Message Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${error_message}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for error details when service is down
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </CardContent>
       </Card>
@@ -282,6 +299,10 @@ export const PlaceholdersTabContent: React.FC<PlaceholdersTabContentProps> = ({ 
               <div className="bg-muted/30 p-2 rounded">
                 <code className="text-xs">${"{time}"}</code>
                 <p className="text-xs text-muted-foreground mt-1">Current date and time</p>
+              </div>
+              <div className="bg-muted/30 p-2 rounded">
+                <code className="text-xs">${"{error_message}"}</code>
+                <p className="text-xs text-muted-foreground mt-1">Error details when service is down</p>
               </div>
             </div>
           </div>

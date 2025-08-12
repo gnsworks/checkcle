@@ -56,6 +56,7 @@ export function processTemplate(
       .replace(/\${region_name}/g, service.region_name || service.RegionName || 'Default')
       .replace(/\${agent_id}/g, service.agent_id ? service.agent_id.toString() : (service.AgentID ? service.AgentID.toString() : '1'))
       .replace(/\${uptime}/g, service.uptime ? `${service.uptime}%` : (service.Uptime ? `${service.Uptime}%` : 'N/A'))
+      .replace(/\${error_message}/g, service.error_message || service.ErrorMessage || service.error || '')
       .replace(/\${time}/g, new Date().toLocaleString());
       
     return message;
