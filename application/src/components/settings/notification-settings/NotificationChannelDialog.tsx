@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { 
   Dialog, 
@@ -75,6 +76,7 @@ const emailSchema = baseSchema.extend({
   email_sender_name: z.string().min(1, "Sender name is required"),
   smtp_server: z.string().min(1, "SMTP server is required"),
   smtp_port: z.string().min(1, "SMTP port is required"),
+  smtp_password: z.string().min(1, "SMTP password is required"),
 });
 
 const webhookSchema = baseSchema.extend({
@@ -112,31 +114,31 @@ const notificationTypeOptions = [
     value: "discord", 
     label: "Discord", 
     description: "Send notifications to Discord webhook",
-    icon: "/upload/notification/discord.png" 
+    icon: "/upload/notification/discord.png"
   },
   { 
     value: "slack", 
     label: "Slack", 
     description: "Send notifications to Slack webhook",
-    icon: "/upload/notification/slack.png" 
+    icon: "/upload/notification/slack.png"
   },
   { 
     value: "signal", 
     label: "Signal", 
     description: "Send notifications via Signal",
-    icon: "/upload/notification/signal.png" 
+    icon: "/upload/notification/signal.png"
   },
   { 
     value: "google_chat", 
     label: "Google Chat", 
     description: "Send notifications to Google Chat webhook",
-    icon: "/upload/notification/google.png" 
+    icon: "/upload/notification/google.png"
   },
   { 
     value: "email", 
     label: "Email", 
     description: "Send notifications via email",
-    icon: "/upload/notification/email.png" 
+    icon: "/upload/notification/email.png"
   },
   { 
     value: "webhook", 
@@ -540,6 +542,22 @@ export const NotificationChannelDialog = ({
                     )}
                   />
                 </div>
+                <FormField
+                  control={form.control}
+                  name="smtp_password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SMTP Password</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter your SMTP password" {...field} type="password" />
+                      </FormControl>
+                      <FormDescription>
+                        Password for authenticating with the SMTP server
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </>
             )}
 

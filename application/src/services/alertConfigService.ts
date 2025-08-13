@@ -24,6 +24,7 @@ export interface AlertConfiguration {
   email_sender_name?: string;
   smtp_server?: string;
   smtp_port?: string;
+  smtp_password?: string;
   webhook_id?: string;
   channel_id?: string;
 }
@@ -44,7 +45,7 @@ export const alertConfigService = {
   },
 
   async createAlertConfiguration(config: Omit<AlertConfiguration, 'id' | 'collectionId' | 'collectionName' | 'created' | 'updated'>): Promise<AlertConfiguration | null> {
-    
+  
     try {
       // Build the configuration object with proper field mapping
       const cleanConfig: any = {
@@ -54,7 +55,7 @@ export const alertConfigService = {
         enabled: config.enabled,
         template_id: config.template_id || "",
       };
-
+     
       // Add type-specific fields based on notification type
       if (config.notification_type === "telegram") {
         cleanConfig.telegram_chat_id = config.telegram_chat_id || "";
@@ -67,23 +68,22 @@ export const alertConfigService = {
         cleanConfig.signal_number = config.signal_number || "";
       } else if (config.notification_type === "google_chat") {
         cleanConfig.google_chat_webhook_url = config.google_chat_webhook_url || "";
-      } else if (config.notification_type === "email") {
-      
+      } else if (config.notification_type === "email") {      
         cleanConfig.email_address = config.email_address || "";
         cleanConfig.email_sender_name = config.email_sender_name || "";
         cleanConfig.smtp_server = config.smtp_server || "";
         cleanConfig.smtp_port = config.smtp_port || "";
-        
+        cleanConfig.smtp_password = config.smtp_password || "";
+
       }
-
       const result = await pb.collection('alert_configurations').create(cleanConfig);
-
+         
       toast({
         title: "Success",
         description: "Notification channel created successfully",
       });
       return result as AlertConfiguration;
-    } catch (error) {
+    } catch (error) {    
       // Try to get more details from the error
       if (error && typeof error === 'object') {
       }
