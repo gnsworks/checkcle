@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertConfiguration, alertConfigService } from "@/services/alertConfigService";
-import { WebhookConfiguration, webhookService } from "@/services/webhookService";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -62,6 +61,7 @@ const slackSchema = baseSchema.extend({
 const signalSchema = baseSchema.extend({
   notification_type: z.literal("signal"),
   signal_number: z.string().min(1, "Signal number is required"),
+  signal_api_endpoint: z.string().url("Must be a valid API endpoint URL"),
 });
 
 const googleChatSchema = baseSchema.extend({
@@ -107,19 +107,19 @@ const notificationTypeOptions = [
     value: "discord", 
     label: "Discord", 
     description: "Send notifications to Discord webhook",
-   icon: "/upload/notification/discord.png"
+    icon: "/upload/notification/discord.png"
   },
   { 
     value: "slack", 
     label: "Slack", 
     description: "Send notifications to Slack webhook",
-   icon: "/upload/notification/slack.png"
+    icon: "/upload/notification/slack.png"
   },
   { 
     value: "signal", 
     label: "Signal", 
     description: "Send notifications via Signal",
-   icon: "/upload/notification/signal.png"
+    icon: "/upload/notification/signal.png"
   },
   { 
     value: "google_chat", 
@@ -234,14 +234,6 @@ export const NotificationChannelDialog = ({
     onClose(false);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied",
-      description: "Template copied to clipboard",
-    });
-  };
-
   const insertTemplate = (template: string) => {
     setValue("webhook_payload_template", template);
   };
@@ -249,39 +241,16 @@ export const NotificationChannelDialog = ({
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
-      if (values.notification_type === "webhook") {
-        // Handle webhook creation/update with simplified fields
-        const webhookData: Omit<WebhookConfiguration, 'id' | 'collectionId' | 'collectionName' | 'created' | 'updated'> = {
-          name: values.notify_name,
-          url: values.webhook_url,
-          enabled: values.enabled ? "on" : "off",
-          method: "POST", 
-          secret: "", 
-          headers: "", 
-          description: "", 
-          payload_template: values.webhook_payload_template || defaultPayloadTemplate,
-          retry_count: "3", 
-          trigger_events: "all", 
-          user_id: "global",
-        };
-
-        if (isEditing && editingConfig?.id) {
-          await webhookService.updateWebhook(editingConfig.id, webhookData);
-        } else {
-          await webhookService.createWebhook(webhookData);
-        }
+      // Handle all notification types including webhook through alert_configurations
+      const configData = {
+        ...values,
+        service_id: values.service_id || "global",
+      };
+      
+      if (isEditing && editingConfig?.id) {
+        await alertConfigService.updateAlertConfiguration(editingConfig.id, configData);
       } else {
-        // Handle all other notification types including Google Chat and Email
-        const configData = {
-          ...values,
-          service_id: values.service_id || "global",
-        };
-        
-        if (isEditing && editingConfig?.id) {
-          await alertConfigService.updateAlertConfiguration(editingConfig.id, configData);
-        } else {
-          await alertConfigService.createAlertConfiguration(configData as any);
-        }
+        await alertConfigService.createAlertConfiguration(configData as any);
       }
       
       onClose(true); // Close with refresh
@@ -435,22 +404,40 @@ export const NotificationChannelDialog = ({
             )}
             
             {notificationType === "signal" && (
-              <FormField
-                control={form.control}
-                name="signal_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Signal Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="+1234567890" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Signal phone number to send notifications to
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+               <>
+                <FormField
+                  control={form.control}
+                  name="signal_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Signal Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+1234567890" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Signal phone number to send notifications to
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="signal_api_endpoint"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Signal API Endpoint</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://your-signal-api.com/v2/send" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The Rest API endpoint for your Signal service
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
             )}
 
             {notificationType === "google_chat" && (

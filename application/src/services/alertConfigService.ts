@@ -11,6 +11,7 @@ export interface AlertConfiguration {
   telegram_chat_id?: string;
   discord_webhook_url?: string;
   signal_number?: string;
+  signal_api_endpoint?: string;
   notify_name: string;
   bot_token?: string;
   template_id?: string;
@@ -27,10 +28,14 @@ export interface AlertConfiguration {
   smtp_password?: string;
   webhook_id?: string;
   channel_id?: string;
+  // Webhook fields for alert_configurations
+  webhook_url?: string;
+  webhook_payload_template?: string;
 }
 
 export const alertConfigService = {
   async getAlertConfigurations(): Promise<AlertConfiguration[]> {
+
     try {
       const response = await pb.collection('alert_configurations').getList(1, 50);
       return response.items as AlertConfiguration[];
@@ -45,7 +50,7 @@ export const alertConfigService = {
   },
 
   async createAlertConfiguration(config: Omit<AlertConfiguration, 'id' | 'collectionId' | 'collectionName' | 'created' | 'updated'>): Promise<AlertConfiguration | null> {
-  
+    
     try {
       // Build the configuration object with proper field mapping
       const cleanConfig: any = {
@@ -55,7 +60,7 @@ export const alertConfigService = {
         enabled: config.enabled,
         template_id: config.template_id || "",
       };
-     
+
       // Add type-specific fields based on notification type
       if (config.notification_type === "telegram") {
         cleanConfig.telegram_chat_id = config.telegram_chat_id || "";
@@ -66,24 +71,33 @@ export const alertConfigService = {
         cleanConfig.slack_webhook_url = config.slack_webhook_url || "";
       } else if (config.notification_type === "signal") {
         cleanConfig.signal_number = config.signal_number || "";
+        cleanConfig.signal_api_endpoint = config.signal_api_endpoint || "";
       } else if (config.notification_type === "google_chat") {
         cleanConfig.google_chat_webhook_url = config.google_chat_webhook_url || "";
-      } else if (config.notification_type === "email") {      
+        
+      } else if (config.notification_type === "email") {
+       
         cleanConfig.email_address = config.email_address || "";
         cleanConfig.email_sender_name = config.email_sender_name || "";
         cleanConfig.smtp_server = config.smtp_server || "";
         cleanConfig.smtp_port = config.smtp_port || "";
         cleanConfig.smtp_password = config.smtp_password || "";
 
-      }
+      } else if (config.notification_type === "webhook") {
+        
+        cleanConfig.webhook_url = config.webhook_url || "";
+        cleanConfig.webhook_payload_template = config.webhook_payload_template || "";
+        
+      }     
       const result = await pb.collection('alert_configurations').create(cleanConfig);
-         
+     
       toast({
         title: "Success",
         description: "Notification channel created successfully",
       });
       return result as AlertConfiguration;
-    } catch (error) {    
+    } catch (error) {
+    
       // Try to get more details from the error
       if (error && typeof error === 'object') {
       }
@@ -99,7 +113,17 @@ export const alertConfigService = {
 
   async updateAlertConfiguration(id: string, config: Partial<AlertConfiguration>): Promise<AlertConfiguration | null> {
     try {
-      const result = await pb.collection('alert_configurations').update(id, config);
+      // Build the update config with proper field mapping
+      const updateConfig: any = {};
+      
+      // Copy all provided fields
+      Object.keys(config).forEach(key => {
+        if (config[key as keyof AlertConfiguration] !== undefined) {
+          updateConfig[key] = config[key as keyof AlertConfiguration];
+        }
+      });
+            
+      const result = await pb.collection('alert_configurations').update(id, updateConfig);
       toast({
         title: "Success",
         description: "Notification channel updated successfully",
