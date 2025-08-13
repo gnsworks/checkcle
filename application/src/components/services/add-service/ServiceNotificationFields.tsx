@@ -173,7 +173,6 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
               <FormControl>
                 <Select 
                   onValueChange={(value) => {
-                    console.log("Alert template changed to:", value);
                     field.onChange(value);
                   }} 
                   value={field.value || ""}
