@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -38,14 +39,45 @@ export const EditSSLCertificateForm = ({ certificate, onSubmit, onCancel, isPend
   const [sslTemplates, setSslTemplates] = useState<SslNotificationTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Parse existing notification channels from certificate data
+  const parseNotificationChannels = (cert: SSLCertificate): string[] => {
+    const channels: string[] = [];
+    
+    // Check notification_id field first (multi-channel support)
+    if (cert.notification_id && cert.notification_id.trim()) {
+      channels.push(...cert.notification_id.split(',').map(id => id.trim()).filter(Boolean));
+    }
+    // Fallback to notification_channel field
+    else if (cert.notification_channel && cert.notification_channel.trim()) {
+      channels.push(...cert.notification_channel.split(',').map(id => id.trim()).filter(Boolean));
+    }
+    return channels;
+  };
+
+  // Get the alert template from certificate data
+  const getAlertTemplate = (cert: SSLCertificate): string => {
+    let templateId = "";
+    
+    // Check template_id field first (new field for PocketBase)
+    if (cert.template_id && cert.template_id.trim()) {
+      templateId = cert.template_id;
+    }
+    // Fallback to alert_template field
+    else if (cert.alert_template && cert.alert_template.trim()) {
+      templateId = cert.alert_template;
+    }
+
+    return templateId || "none";
+  };
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       domain: certificate.domain,
       warning_threshold: certificate.warning_threshold,
       expiry_threshold: certificate.expiry_threshold,
-      notification_channels: certificate.notification_channel ? certificate.notification_channel.split(',') : [],
-      alert_template: certificate.alert_template || "none",
+      notification_channels: parseNotificationChannels(certificate),
+      alert_template: getAlertTemplate(certificate),
       check_interval: certificate.check_interval || 1,
     },
   });
@@ -80,16 +112,36 @@ export const EditSSLCertificateForm = ({ certificate, onSubmit, onCancel, isPend
     fetchData();
   }, [t]);
 
+  // Update form values when certificate data changes
+  useEffect(() => {
+    if (certificate) {
+      const channels = parseNotificationChannels(certificate);
+      const template = getAlertTemplate(certificate);
+      
+      form.reset({
+        domain: certificate.domain,
+        warning_threshold: certificate.warning_threshold,
+        expiry_threshold: certificate.expiry_threshold,
+        notification_channels: channels,
+        alert_template: template,
+        check_interval: certificate.check_interval || 1,
+      });
+      
+    }
+  }, [certificate, form]);
+
   const handleChannelAdd = (channelId: string) => {
     const currentChannels = form.getValues("notification_channels") || [];
     if (!currentChannels.includes(channelId)) {
-      form.setValue("notification_channels", [...currentChannels, channelId]);
+      const newChannels = [...currentChannels, channelId];
+      form.setValue("notification_channels", newChannels);
     }
   };
 
   const handleChannelRemove = (channelId: string) => {
     const currentChannels = form.getValues("notification_channels") || [];
-    form.setValue("notification_channels", currentChannels.filter(id => id !== channelId));
+    const newChannels = currentChannels.filter(id => id !== channelId);
+    form.setValue("notification_channels", newChannels);
   };
 
   const getSelectedChannelNames = () => {
@@ -99,18 +151,15 @@ export const EditSSLCertificateForm = ({ certificate, onSubmit, onCancel, isPend
     });
   };
 
-  const handleSubmit = (data: FormValues) => {
+  const handleSubmit = (data: FormValues) => {  
     // Merge the updated values with the original certificate
     const updatedCertificate: SSLCertificate = {
       ...certificate,
       ...data,
-      // Save notification channels as comma-separated string for notification_channel field
+      
       notification_channel: data.notification_channels.length > 0 ? data.notification_channels.join(',') : '',
-      // Save notification channels as comma-separated string for notification_id field (for PocketBase)
       notification_id: data.notification_channels.length > 0 ? data.notification_channels.join(',') : '',
-      // Save alert template as template_id field (for PocketBase) - handle "none" value
       template_id: data.alert_template && data.alert_template !== 'none' ? data.alert_template : '',
-      // Ensure values are correctly typed as numbers
       warning_threshold: Number(data.warning_threshold),
       expiry_threshold: Number(data.expiry_threshold),
       check_interval: data.check_interval ? Number(data.check_interval) : undefined
