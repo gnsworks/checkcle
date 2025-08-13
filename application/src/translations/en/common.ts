@@ -8,6 +8,7 @@ export const commonTranslations: CommonTranslations = {
   english: "English",
   khmer: "Khmer",
   german: "Deutsch",
+  simplifiedChinese: "Simplified Chinese",
   goodMorning: "Good morning",
   goodAfternoon: "Good afternoon",
   goodEvening: "Good evening",

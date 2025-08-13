@@ -1,0 +1,116 @@
+
+import { SSLTranslations } from '../types/ssl';
+
+export const sslTranslations: SSLTranslations = {
+  // Page and section titles
+  sslDomainManagement: "SSL & 域名管理",
+  monitorSSLCertificates: "监控和管理您的域名的 SSL 证书",
+  addSSLCertificate: "添加 SSL 证书",
+  editSSLCertificate: "编辑 SSL 证书",
+  deleteSSLCertificate: "删除 SSL 证书",
+  sslCertificateDetails: "SSL 证书详情",
+  detailedInfo: "关于",
+  viewDetailedInformation: "查看详细信息",
+
+  // Status related
+  valid: "有效",
+  expiringSoon: "即将过期",
+  expired: "已过期",
+  pending: "待处理",
+
+  // Statistics and cards
+  validCertificates: "有效证书",
+  expiringSoonCertificates: "即将过期",
+  expiredCertificates: "已过期",
+
+  // Form fields
+  domain: "域",
+  domainName: "域名",
+  domainCannotChange: "域名创建后不能更改",
+  warningThreshold: "警告阈值",
+  warningThresholdDays: "警告阈值（天）",
+  expiryThreshold: "过期阈值",
+  expiryThresholdDays: "过期阈值（天）",
+  notificationChannel: "通知渠道",
+  chooseChannel: "选择通知渠道",
+  whereToSend: "通知渠道",
+  daysBeforeExpiration: "过期前警告天数",
+  daysBeforeCritical: "过期前关键警告天数",
+  getNotifiedExpiration: "获取证书即将过期的通知",
+  getNotifiedCritical: "获取证书即将过期的关键通知",
+
+  // Table headers and fields
+  issuer: "发行机构",
+  expirationDate: "过期日期",
+  daysLeft: "剩余天数",
+  status: "状态",
+  lastNotified: "最后通知时间",
+  actions: "操作",
+  validFrom: "有效从",
+  validUntil: "有效至",
+  validityDays: "有效期天数",
+  validityPeriod: "有效期",
+  organization: "组织",
+  commonName: "通用名称",
+  serialNumber: "序列号",
+  algorithm: "算法",
+  subjectAltNames: "主题备用名称",
+  subjectAlternativeNames: "主题备用名称",
+  resolvedIP: "解析 IP",
+  issuedTo: "颁发给",
+  days: "天",
+  
+  // Buttons and actions
+  addDomain: "添加域名",
+  refreshAll: "刷新所有",
+  cancel: "取消",
+  addCertificate: "添加证书",
+  check: "检查",
+  view: "查看",
+  edit: "编辑",
+  delete: "删除",
+  close: "关闭",
+  saveChanges: "保存更改",
+  updating: "更新中",
+  
+  // Sections in detail view
+  basicInformation: "基本信息",
+  validity: "有效期",
+  issuerInfo: "发行机构信息",
+  technicalDetails: "技术详情",
+  technicalInformation: "技术信息",
+  monitoringConfig: "监控配置",
+  monitoringConfiguration: "监控配置",
+  recordInfo: "记录信息",
+  certificateDetails: "证书详情",
+  
+  // Notifications and messages
+  sslCertificateAdded: "SSL 证书添加成功",
+  sslCertificateUpdated: "SSL 证书更新成功",
+  sslCertificateDeleted: "SSL 证书删除成功",
+  sslCertificateRefreshed: "SSL 证书为 {domain} 刷新成功",
+  allCertificatesRefreshed: "所有 {count} 证书刷新成功",
+  someCertificatesFailed: "{success} 证书刷新成功，{failed} 失败",
+  failedToAddCertificate: "添加 SSL 证书失败",
+  failedToLoadCertificates: "加载 SSL 证书失败",
+  failedToUpdateCertificate: "更新 SSL 证书失败",
+  failedToDeleteCertificate: "删除 SSL 证书失败",
+  failedToCheckCertificate: "检查 SSL 证书失败",
+  noCertificatesToRefresh: "没有证书可刷新",
+  startingRefreshAll: "开始刷新 {count} 证书",
+  checkingSSLCertificate: "检查 SSL 证书...",
+  deleteConfirmation: "确定要删除 {domain} 的证书吗？",
+  deleteWarning: "此操作无法撤销。这将永久删除证书。",
+  
+  // Misc
+  unknown: "未知",
+  never: "从不",
+  none: "无",
+  loadingChannels: "加载通知渠道...",
+  noChannelsFound: "未找到通知渠道",
+  noSSLCertificates: "未找到 SSL 证书",
+  created: "创建时间",
+  lastUpdated: "最后更新时间",
+  lastNotification: "最后通知时间",
+  collectionId: "集合 ID"
+};

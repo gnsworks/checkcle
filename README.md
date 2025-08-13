@@ -20,6 +20,12 @@
         <br/><strong>Japanese</strong>
       </a>
     </td>
+    <td align="center">
+      <a href="docs/README_zhcn.md">
+        <img src="https://flagcdn.com/24x18/cn.png" alt="Chinese" />  
+        <br/><strong>Chinese</strong>
+      </a>
+    </td>
   </tr>
 </table>
 
@@ -176,5 +182,3 @@ Here are some ways you can help improve CheckCle:
 CheckCle is released under the MIT License.
 
 ---
-
-
