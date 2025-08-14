@@ -566,13 +566,7 @@ export const NotificationChannelDialog = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Payload Template (Optional)</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder={defaultPayloadTemplate}
-                            className="min-h-32 font-mono text-sm"
-                            {...field} 
-                          />
-                        </FormControl>
+                       
                         <FormDescription>
                           JSON template for the webhook payload. Leave empty to use default template.
                         </FormDescription>
@@ -587,36 +581,6 @@ export const NotificationChannelDialog = ({
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => insertTemplate(webhookPayloadTemplates.server)}
-                            className="justify-start"
-                          >
-                            Server Monitoring
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => insertTemplate(webhookPayloadTemplates.service)}
-                            className="justify-start"
-                          >
-                            Service Uptime
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => insertTemplate(webhookPayloadTemplates.ssl)}
-                            className="justify-start"
-                          >
-                            SSL Certificate
-                          </Button>
-                        </div>
-                        
                         <div className="mt-4">
                           <h4 className="text-sm font-medium mb-2">Available Placeholders:</h4>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
