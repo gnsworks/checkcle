@@ -69,19 +69,19 @@ The roadmap is divided into the following stages:
 - [ ] ✅ Server and Service Table row clickable to detail page.
 - [ ] ✅ Implement pagination for the SSL dashboard table
 - [ ] ✅ Server Agent (RPM, Docker container, and general binary package) 
-- [ ] 🔧 Notification System (Webhook, Telegram, Discord, Slack, Email, Google Chat)
-- [ ] 🔧 Improve Uptime Service and Server connection update based on status and notification.
-- [ ] 🔧 Improve SSL perform the initial check automatically after creation 
-- [ ] 🔧 Rate limiting and abuse protection
-- [ ] 🎯 Improve the Operational status page
+- [ ] ✅ Notification System (Webhook, Telegram, Discord, Slack, Email, Google Chat)
+- [ ] ✅ Improve Uptime Service and Server connection update based on status and notification.
+- [ ] ✅ Improve SSL perform the initial check automatically after creation 
+- [ ] ✅ Rate limiting and abuse protection
+- [ ] 🔧 Server Windows Agent
+- [ ] 🔧 Improve the Operational status page
+- [ ] 🔧 More Uptime Service Type (HTTP keyword, HTTP json)
+- [ ] 🔧 Server support with cpu temperature 
+- [ ] 🔧 Server upport with multiple disks 
+- [ ] 🔧 Server support with Multiple Network Interfaces 
 - [ ] 🎯 Improve the Schedule and Incident for automation
-- [ ] 🎯 Server Windows Agent
-- [ ] 🎯 More Uptime Service Type (HTTP keyword, HTTP json)
-- [ ] 🎯 Server support with Multiple Network Interfaces 
-- [ ] 🎯 Server support with cpu temperature 
-- [ ] 🎯 Server upport with multiple disks 
+- [ ] 🎯 Uptime Monitoring option for choose: HTTP/HTTPS
 - [ ] 🎯 Add 2FA support
-- [ ] 🎯 Rate limiting and abuse protection
 
 ---
 
@@ -90,9 +90,10 @@ The roadmap is divided into the following stages:
 These are community-suggested or experimental features under review:
 
 - [ ] Grouping uptime services
-- [ ] OAuth2 integration
+- [ ] OIDC Connect | OAuth2 integration
 - [ ] Mobile PWA support
 - [ ] Cloud-native Helm/Kubernetes deployment
+- [ ] Server outbound and inbound traffic usage
 
 You’re welcome to propose features via [GitHub Discussions](https://github.com/operacle/checkcle/discussions) or open an issue with the `feature-request` template.
 
