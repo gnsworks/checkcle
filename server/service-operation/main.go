@@ -12,38 +12,79 @@ import (
 	"service-operation/handlers"
 	"service-operation/monitoring"
 	"service-operation/pocketbase"
+	servermonitoring "service-operation/server-monitoring"
+	sslmonitoring "service-operation/ssl-monitoring"
+	uptimemonitoring "service-operation/uptime-monitoring"
 )
 
 func main() {
+	//log.Println("🚀 === STARTING SERVICE OPERATION SERVER ===")
+	
 	cfg := config.Load()
+	//log.Printf("📋 Configuration loaded:")
+	//log.Printf("  - Port: %s", cfg.Port)
+	//log.Printf("  - Backend PB Enabled: %t", cfg.PocketBaseEnabled)
+	if cfg.PocketBaseEnabled {
+		//log.Printf("  - PocketBase URL: %s", cfg.PocketBaseURL)
+	}
 	
 	// Initialize PocketBase client (no credentials required)
 	var pbClient *pocketbase.PocketBaseClient
 	var monitoringService *monitoring.MonitoringService
 	var sslMonitoringService *monitoring.SSLMonitoringService
+	var sslNotificationService *sslmonitoring.SSLMonitor
+	var serverMonitoringService *servermonitoring.ServerMonitoringService
+	var uptimeMonitoringService *uptimemonitoring.UptimeMonitor
 	
 	if cfg.PocketBaseEnabled {
+		//log.Println("🔧 Initializing PocketBase client...")
 		var err error
 		pbClient, err = pocketbase.NewPocketBaseClient(cfg.PocketBaseURL)
 		if err != nil {
-			log.Printf("Warning: Failed to initialize PocketBase client: %v", err)
+			//log.Printf("⚠️  WARNING: Failed to initialize PocketBase client: %v", err)
 		} else {
+			//log.Println("✅ PocketBase client initialized successfully")
+			
+			//log.Println("🔍 Testing PocketBase connection...")
 			if err := pbClient.TestConnection(); err != nil {
-				log.Printf("Warning: Backend connection test failed: %v", err)
+				//log.Printf("⚠️  WARNING: PocketBase connection test failed: %v", err)
 			} else {
-				// Initialize and start monitoring service with regional support
+				//log.Println("✅ PocketBase connection test successful")
+				
+				// Initialize and start service monitoring with regional support
+				//log.Println("🔧 Initializing service monitoring...")
 				monitoringService = monitoring.NewMonitoringService(pbClient)
 				go monitoringService.Start()
-				log.Println("Uptime Monitoring service started with Default System agent support")
+				//log.Println("✅ Service monitoring started with regional agent support")
 				
-				// Initialize and start SSL monitoring service (unchanged - no regional support)
+				// Initialize and start SSL monitoring service (original)
+				//log.Println("🔧 Initializing SSL monitoring (original)...")
 				sslMonitoringService = monitoring.NewSSLMonitoringService(pbClient)
 				go sslMonitoringService.Start()
-				log.Println("SSL monitoring service started (independent of Default System Agent)")
+				//log.Println("✅ SSL monitoring started (independent of regional agents)")
+				
+				// Initialize and start SSL notification service (new)
+				//log.Println("🔧 Initializing SSL notification monitoring...")
+				sslNotificationService = sslmonitoring.NewSSLMonitor(pbClient)
+				go sslNotificationService.Start()
+				//log.Println("✅ SSL notification monitoring started with Telegram support")
+				
+				// Initialize and start server monitoring service
+				//log.Println("🔧 Initializing server monitoring...")
+				serverMonitoringService = servermonitoring.NewServerMonitoringService(pbClient)
+				serverMonitoringService.Start()
+				//log.Println("✅ Server monitoring started with notification support")
+				
+				// Initialize and start uptime monitoring service
+				//log.Println("🔧 Initializing uptime monitoring...")
+				uptimeMonitoringService = uptimemonitoring.NewUptimeMonitor(pbClient)
+				go uptimeMonitoringService.Start()
+				//log.Println("✅ Uptime monitoring started with notification support")
 			}
 		}
 	}
 	
+	//log.Println("🔧 Initializing HTTP handlers...")
 	handler := handlers.NewOperationHandler(cfg, pbClient)
 
 	router := mux.NewRouter()
@@ -61,24 +102,28 @@ func main() {
 	// Health check
 	router.HandleFunc("/health", handler.HandleHealth).Methods("GET")
 
-	log.Printf("Service Operation starting on port %s", cfg.Port)
+	log.Printf("=== 🌐 CHECKCLE SERVICE OPERATION SERVER READY ===")
+	log.Printf("🚀 Starting on port %s", cfg.Port)
 	if pbClient != nil {
-		log.Printf("Backend Server integration enabled at %s", pbClient.GetBaseURL())
+		log.Printf("✓Backend integration enabled at %s ", pbClient.GetBaseURL())
 	}
 	if monitoringService != nil {
-		log.Printf("Automatic service monitoring enabled with regional agent support")
+		log.Printf("✓Service monitoring enabled with regional agent support")
 	}
 	if sslMonitoringService != nil {
-		log.Printf("SSL certificate monitoring enabled (independent)")
+		//log.Printf("🔒 SSL certificate monitoring enabled (independent)")
 	}
-	log.Printf("Endpoints:")
-	log.Printf("  POST /operation - Full operation test (ping, dns, tcp, http, ssl)")
-	log.Printf("  GET  /operation/quick?type=<type>&host=<host> - Quick operation test")
-	log.Printf("  POST /ping - Legacy ping endpoint")
-	log.Printf("  GET  /ping/quick?host=<host> - Legacy quick ping test")
-	log.Printf("  GET  /health - Health check")
-	log.Printf("Default SystemSupported operations: ping, dns, tcp, http, ssl")
-	log.Printf("Default System: Tracks 'Default' region connection status")
+	if sslNotificationService != nil {
+		log.Printf("✓SSL notification monitoring enabled with Telegram support")
+	}
+	if serverMonitoringService != nil {
+		log.Printf("✓Server monitoring enabled with notification support")
+	}
+	if uptimeMonitoringService != nil {
+		log.Printf("✓Uptime monitoring enabled with notification support")
+	}
+	log.Printf("✓Supported operations: ping, dns, tcp, http, ssl")
+	
 
 	// Setup graceful shutdown
 	c := make(chan os.Signal, 1)
@@ -86,18 +131,37 @@ func main() {
 	
 	go func() {
 		<-c
-		log.Println("Shutting down monitoring services...")
+		log.Println("🛑 === GRACEFUL SHUTDOWN INITIATED ===")
+		log.Println("🛑 Shutting down monitoring services...")
+		
 		if monitoringService != nil {
+			log.Println("🛑 Stopping service monitoring...")
 			monitoringService.Stop()
 		}
 		if sslMonitoringService != nil {
+			log.Println("🛑 Stopping SSL monitoring...")
 			sslMonitoringService.Stop()
 		}
-		log.Println("Service stopped")
+		if sslNotificationService != nil {
+			log.Println("🛑 Stopping SSL notification monitoring...")
+			sslNotificationService.Stop()
+		}
+		if serverMonitoringService != nil {
+			log.Println("🛑 Stopping server monitoring...")
+			serverMonitoringService.Stop()
+		}
+		if uptimeMonitoringService != nil {
+			log.Println("🛑 Stopping uptime monitoring...")
+			uptimeMonitoringService.Stop()
+		}
+		
+		log.Println("✅ All services stopped gracefully")
+		log.Println("🛑 === SERVICE OPERATION SERVER STOPPED ===")
 		os.Exit(0)
 	}()
 
+	//log.Println("🌐 HTTP server starting...")
 	if err := http.ListenAndServe(":"+cfg.Port, router); err != nil {
-		log.Fatal("Failed to start server:", err)
+		log.Fatal("❌ FATAL: Failed to start HTTP server:", err)
 	}
 }

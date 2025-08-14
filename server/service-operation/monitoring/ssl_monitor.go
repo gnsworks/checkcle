@@ -1,8 +1,8 @@
+
 package monitoring
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"service-operation/operations"
@@ -30,14 +30,14 @@ func (s *SSLMonitoringService) Start() {
 	ticker := time.NewTicker(1 * time.Minute) // Check every minute for scheduling
 	defer ticker.Stop()
 
-	log.Println("SSL monitoring service started with interval and check_at scheduling")
+	// log.Println("SSL monitoring service started with interval and check_at scheduling")
 
 	for {
 		select {
 		case <-ticker.C:
 			s.checkSSLCertificates()
 		case <-s.stopChan:
-			log.Println("SSL monitoring service stopped")
+			// log.Println("SSL monitoring service stopped")
 			return
 		}
 	}
@@ -48,21 +48,24 @@ func (s *SSLMonitoringService) Stop() {
 }
 
 func (s *SSLMonitoringService) checkSSLCertificates() {
-	//log.Println("Fetching SSL certificates from PocketBase...")
+	// log.Println("Fetching SSL certificates from PocketBase...")
 	
 	certificates, err := s.pbClient.GetSSLCertificates()
 	if err != nil {
-		log.Printf("Failed to fetch SSL certificates: %v", err)
+		// log.Printf("Failed to fetch SSL certificates: %v", err)
+		_ = err
 		return
 	}
 
-	//log.Printf("Found %d SSL certificates to check", len(certificates))
+	// log.Printf("Found %d SSL certificates to check", len(certificates))
 
 	for _, cert := range certificates {
 		if s.shouldCheckCertificate(cert) {
 			go s.checkSingleCertificateWithRetry(cert)
 		}
 	}
+	
+	_ = certificates
 }
 
 func (s *SSLMonitoringService) shouldCheckCertificate(cert types.SSLCertificate) bool {
@@ -72,29 +75,33 @@ func (s *SSLMonitoringService) shouldCheckCertificate(cert types.SSLCertificate)
 	if cert.CheckAt != "" {
 		if checkAt, err := s.parseFlexibleTime(cert.CheckAt); err == nil {
 			if now.After(checkAt) || now.Equal(checkAt) {
-				log.Printf("Certificate %s is due for manual check (check_at: %s)", 
-					cert.Domain, checkAt.Format("2006-01-02 15:04:05"))
+				// log.Printf("Certificate %s is due for manual check (check_at: %s)", 
+				//	cert.Domain, checkAt.Format("2006-01-02 15:04:05"))
+				_ = checkAt
 				return true
 			} else {
-				//log.Printf("Certificate %s scheduled for later check (check_at: %s)", 
+				// log.Printf("Certificate %s scheduled for later check (check_at: %s)", 
 				//	cert.Domain, checkAt.Format("2006-01-02 15:04:05"))
-				//return false
+				_ = checkAt
+				return false
 			}
 		} else {
-			log.Printf("Error parsing check_at for %s: %v", cert.Domain, err)
+			// log.Printf("Error parsing check_at for %s: %v", cert.Domain, err)
+			_ = err
 		}
 	}
 
 	// Priority 2: Check based on check_interval (in days) from last update
 	if cert.Updated == "" {
-		log.Printf("Certificate %s has never been checked, scheduling check", cert.Domain)
+		// log.Printf("Certificate %s has never been checked, scheduling check", cert.Domain)
 		return true
 	}
 
 	// Parse last check time from updated field
 	lastCheck, err := s.parseFlexibleTime(cert.Updated)
 	if err != nil {
-		log.Printf("Error parsing last check time for %s, scheduling check: %v", cert.Domain, err)
+		// log.Printf("Error parsing last check time for %s, scheduling check: %v", cert.Domain, err)
+		_ = err
 		return true
 	}
 
@@ -112,11 +119,15 @@ func (s *SSLMonitoringService) shouldCheckCertificate(cert types.SSLCertificate)
 	shouldCheck := now.After(nextCheck)
 	
 	if shouldCheck {
-		log.Printf("Certificate %s is due for interval check (last: %s, interval: %d days)", 
-			cert.Domain, lastCheck.Format("2006-01-02 15:04:05"), adjustedIntervalDays)
+		// log.Printf("Certificate %s is due for interval check (last: %s, interval: %d days)", 
+		//	cert.Domain, lastCheck.Format("2006-01-02 15:04:05"), adjustedIntervalDays)
+		_ = lastCheck
+		_ = adjustedIntervalDays
 	} else {
-		//log.Printf("Certificate %s not due yet (next check: %s, interval: %d days)", 
-			//cert.Domain, nextCheck.Format("2006-01-02 15:04:05"), adjustedIntervalDays)
+		// log.Printf("Certificate %s not due yet (next check: %s, interval: %d days)", 
+		//	cert.Domain, nextCheck.Format("2006-01-02 15:04:05"), adjustedIntervalDays)
+		_ = nextCheck
+		_ = adjustedIntervalDays
 	}
 	
 	return shouldCheck
@@ -171,16 +182,16 @@ func (s *SSLMonitoringService) adjustCheckIntervalDays(cert types.SSLCertificate
 func (s *SSLMonitoringService) checkSingleCertificateWithRetry(cert types.SSLCertificate) {
 	retryCount := s.retryQueue[cert.ID]
 	
-	log.Printf("🔍 Checking SSL certificate for domain: %s (attempt %d/%d)", 
-		cert.Domain, retryCount+1, s.maxRetries+1)
+	// log.Printf("🔍 Checking SSL certificate for domain: %s (attempt %d/%d)", 
+	//	cert.Domain, retryCount+1, s.maxRetries+1)
 	
 	result, err := s.performSSLCheck(cert.Domain)
 	
 	if err != nil && retryCount < s.maxRetries {
 		// Increment retry count and schedule retry
 		s.retryQueue[cert.ID] = retryCount + 1
-		log.Printf("SSL check failed for %s, will retry (%d/%d): %v", 
-			cert.Domain, retryCount+1, s.maxRetries, err)
+		// log.Printf("SSL check failed for %s, will retry (%d/%d): %v", 
+		//	cert.Domain, retryCount+1, s.maxRetries, err)
 		
 		// Schedule retry with exponential backoff
 		go func() {
@@ -188,6 +199,9 @@ func (s *SSLMonitoringService) checkSingleCertificateWithRetry(cert types.SSLCer
 			time.Sleep(backoffDuration)
 			s.checkSingleCertificateWithRetry(cert)
 		}()
+		
+		_ = retryCount
+		_ = err
 		return
 	}
 	
@@ -195,8 +209,8 @@ func (s *SSLMonitoringService) checkSingleCertificateWithRetry(cert types.SSLCer
 	delete(s.retryQueue, cert.ID)
 	
 	if err != nil {
-		log.Printf("❌ SSL check failed for domain %s after %d attempts: %v", 
-			cert.Domain, s.maxRetries+1, err)
+		// log.Printf("❌ SSL check failed for domain %s after %d attempts: %v", 
+		//	cert.Domain, s.maxRetries+1, err)
 		s.updateCertificateWithError(cert, err)
 		return
 	}
@@ -206,28 +220,31 @@ func (s *SSLMonitoringService) checkSingleCertificateWithRetry(cert types.SSLCer
 }
 
 func (s *SSLMonitoringService) performSSLCheck(domain string) (*types.OperationResult, error) {
-	log.Printf("Performing SSL check for domain: %s", domain)
+	// log.Printf("Performing SSL check for domain: %s", domain)
 	sslOp := operations.NewSSLOperation(30 * time.Second)
 	result, err := sslOp.Execute(domain)
 	
 	if err != nil {
-		log.Printf("SSL operation failed for %s: %v", domain, err)
+		// log.Printf("SSL operation failed for %s: %v", domain, err)
+		_ = err
 		return nil, err
 	}
 	
 	if result == nil {
-		log.Printf("SSL operation returned nil result for %s", domain)
+		// log.Printf("SSL operation returned nil result for %s", domain)
 		return nil, fmt.Errorf("SSL check returned nil result")
 	}
 	
-	log.Printf("SSL check completed for %s: success=%v, days_left=%d", 
-		domain, result.Success, result.SSLDaysLeft)
+	// log.Printf("SSL check completed for %s: success=%v, days_left=%d", 
+	//	domain, result.Success, result.SSLDaysLeft)
 	
+	_ = domain
+	_ = result
 	return result, nil
 }
 
 func (s *SSLMonitoringService) updateCertificateWithError(cert types.SSLCertificate, err error) {
-	log.Printf("Updating certificate %s with error status", cert.Domain)
+	// log.Printf("Updating certificate %s with error status", cert.Domain)
 	
 	updateData := map[string]interface{}{
 		"status":       "error",
@@ -250,18 +267,24 @@ func (s *SSLMonitoringService) updateCertificateWithError(cert types.SSLCertific
 	updateData["check_at"] = nextCheck.Format(time.RFC3339)
 	
 	if updateErr := s.pbClient.UpdateSSLCertificate(cert.ID, updateData); updateErr != nil {
-		log.Printf("Failed to update SSL certificate %s with error status: %v", cert.ID, updateErr)
+		// log.Printf("Failed to update SSL certificate %s with error status: %v", cert.ID, updateErr)
+		_ = updateErr
 	} else {
-		log.Printf("📝 Updated certificate %s with error status (next check in %d days)", 
-			cert.Domain, errorIntervalDays)
+		// log.Printf("📝 Updated certificate %s with error status (next check in %d days)", 
+		//	cert.Domain, errorIntervalDays)
+		_ = errorIntervalDays
 	}
+	
+	_ = err
+	_ = updateData
+	_ = nextCheck
 }
 
 func (s *SSLMonitoringService) updateCertificateWithResults(cert types.SSLCertificate, result *types.OperationResult) {
 	status := getSSLStatus(result)
 	
-	log.Printf("Updating certificate %s with results: status=%s, days_left=%d, issuer=%s", 
-		cert.Domain, status, result.SSLDaysLeft, result.SSLIssuer)
+	// log.Printf("Updating certificate %s with results: status=%s, days_left=%d, issuer=%s", 
+	//	cert.Domain, status, result.SSLDaysLeft, result.SSLIssuer)
 	
 	updateData := map[string]interface{}{
 		"status":                 status,
@@ -290,11 +313,18 @@ func (s *SSLMonitoringService) updateCertificateWithResults(cert types.SSLCertif
 	updateData["check_at"] = nextCheck.Format(time.RFC3339)
 
 	if err := s.pbClient.UpdateSSLCertificate(cert.ID, updateData); err != nil {
-		log.Printf("Failed to update SSL certificate %s: %v", cert.ID, err)
+		// log.Printf("Failed to update SSL certificate %s: %v", cert.ID, err)
+		_ = err
 	} else {
-		log.Printf("✅ SSL certificate updated for %s: %s (%d days left, issuer: %s, next check in %d days)", 
-			cert.Domain, status, result.SSLDaysLeft, result.SSLIssuer, adjustedIntervalDays)
+		// log.Printf("✅ SSL certificate updated for %s: %s (%d days left, issuer: %s, next check in %d days)", 
+		//	cert.Domain, status, result.SSLDaysLeft, result.SSLIssuer, adjustedIntervalDays)
+		_ = status
+		_ = result
+		_ = adjustedIntervalDays
 	}
+	
+	_ = updateData
+	_ = nextCheck
 }
 
 func getSSLStatus(result *types.OperationResult) string {
