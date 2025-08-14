@@ -21,6 +21,8 @@ export interface Server {
   template_id: string;
   threshold_id: string;
   notification_id: string;
+  notification_status: boolean; 
+  max_retries: number;
   timestamp: string;
   connection: string;
   agent_status: string;

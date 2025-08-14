@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -30,12 +29,9 @@ export const SSLDomainContent = () => {
     queryKey: ['ssl-certificates'],
     queryFn: async () => {
       try {
-       // console.log("Fetching SSL certificates from SSLDomainContent...");
         const result = await fetchSSLCertificates();
-       // console.log("Received SSL certificates:", result);
         return result;
       } catch (error) {
-       // console.error("Error fetching certificates:", error);
         toast.error(t('failedToLoadCertificates'));
         throw error;
       }
@@ -53,29 +49,27 @@ export const SSLDomainContent = () => {
       toast.success(t('sslCertificateAdded'));
     },
     onError: (error) => {
-      console.error("Error adding SSL certificate:", error);
       toast.error(error instanceof Error ? error.message : t('failedToAddCertificate'));
     }
   });
 
-  // Edit certificate mutation - Updated to ensure thresholds are properly updated
+  // Edit certificate mutation - Updated to include notification_id and template_id
   const editMutation = useMutation({
     mutationFn: async (certificate: SSLCertificate) => {
-     // console.log("Updating certificate with data:", certificate);
       
-      // Create the update data object
+      // Create the update data object with new fields
       const updateData = {
         warning_threshold: Number(certificate.warning_threshold),
         expiry_threshold: Number(certificate.expiry_threshold),
         notification_channel: certificate.notification_channel,
+        notification_id: certificate.notification_id || '', // Multi notification channels
+        template_id: certificate.template_id || '', // Alert template ID
+        check_interval: certificate.check_interval,
       };
       
-    //  console.log("Update data to be sent:", updateData);
       
       // Update certificate in the database using PocketBase directly
       const updated = await pb.collection('ssl_certificates').update(certificate.id, updateData);
-      
-    //  console.log("PocketBase update response:", updated);
       
       // After updating the settings, refresh the certificate to ensure it's up to date
       // This will also check if notification needs to be sent based on updated thresholds
@@ -90,7 +84,6 @@ export const SSLDomainContent = () => {
       toast.success(t('sslCertificateUpdated'));
     },
     onError: (error) => {
-     // console.error("Error updating SSL certificate:", error);
       toast.error(error instanceof Error ? error.message : t('failedToUpdateCertificate'));
     }
   });
@@ -103,7 +96,6 @@ export const SSLDomainContent = () => {
       toast.success(t('sslCertificateDeleted'));
     },
     onError: (error) => {
-     // console.error("Error deleting SSL certificate:", error);
       toast.error(error instanceof Error ? error.message : t('failedToDeleteCertificate'));
     }
   });
@@ -117,7 +109,6 @@ export const SSLDomainContent = () => {
       // Removed individual success toast notification
     },
     onError: (error) => {
-    //  console.error("Error refreshing SSL certificate:", error);
       setRefreshingId(null);
       
       // Still refresh the data to show any partial information that was saved
@@ -142,7 +133,6 @@ export const SSLDomainContent = () => {
       }
     },
     onError: (error) => {
-    //  console.error("Error refreshing all certificates:", error);
       toast.error(t('failedToCheckCertificate'));
       setIsRefreshingAll(false);
       
@@ -167,7 +157,6 @@ export const SSLDomainContent = () => {
   };
 
   const handleUpdateCertificate = (certificate: SSLCertificate) => {
-    console.log("Handling certificate update with data:", certificate);
     editMutation.mutate(certificate);
   };
 

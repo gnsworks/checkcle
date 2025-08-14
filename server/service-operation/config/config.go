@@ -23,7 +23,7 @@ func Load() *Config {
 	cfg := &Config{
 		Port:           getEnv("PORT", "8091"),
 		DefaultCount:   getEnvInt("DEFAULT_COUNT", 4),
-		DefaultTimeout: getEnvDuration("DEFAULT_TIMEOUT", 10*time.Second),
+		DefaultTimeout: getEnvDuration("DEFAULT_TIMEOUT", 15*time.Second),
 		MaxCount:       getEnvInt("MAX_COUNT", 20),
 		MaxTimeout:     getEnvDuration("MAX_TIMEOUT", 30*time.Second),
 		EnableLogging:  getEnvBool("ENABLE_LOGGING", true),

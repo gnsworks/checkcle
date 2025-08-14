@@ -37,7 +37,7 @@ func (ms *MonitoringService) Start() {
 	}
 
 	ms.isRunning = true
-	log.Println("Starting monitoring service...")
+	//log.Println("Starting monitoring service...")
 
 	// Start regional monitoring
 	ms.regionalMonitor.Start()

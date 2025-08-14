@@ -13,9 +13,17 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { alertConfigService } from "@/services/alertConfigService";
+import { pb } from "@/lib/pocketbase";
+
+interface CombinedChannel extends Partial<AlertConfiguration> {
+  isWebhook?: boolean;
+  url?: string;
+  method?: string;
+  description?: string;
+}
 
 interface NotificationChannelListProps {
-  channels: AlertConfiguration[];
+  channels: CombinedChannel[];
   onEdit: (config: AlertConfiguration) => void;
   onDelete: (id: string) => void;
 }
@@ -25,25 +33,63 @@ export const NotificationChannelList = ({
   onEdit,
   onDelete
 }: NotificationChannelListProps) => {
-  const toggleEnabled = async (config: AlertConfiguration) => {
+  const toggleEnabled = async (config: CombinedChannel) => {
     if (!config.id) return;
     
-    await alertConfigService.updateAlertConfiguration(config.id, {
-      enabled: !config.enabled
-    });
-    
-    // The parent component will refresh the list
-    onEdit(config);
+    if (config.isWebhook) {
+      // Handle webhook toggle
+      try {
+        const newEnabled = config.enabled ? "off" : "on";
+        await pb.collection('webhook').update(config.id, {
+          enabled: newEnabled
+        });
+        // Trigger refresh by calling onEdit with empty config
+        onEdit({} as AlertConfiguration);
+      } catch (error) {
+        console.error("Error updating webhook:", error);
+      }
+    } else {
+      // Handle alert config toggle
+      await alertConfigService.updateAlertConfiguration(config.id, {
+        enabled: !config.enabled
+      });
+      
+      // The parent component will refresh the list
+      onEdit(config as AlertConfiguration);
+    }
   };
 
-  const getChannelTypeLabel = (type: string) => {
+  const getChannelTypeLabel = (type: string | undefined) => {
     switch(type) {
       case "telegram": return "Telegram";
       case "discord": return "Discord";
       case "slack": return "Slack";
       case "signal": return "Signal";
+      case "google_chat": return "Google Chat";
       case "email": return "Email";
-      default: return type;
+      case "webhook": return "Webhook";
+      default: return type || "Unknown";
+    }
+  };
+
+  const getChannelDetails = (config: CombinedChannel) => {
+    if (config.isWebhook) {
+      return `${config.method || 'POST'} ${config.url || ''}`;
+    }
+    
+    switch(config.notification_type) {
+      case "telegram":
+        return config.telegram_chat_id || '';
+      case "discord":
+      case "slack":
+      case "google_chat":
+        return config.discord_webhook_url || config.slack_webhook_url || config.google_chat_webhook_url || '';
+      case "signal":
+        return config.signal_number || '';
+      case "email":
+        return config.email_address || '';
+      default:
+        return '';
     }
   };
 
@@ -66,6 +112,7 @@ export const NotificationChannelList = ({
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Type</TableHead>
+            <TableHead>Details</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -78,11 +125,14 @@ export const NotificationChannelList = ({
               <TableCell>
                 <Badge variant="outline">{getChannelTypeLabel(channel.notification_type)}</Badge>
               </TableCell>
+              <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
+                {getChannelDetails(channel)}
+              </TableCell>
               <TableCell>
                 <Switch 
                   checked={
                     typeof channel.enabled === 'string'
-                      ? channel.enabled === "true"
+                      ? channel.enabled === "true" || channel.enabled === "on"
                       : !!channel.enabled
                   }
                   onCheckedChange={() => toggleEnabled(channel)}
@@ -96,7 +146,8 @@ export const NotificationChannelList = ({
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => onEdit(channel)}
+                    onClick={() => onEdit(channel as AlertConfiguration)}
+                    disabled={channel.isWebhook} // Disable edit for webhooks for now
                   >
                     <Edit className="h-4 w-4" />
                   </Button>

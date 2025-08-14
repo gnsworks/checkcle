@@ -20,6 +20,12 @@
         <br/><strong>Japanese</strong>
       </a>
     </td>
+    <td align="center">
+      <a href="docs/README_zhcn.md">
+        <img src="https://flagcdn.com/24x18/cn.png" alt="Chinese" />  
+        <br/><strong>Chinese</strong>
+      </a>
+    </td>
   </tr>
 </table>
 
@@ -111,7 +117,7 @@ docker run -d \
 ![Service Detail Page](https://cdn.checkcle.io/images/uptime/uptime-regional-detail.png)
 ![checkcle-server-instance](https://cdn.checkcle.io/images/server/server-list.png)
 ![SSL Monitoring](https://cdn.checkcle.io/images/ssl-domain/ssl-list.png)
-![Schedule Maintenance](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/checkcle-schedule-maintenance.png)
+![Notification System](https://cdn.checkcle.io/general/powerfull_notification.png)
 
 
 ## 🌟 CheckCle for Communities?
@@ -126,17 +132,31 @@ docker run -d \
 
 ### 🥈 Silver Uptime Ally
 
-<a href="https://github.com/sponsors/tolaleng">
-  <img src="https://avatars.githubusercontent.com/u/135371107?v=4" width="75" height="75" style="border-radius: 50%" />
+<a href="https://github.com/michaelortnerit">
+  <img src="https://avatars.githubusercontent.com/u/135371107?v=4" width="75" height="75" style="border-radius: 50%; display: block;" />
 </a>
 
 ### 🧡 Ping Supporter
 
-<a href="https://github.com/sponsors/tolaleng">
-  <img src="https://avatars.githubusercontent.com/u/4575656?v=4" width="75" height="75" style="border-radius: 50%" />
+<a href="https://github.com/samang-dauth">
+  <img src="https://avatars.githubusercontent.com/u/4575656?v=4" width="75" height="75" style="border-radius: 50%; display: block;" />
 </a>
 
+### 🤝 Ecosystem & Community Partner
+<a href="https://github.com/gitbookio" style="display: inline-block; margin-right: 10px; vertical-align: middle;">
+  <img src="https://avatars.githubusercontent.com/u/7111340?s=200&v=4" 
+       width="75" height="75" 
+       style="border-radius: 50%;" />
+</a>
+<a href="https://m.do.co/c/0c27ef82475f" style="display: inline-block; vertical-align: middle;">
+  <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" 
+       height="45" 
+       alt="DigitalOcean Logo">
+</a>
+
+
 ---
+
 
 ## 👥 Contributors
 Thank you for contributing and continuously making CheckCle better, you're awesome 🫶
@@ -159,7 +179,7 @@ Here are some ways you can help improve CheckCle:
 
 ## 🌍 Stay Connected
 - Website: [checkcle.io](https://checkcle.io)
-- Documentation: [docs.checkcle.io](https://docs.checkcle.io)
+- Documentation: [docs.checkcle.io](https://docs.checkcle.io) | Big thanks to [GitBook](https://github.com/gitbookio) for sponsoring the OSS site plan for CheckCle!
 - Chat on Discord: Join our community [@discord](https://discord.gg/xs9gbubGwX)
 - Follow us on X: [@checkcle_oss](https://x.com/checkcle_oss)
 
@@ -168,5 +188,3 @@ Here are some ways you can help improve CheckCle:
 CheckCle is released under the MIT License.
 
 ---
-
-

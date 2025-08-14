@@ -8,6 +8,7 @@ export interface SSLTranslations {
   deleteSSLCertificate: string;
   sslCertificateDetails: string;
   detailedInfo: string;
+  viewDetailedInformation: string;
 
   // Status related
   valid: string;
@@ -46,11 +47,16 @@ export interface SSLTranslations {
   validFrom: string;
   validUntil: string;
   validityDays: string;
+  validityPeriod: string;
   organization: string;
   commonName: string;
   serialNumber: string;
   algorithm: string;
   subjectAltNames: string;
+  subjectAlternativeNames: string;
+  resolvedIP: string;
+  issuedTo: string;
+  days: string;
   
   // Buttons and actions
   addDomain: string;
@@ -70,8 +76,11 @@ export interface SSLTranslations {
   validity: string;
   issuerInfo: string;
   technicalDetails: string;
+  technicalInformation: string;
   monitoringConfig: string;
+  monitoringConfiguration: string;
   recordInfo: string;
+  certificateDetails: string;
   
   // Notifications and messages
   sslCertificateAdded: string;

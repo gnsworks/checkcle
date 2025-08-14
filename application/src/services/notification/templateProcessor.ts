@@ -1,43 +1,39 @@
 
-import { NotificationTemplate } from "../templateService";
+import { AnyTemplate } from "../templateService";
 
 /**
  * Process a notification template with service data
  */
 export function processTemplate(
-  template: NotificationTemplate,
+  template: AnyTemplate,
   service: any,
   status: string,
   responseTime?: number
 ): string {
   try {
-    console.log(`Processing template for status: ${status}`);
     
     let templateText = "";
     
     // Select the appropriate message template based on status
     if (status === "up") {
-      templateText = template.up_message || `Service ${service.name} is now UP`;
+      templateText = (template as any).up_message || generateDefaultUptimeMessage(service, status, responseTime);
     } else if (status === "down") {
-      templateText = template.down_message || `Service ${service.name} is DOWN`;
+      templateText = (template as any).down_message || generateDefaultUptimeMessage(service, status, responseTime);
     } else if (status === "warning") {
-      templateText = template.incident_message || `Warning: Service ${service.name} has an incident`;
+      templateText = (template as any).incident_message || generateDefaultUptimeMessage(service, status, responseTime);
     } else if (status === "maintenance" || status === "paused") {
-      templateText = template.maintenance_message || `Service ${service.name} is in maintenance mode`;
+      templateText = (template as any).maintenance_message || generateDefaultUptimeMessage(service, status, responseTime);
     } else if (status === "resolved") {
-      templateText = template.resolved_message || `Issue with service ${service.name} has been resolved`;
+      templateText = (template as any).resolved_message || generateDefaultUptimeMessage(service, status, responseTime);
     } else {
-      templateText = `Service ${service.name} status changed to: ${status}`;
+      templateText = generateDefaultUptimeMessage(service, status, responseTime);
     }
     
     // Skip replacement if template is empty
     if (!templateText) {
-      console.log("Empty template for status:", status);
-      return generateDefaultMessage(service.name, status, responseTime);
+      return generateDefaultUptimeMessage(service, status, responseTime);
     }
-    
-    console.log("Using template text:", templateText);
-    
+        
     // Replace placeholders with actual values
     let message = templateText
       .replace(/\${service_name}/g, service.name || 'Unknown Service')
@@ -50,22 +46,113 @@ export function processTemplate(
       message = message.replace(/\${response_time}/g, 'N/A');
     }
     
-    // Replace any other placeholders
+    // Replace service-specific placeholders
     message = message
-      .replace(/\${threshold}/g, service.threshold || 'N/A')
-      .replace(/\${url}/g, service.url || 'N/A')
+      .replace(/\${url}/g, service.url || service.URL || 'N/A')
+      .replace(/\${host}/g, service.host || service.Host || 'N/A')
+      .replace(/\${service_type}/g, service.service_type?.toUpperCase() || service.ServiceType?.toUpperCase() || service.type?.toUpperCase() || 'N/A')
+      .replace(/\${port}/g, service.port ? service.port.toString() : (service.Port ? service.Port.toString() : 'N/A'))
+      .replace(/\${domain}/g, service.domain || service.Domain || 'N/A')
+      .replace(/\${region_name}/g, service.region_name || service.RegionName || 'Default')
+      .replace(/\${agent_id}/g, service.agent_id ? service.agent_id.toString() : (service.AgentID ? service.AgentID.toString() : '1'))
+      .replace(/\${uptime}/g, service.uptime ? `${service.uptime}%` : (service.Uptime ? `${service.Uptime}%` : 'N/A'))
+      .replace(/\${error_message}/g, service.error_message || service.ErrorMessage || service.error || '')
       .replace(/\${time}/g, new Date().toLocaleString());
       
-    console.log("Processed template message:", message);
     return message;
   } catch (error) {
-    console.error("Error processing template:", error);
-    return generateDefaultMessage(service.name, status, responseTime);
+    return generateDefaultUptimeMessage(service, status, responseTime);
   }
 }
 
 /**
- * Generate a default message when no template is available
+ * Generate a default uptime message with proper formatting and emojis
+ */
+export function generateDefaultUptimeMessage(
+  service: any,
+  status: string,
+  responseTime?: number
+): string {
+  const serviceName = service.name || service.Name || 'Unknown Service';
+  const statusUpper = status.toUpperCase();
+  
+  // Status emoji mapping
+  let statusEmoji = "🔵";
+  if (status === "up") {
+    statusEmoji = "🟢";
+  } else if (status === "down") {
+    statusEmoji = "🔴";
+  } else if (status === "warning") {
+    statusEmoji = "🟡";
+  } else if (status === "maintenance" || status === "paused") {
+    statusEmoji = "🟠";
+  }
+  
+  let message = `${statusEmoji}Service ${serviceName} is ${statusUpper}.`;
+  
+  // Add service details
+  const host = service.host || service.Host;
+  const url = service.url || service.URL;
+  const serviceType = service.service_type || service.ServiceType || service.type;
+  const port = service.port || service.Port;
+  const domain = service.domain || service.Domain;
+  const regionName = service.region_name || service.RegionName;
+  const agentId = service.agent_id || service.AgentID;
+  const uptime = service.uptime || service.Uptime;
+  
+  // Build formatted details
+  const details = [];
+  
+  if (url && url !== 'N/A') {
+    details.push(` - Host URL: ${url}`);
+  } else if (host && host !== 'N/A') {
+    details.push(` - Host: ${host}`);
+  }
+  
+  if (serviceType && serviceType !== 'N/A') {
+    details.push(` - Type: ${serviceType.toUpperCase()}`);
+  }
+  
+  if (port && port !== 'N/A') {
+    details.push(` - Port: ${port}`);
+  }
+  
+  if (domain && domain !== 'N/A') {
+    details.push(` - Domain: ${domain}`);
+  }
+  
+  // Response time handling
+  if (responseTime !== undefined && responseTime > 0) {
+    details.push(` - Response time: ${responseTime}ms`);
+  } else {
+    details.push(` - Response time: N/A`);
+  }
+  
+  if (regionName && regionName !== 'N/A') {
+    details.push(` - Region: ${regionName}`);
+  }
+  
+  if (agentId && agentId !== 'N/A') {
+    details.push(` - Agent: ${agentId}`);
+  }
+  
+  if (uptime !== undefined && uptime !== 'N/A') {
+    details.push(` - Uptime: ${uptime}%`);
+  }
+  
+  // Add timestamp
+  details.push(` - Time: ${new Date().toLocaleString()}`);
+  
+  // Combine message with details
+  if (details.length > 0) {
+    message += '\n' + details.join('\n');
+  }
+  
+  return message;
+}
+
+/**
+ * Generate a default message when no template is available (legacy support)
  */
 export function generateDefaultMessage(
   serviceName: string,

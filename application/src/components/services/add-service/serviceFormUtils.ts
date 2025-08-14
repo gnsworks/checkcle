@@ -74,7 +74,6 @@ export const mapServiceToFormData = (service: Service): ServiceFormData => {
         notificationChannels.push(...parsedChannels);
       }
     } catch (error) {
-     // console.warn("Failed to parse notification_channel JSON:", error);
       // If parsing fails, treat as single channel ID
       notificationChannels.push(service.notification_channel);
     }
@@ -91,16 +90,13 @@ export const mapServiceToFormData = (service: Service): ServiceFormData => {
     }
   }
 
-//  console.log("Mapping service to form data:", {
- //   serviceName: service.name,
- //   notification_status: service.notification_status,
- //   notification_channel: service.notification_channel,
- //   notificationChannel: service.notificationChannel,
- //   mappedChannels: notificationChannels,
-  //  regionalAgents: regionalAgents,
-  //  region_name: service.region_name,
-  ///  agent_id: service.agent_id
- // });
+  // Handle notification_status - it can be boolean or string
+  let notificationStatus: "enabled" | "disabled" = "disabled";
+  if (typeof service.notification_status === "boolean") {
+    notificationStatus = service.notification_status ? "enabled" : "disabled";
+  } else if (typeof service.notification_status === "string") {
+    notificationStatus = service.notification_status === "enabled" ? "enabled" : "disabled";
+  }
 
   return {
     name: service.name || "",
@@ -109,7 +105,7 @@ export const mapServiceToFormData = (service: Service): ServiceFormData => {
     port: portValue,
     interval: String(service.interval || 60),
     retries: String(service.retries || 3),
-    notificationStatus: service.notification_status || "disabled",
+    notificationStatus: notificationStatus,
     notificationChannels: notificationChannels,
     alertTemplate: service.alertTemplate === "default" ? "" : service.alertTemplate || "",
     regionalMonitoringEnabled: isRegionalEnabled,
@@ -152,7 +148,8 @@ export const mapFormDataToServiceData = (data: ServiceFormData) => {
     type: data.type,
     interval: parseInt(data.interval),
     retries: parseInt(data.retries),
-    notificationStatus: data.notificationStatus || "disabled",
+    // Convert string status to boolean for notification_status field
+    notificationStatus: data.notificationStatus === "enabled",
     notificationChannels: data.notificationChannels || [],
     alertTemplate: data.alertTemplate === "default" ? "" : data.alertTemplate,
     // Use regional_status field and store multiple agents as comma-separated values

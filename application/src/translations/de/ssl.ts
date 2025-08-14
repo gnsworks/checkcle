@@ -10,6 +10,7 @@ export const sslTranslations: SSLTranslations = {
   deleteSSLCertificate: "Delete SSL Certificate",
   sslCertificateDetails: "SSL-Zertifikatdetails",
   detailedInfo: "Detaillierte Informationen zum SSL-Zertifikat für",
+  viewDetailedInformation: "View detailed information for",
 
   // Status related
   valid: "Gültig",
@@ -48,11 +49,16 @@ export const sslTranslations: SSLTranslations = {
   validFrom: "Gültig von",
   validUntil: "Gültig bis",
   validityDays: "Gültigkeitsdauer Tage",
+  validityPeriod: "Validity Period",
   organization: "Organisation",
   commonName: "Allgemeiner Name",
   serialNumber: "Seriennummer",
   algorithm: "Algorithmus",
   subjectAltNames: "Thema Alternative Bezeichnungen",
+  subjectAlternativeNames: "Subject Alternative Names",
+  resolvedIP: "Resolved IP",
+  issuedTo: "Issued To",
+  days: "days",
   
   // Buttons and actions
   addDomain: "Domain hinzufügen",
@@ -72,8 +78,11 @@ export const sslTranslations: SSLTranslations = {
   validity: "Gültigkeit",
   issuerInfo: "Informationen zum Aussteller",
   technicalDetails: "Technische Details",
+  technicalInformation: "Technical Information",
   monitoringConfig: "Monitoring-Konfiguration",
+  monitoringConfiguration: "Monitoring Configuration",
   recordInfo: "Aufzeichnungsinformationen",
+  certificateDetails: "Certificate Details",
 
   // Notifications and messages
   sslCertificateAdded: "SSL-Zertifikat erfolgreich hinzugefügt",

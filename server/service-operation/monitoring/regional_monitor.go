@@ -49,7 +49,7 @@ func (rm *RegionalMonitor) Start() {
 	rm.updateConnectionStatus("online")
 	rm.isOnline = true
 
-	log.Printf("Regional monitor started for region: %s (Agent ID: %s)", 
+	log.Printf("✓Default Regional monitor started for region: %s (Agent ID: %s)", 
 		service.RegionName, service.AgentID)
 
 	go func() {

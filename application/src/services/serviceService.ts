@@ -9,7 +9,6 @@ export type { Service, UptimeData, CreateServiceParams };
 export const serviceService = {
   async getServices(): Promise<Service[]> {
     try {
-      
       // First get the total count of records
       const countResponse = await pb.collection('services').getList(1, 1, {
         sort: 'name',
@@ -37,7 +36,7 @@ export const serviceService = {
         retries: item.max_retries || item.retries || 3,
         notificationChannel: item.notification_id,
         notification_channel: item.notification_channel, // Add this field for multiple channels support
-        notification_status: item.notification_status || "disabled",
+        notification_status: item.notification_status || false,
         alertTemplate: item.template_id,
         muteAlerts: item.alerts === "muted",  // Convert string to boolean for compatibility
         alerts: item.alerts || "unmuted",     // Store actual database field
@@ -49,7 +48,6 @@ export const serviceService = {
         regional_monitoring_enabled: item.regional_status === "enabled", // Backward compatibility
       }));
     } catch (error) {
-    //  console.error("Error fetching services:", error);
       throw new Error('Failed to load services data.');
     }
   },
@@ -60,7 +58,6 @@ export const serviceService = {
       const serviceType = params.type.toLowerCase();
       
       // Debug log to check what we're sending
-     // console.log("Creating service with params:", params);
       
       const data = {
         name: params.name,
@@ -71,16 +68,16 @@ export const serviceService = {
         last_checked: new Date().toLocaleString(),
         heartbeat_interval: params.interval,
         max_retries: params.retries,
-        notification_status: params.notificationStatus || "disabled",
-        // Store multiple notification channels as JSON string
+        // Store notification_status as boolean
+        notification_status: params.notificationStatus === true,
+        // Always store channels and template if provided (don't clear based on status)
         notification_channel: params.notificationChannels && params.notificationChannels.length > 0 
           ? JSON.stringify(params.notificationChannels)
           : null,
-        // Store multiple notification IDs as comma-separated string in notification_id field
         notification_id: params.notificationChannels && params.notificationChannels.length > 0 
           ? params.notificationChannels.join(',')
           : null,
-        template_id: params.alertTemplate,
+        template_id: params.alertTemplate || null,
         // Regional monitoring fields - use regional_status
         regional_status: params.regionalStatus || "disabled",
         region_name: params.regionName || "",
@@ -96,9 +93,7 @@ export const serviceService = {
         )
       };
 
-     // console.log("Creating service with data:", data);
       const record = await pb.collection('services').create(data);
-     // console.log("Service created, returned record:", record);
       
       // Return the newly created service
       const newService = {
@@ -117,7 +112,7 @@ export const serviceService = {
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
         notification_channel: record.notification_channel,
-        notification_status: record.notification_status || "disabled",
+        notification_status: record.notification_status || false,
         alertTemplate: record.template_id,
         regional_status: record.regional_status || "disabled",
         regional_monitoring_enabled: record.regional_status === "enabled",
@@ -130,7 +125,6 @@ export const serviceService = {
       
       return newService;
     } catch (error) {
-    //  console.error("Error creating service:", error);
       throw new Error('Failed to create service.');
     }
   },
@@ -141,23 +135,22 @@ export const serviceService = {
       const serviceType = params.type.toLowerCase();
       
       // Debug log to check what we're updating
-    //  console.log("Updating service with params:", params);
       
       const data = {
         name: params.name,
         service_type: serviceType,
         heartbeat_interval: params.interval,
         max_retries: params.retries,
-        notification_status: params.notificationStatus || "disabled",
-        // Store multiple notification channels as JSON string
-        notification_channel: params.notificationChannels && params.notificationChannels.length > 0 
-          ? JSON.stringify(params.notificationChannels)
-          : null,
-        // Store multiple notification IDs as comma-separated string in notification_id field
-        notification_id: params.notificationChannels && params.notificationChannels.length > 0 
-          ? params.notificationChannels.join(',')
-          : null,
-        template_id: params.alertTemplate || null,
+        // Store notification_status as boolean - preserve existing channels/template
+        notification_status: params.notificationStatus === true,
+        // Only update channels and template if they are provided (don't clear them)
+        ...(params.notificationChannels && params.notificationChannels.length > 0 && {
+          notification_channel: JSON.stringify(params.notificationChannels),
+          notification_id: params.notificationChannels.join(',')
+        }),
+        ...(params.alertTemplate && {
+          template_id: params.alertTemplate
+        }),
         // Regional monitoring fields - use regional_status
         regional_status: params.regionalStatus || "disabled",
         region_name: params.regionName || "",
@@ -173,7 +166,6 @@ export const serviceService = {
         )
       };
 
-     // console.log("Updating service with data:", data);
       
       // Use timeout to ensure the request doesn't hang
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -182,7 +174,6 @@ export const serviceService = {
       
       const updatePromise = pb.collection('services').update(id, data);
       const record = await Promise.race([updatePromise, timeoutPromise]) as any;
-     // console.log("Service updated, returned record:", record);
       
       // Return the updated service
       const updatedService = {
@@ -201,7 +192,7 @@ export const serviceService = {
         retries: record.max_retries || 3,
         notificationChannel: record.notification_id,
         notification_channel: record.notification_channel,
-        notification_status: record.notification_status || "disabled",
+        notification_status: record.notification_status || false,
         alertTemplate: record.template_id,
         regional_status: record.regional_status || "disabled",
         regional_monitoring_enabled: record.regional_status === "enabled",
@@ -211,7 +202,6 @@ export const serviceService = {
       
       return updatedService;
     } catch (error) {
-      //console.error("Error updating service:", error);
       throw new Error(`Failed to update service: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   },

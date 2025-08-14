@@ -1,4 +1,3 @@
-
 import { FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -8,6 +7,7 @@ import { UseFormReturn } from "react-hook-form";
 import { ServiceFormData } from "./types";
 import { useQuery } from "@tanstack/react-query";
 import { alertConfigService, AlertConfiguration } from "@/services/alertConfigService";
+import { serviceNotificationTemplateService, ServiceNotificationTemplate } from "@/services/serviceNotificationTemplateService";
 import { useState, useEffect } from "react";
 
 interface ServiceNotificationFieldsProps {
@@ -21,17 +21,17 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
   const notificationStatus = form.watch("notificationStatus");
   const notificationChannels = form.watch("notificationChannels") || [];
   const alertTemplate = form.watch("alertTemplate");
-  
- // console.log("Current notification values:", { 
- //   notificationStatus, 
- //   notificationChannels,
- //   alertTemplate 
- // });
-  
+   
   // Fetch alert configurations for notification channels
   const { data: alertConfigsData } = useQuery({
     queryKey: ['alertConfigs'],
     queryFn: () => alertConfigService.getAlertConfigurations(),
+  });
+
+  // Fetch service notification templates
+  const { data: serviceTemplates, isLoading: isLoadingTemplates } = useQuery({
+    queryKey: ['serviceNotificationTemplates'],
+    queryFn: () => serviceNotificationTemplateService.getTemplates(),
   });
   
   // Update alert configs when data is loaded
@@ -42,13 +42,19 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
       setAlertConfigs(enabledChannels);
       
       // Debug log to check what alert configs are loaded
-   //   console.log("Loaded alert configurations:", enabledChannels);
     }
   }, [alertConfigsData]);
 
+  // Debug log for service templates
+  useEffect(() => {
+    if (serviceTemplates) {
+     // console.log("Loaded service notification templates:", serviceTemplates);
+    }
+  }, [serviceTemplates]);
+
   // Log when form values change to debug
   useEffect(() => {
-  //  console.log("Notification values changed:", {
+   // console.log("Notification values changed:", {
    //   notificationStatus: form.getValues("notificationStatus"),
    //   notificationChannels: form.getValues("notificationChannels")
    // });
@@ -159,9 +165,7 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
         control={form.control}
         name="alertTemplate"
         render={({ field }) => {
-          // Don't convert existing values to "default"
-          const displayValue = field.value || "default";
-         // console.log("Rendering alert template field with value:", displayValue);
+         // console.log("Rendering alert template field with value:", field.value);
           
           return (
             <FormItem>
@@ -169,18 +173,20 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
               <FormControl>
                 <Select 
                   onValueChange={(value) => {
-                    console.log("Alert template changed to:", value);
-                    field.onChange(value === "default" ? "" : value);
+                    field.onChange(value);
                   }} 
-                  value={displayValue}
-                  disabled={notificationStatus !== "enabled"}
+                  value={field.value || ""}
+                  disabled={notificationStatus !== "enabled" || isLoadingTemplates}
                 >
                   <SelectTrigger className={notificationStatus !== "enabled" ? 'opacity-50' : ''}>
-                    <SelectValue placeholder="Select an alert template" />
+                    <SelectValue placeholder={isLoadingTemplates ? "Loading templates..." : "Select an alert template"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="default">Default</SelectItem>
-                    {/* Add templates here when available */}
+                    {serviceTemplates?.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormControl>

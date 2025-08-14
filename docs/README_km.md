@@ -20,6 +20,12 @@
         <br/><strong>Japanese</strong>
       </a>
     </td>
+    <td align="center">
+      <a href="README_zhcn.md">
+        <img src="https://flagcdn.com/24x18/cn.png" alt="Chinese" />  
+        <br/><strong>Chinese</strong>
+      </a>
+    </td>
   </tr>
 </table>
 

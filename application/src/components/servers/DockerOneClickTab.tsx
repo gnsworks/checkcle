@@ -64,18 +64,18 @@ sudo -E bash ./server-docker-agent.sh`;
   const handleCopyOneClickCommand = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Copy one-click command button clicked');
+  //  console.log('Copy one-click command button clicked');
     const command = getDockerOneClickCommand();
-    console.log('Copying one-click command:', command);
+  //  console.log('Copying one-click command:', command);
     await copyToClipboard(command);
   };
 
   const handleCopyDockerCommand = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Copy docker command button clicked');
+   // console.log('Copy docker command button clicked');
     const command = getDirectDockerCommand();
-    console.log('Copying docker command:', command);
+  //  console.log('Copying docker command:', command);
     await copyToClipboard(command);
   };
 
@@ -86,7 +86,7 @@ sudo -E bash ./server-docker-agent.sh`;
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
             <Container className="h-5 w-5" />
-            Docker One-Click Install (Recommended)
+            Docker One-Click Install
           </CardTitle>
           <CardDescription className="text-blue-600 dark:text-blue-300">
             Automated Docker container installation with system monitoring capabilities

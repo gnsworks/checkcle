@@ -9,6 +9,7 @@ export const sslTranslations: SSLTranslations = {
   deleteSSLCertificate: "SSL証明書を削除",
   sslCertificateDetails: "SSL証明書詳細",
   detailedInfo: "詳細情報:",
+  viewDetailedInformation: "View detailed information for",
 
   // ステータス関連
   valid: "有効",
@@ -47,11 +48,16 @@ export const sslTranslations: SSLTranslations = {
   validFrom: "有効開始日",
   validUntil: "有効終了日",
   validityDays: "有効期間",
+  validityPeriod: "Validity Period",
   organization: "組織",
   commonName: "コモンネーム",
   serialNumber: "シリアル番号",
   algorithm: "アルゴリズム",
   subjectAltNames: "サブジェクト代替名",
+  subjectAlternativeNames: "Subject Alternative Names",
+  resolvedIP: "Resolved IP",
+  issuedTo: "Issued To",
+  days: "days",
   
   // ボタンとアクション
   addDomain: "ドメインを追加",
@@ -71,8 +77,11 @@ export const sslTranslations: SSLTranslations = {
   validity: "有効性",
   issuerInfo: "発行者情報",
   technicalDetails: "技術的詳細",
+  technicalInformation: "Technical Information",
   monitoringConfig: "監視設定",
+  monitoringConfiguration: "Monitoring Configuration",
   recordInfo: "レコード情報",
+  certificateDetails: "Certificate Details",
   
   // 通知とメッセージ
   sslCertificateAdded: "SSL証明書が正常に追加されました",

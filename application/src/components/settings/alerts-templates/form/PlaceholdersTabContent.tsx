@@ -71,15 +71,168 @@ export const PlaceholdersTabContent: React.FC<PlaceholdersTabContentProps> = ({ 
             
             <FormField
               control={control}
-              name="threshold_placeholder"
+              name="url_placeholder"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Threshold Placeholder</FormLabel>
+                  <FormLabel>URL Placeholder</FormLabel>
                   <FormControl>
-                    <Input placeholder="${threshold}" {...field} />
+                    <Input placeholder="${url}" {...field} />
                   </FormControl>
                   <FormDescription className="text-xs">
-                    Used for threshold values in alerts
+                    Used for service URL
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="host_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Host/IP Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${host}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for service host or IP address
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="service_type_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Service Type Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${service_type}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for service type (HTTP, PING, TCP, DNS)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="port_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Port Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${port}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for service port number
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="domain_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Domain Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${domain}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for domain name (DNS services)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="region_name_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Region Name Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${region_name}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for regional agent name
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="agent_id_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Agent ID Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${agent_id}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for regional agent ID
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="uptime_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Uptime Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${uptime}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for service uptime percentage
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={control}
+              name="time_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Time Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${time}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for current date and time
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="error_message_placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Error Message Placeholder</FormLabel>
+                  <FormControl>
+                    <Input placeholder="${error_message}" {...field} />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Used for error details when service is down
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -112,16 +265,44 @@ export const PlaceholdersTabContent: React.FC<PlaceholdersTabContentProps> = ({ 
                 <p className="text-xs text-muted-foreground mt-1">Service status (UP, DOWN)</p>
               </div>
               <div className="bg-muted/30 p-2 rounded">
-                <code className="text-xs">${"{threshold}"}</code>
-                <p className="text-xs text-muted-foreground mt-1">Service threshold value</p>
-              </div>
-              <div className="bg-muted/30 p-2 rounded">
                 <code className="text-xs">${"{url}"}</code>
                 <p className="text-xs text-muted-foreground mt-1">Service URL</p>
               </div>
               <div className="bg-muted/30 p-2 rounded">
+                <code className="text-xs">${"{host}"}</code>
+                <p className="text-xs text-muted-foreground mt-1">Service host or IP address</p>
+              </div>
+              <div className="bg-muted/30 p-2 rounded">
+                <code className="text-xs">${"{service_type}"}</code>
+                <p className="text-xs text-muted-foreground mt-1">Service type (HTTP, PING, TCP, DNS)</p>
+              </div>
+              <div className="bg-muted/30 p-2 rounded">
+                <code className="text-xs">${"{port}"}</code>
+                <p className="text-xs text-muted-foreground mt-1">Service port number</p>
+              </div>
+              <div className="bg-muted/30 p-2 rounded">
+                <code className="text-xs">${"{domain}"}</code>
+                <p className="text-xs text-muted-foreground mt-1">Domain name (DNS services)</p>
+              </div>
+              <div className="bg-muted/30 p-2 rounded">
+                <code className="text-xs">${"{region_name}"}</code>
+                <p className="text-xs text-muted-foreground mt-1">Regional agent name</p>
+              </div>
+              <div className="bg-muted/30 p-2 rounded">
+                <code className="text-xs">${"{agent_id}"}</code>
+                <p className="text-xs text-muted-foreground mt-1">Regional agent ID</p>
+              </div>
+              <div className="bg-muted/30 p-2 rounded">
+                <code className="text-xs">${"{uptime}"}</code>
+                <p className="text-xs text-muted-foreground mt-1">Service uptime percentage</p>
+              </div>
+              <div className="bg-muted/30 p-2 rounded">
                 <code className="text-xs">${"{time}"}</code>
                 <p className="text-xs text-muted-foreground mt-1">Current date and time</p>
+              </div>
+              <div className="bg-muted/30 p-2 rounded">
+                <code className="text-xs">${"{error_message}"}</code>
+                <p className="text-xs text-muted-foreground mt-1">Error details when service is down</p>
               </div>
             </div>
           </div>

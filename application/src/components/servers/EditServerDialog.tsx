@@ -12,7 +12,7 @@ import { pb } from "@/lib/pocketbase";
 import { Server } from "@/types/server.types";
 import { RefreshCw, X } from "lucide-react";
 import { alertConfigService, AlertConfiguration } from "@/services/alertConfigService";
-import { templateService, NotificationTemplate } from "@/services/templateService";
+import { templateService, ServerNotificationTemplate } from "@/services/templateService";
 import { serverThresholdService, ServerThreshold } from "@/services/serverThresholdService";
 
 interface EditServerDialogProps {
@@ -25,7 +25,7 @@ interface EditServerDialogProps {
 interface ServerFormData {
   name: string;
   check_interval: number;
-  retry_attempts: number;
+  max_retries: number;
   docker_monitoring: boolean;
   notification_enabled: boolean;
   notification_channels: string[]; // Changed to array for multiple selections
@@ -49,7 +49,7 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   const [formData, setFormData] = useState<ServerFormData>({
     name: "",
     check_interval: 60,
-    retry_attempts: 3,
+    max_retries: 3,
     docker_monitoring: false,
     notification_enabled: false,
     notification_channels: [], // Changed to array
@@ -66,9 +66,9 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alertConfigs, setAlertConfigs] = useState<AlertConfiguration[]>([]);
-  const [templates, setTemplates] = useState<NotificationTemplate[]>([]);
+  const [templates, setTemplates] = useState<ServerNotificationTemplate[]>([]);
   const [thresholds, setThresholds] = useState<ServerThreshold[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<NotificationTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<ServerNotificationTemplate | null>(null);
   const [selectedThreshold, setSelectedThreshold] = useState<ServerThreshold | null>(null);
   const [loadingAlertConfigs, setLoadingAlertConfigs] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
@@ -78,7 +78,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   // Initialize form data when server changes
   useEffect(() => {
     if (server) {
-    //  console.log("Setting form data for server:", server);
       // Parse comma-separated notification_id into array
       const notificationChannels = server.notification_id 
         ? server.notification_id.split(',').map(id => id.trim()).filter(id => id)
@@ -87,9 +86,9 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       setFormData({
         name: server.name || "",
         check_interval: server.check_interval || 60,
-        retry_attempts: 3,
+        max_retries: server.max_retries || 3,
         docker_monitoring: server.docker === "true",
-        notification_enabled: notificationChannels.length > 0,
+        notification_enabled: server.notification_status === true,
         notification_channels: notificationChannels,
         threshold_id: server.threshold_id || "none",
         template_id: server.template_id || "none",
@@ -109,10 +108,8 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   // Load existing threshold data when thresholds are loaded and we have a server with threshold_id
   useEffect(() => {
     if (server && server.threshold_id && thresholds.length > 0) {
-    //  console.log("Loading existing threshold data for server:", server.threshold_id);
       const existingThreshold = thresholds.find(t => t.id === server.threshold_id);
       if (existingThreshold) {
-      //  console.log("Found existing threshold:", existingThreshold);
         setSelectedThreshold(existingThreshold);
         // Handle the API response format with proper field names and type conversion
         setThresholdFormData({
@@ -166,7 +163,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       const configs = await alertConfigService.getAlertConfigurations();
       setAlertConfigs(configs);
     } catch (error) {
-    //  console.error('Error loading alert configurations:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -180,10 +176,10 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
   const loadTemplates = async () => {
     try {
       setLoadingTemplates(true);
-      const templateList = await templateService.getTemplates();
-      setTemplates(templateList);
+      const templateList = await templateService.getTemplates('server');
+      // Cast to ServerNotificationTemplate[] since we know we're getting server templates
+      setTemplates(templateList as ServerNotificationTemplate[]);
     } catch (error) {
-    //  console.error('Error loading templates:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -200,7 +196,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       const thresholdList = await serverThresholdService.getServerThresholds();
       setThresholds(thresholdList);
     } catch (error) {
-     // console.error('Error loading server thresholds:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -208,47 +203,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       });
     } finally {
       setLoadingThresholds(false);
-    }
-  };
-
-  const handleThresholdUpdate = async () => {
-    if (!selectedThreshold) return;
-
-    try {
-      // Use the correct field name for RAM threshold
-      const updateData = {
-        cpu_threshold: thresholdFormData.cpu_threshold,
-        ram_threshold_message: thresholdFormData.ram_threshold, // Use the correct field name
-        disk_threshold: thresholdFormData.disk_threshold,
-        network_threshold: thresholdFormData.network_threshold,
-      };
-
-      await serverThresholdService.updateServerThreshold(selectedThreshold.id, updateData);
-      
-      // Update local state
-      setSelectedThreshold({
-        ...selectedThreshold,
-        ...thresholdFormData,
-      });
-
-      // Update thresholds list
-      setThresholds(prev => prev.map(t => 
-        t.id === selectedThreshold.id 
-          ? { ...t, ...thresholdFormData }
-          : t
-      ));
-
-      toast({
-        title: "Threshold updated",
-        description: "Server threshold values have been updated successfully.",
-      });
-    } catch (error) {
-    //  console.error('Error updating threshold:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update threshold values.",
-      });
     }
   };
 
@@ -276,21 +230,55 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       setIsSubmitting(true);
 
       // Convert notification channels array to comma-separated string
-      const notificationChannelsString = formData.notification_enabled 
-        ? formData.notification_channels.join(',')
-        : "";
+      const notificationChannelsString = formData.notification_channels.join(',');
 
       const updateData = {
         name: formData.name,
         check_interval: formData.check_interval,
+        max_retries: formData.max_retries,
         docker: formData.docker_monitoring ? "true" : "false",
+        notification_status: formData.notification_enabled,
         notification_id: notificationChannelsString,
-        threshold_id: formData.notification_enabled && formData.threshold_id !== "none" ? formData.threshold_id : "",
-        template_id: formData.notification_enabled && formData.template_id !== "none" ? formData.template_id : "",
+        threshold_id: formData.threshold_id !== "none" ? formData.threshold_id : "",
+        template_id: formData.template_id !== "none" ? formData.template_id : "",
         updated: new Date().toISOString(),
       };
 
       await pb.collection('servers').update(server.id, updateData);
+
+      // Update threshold if a threshold is selected and values have been modified
+      if (selectedThreshold && formData.threshold_id !== "none") {
+        try {
+          const updateThresholdData = {
+            cpu_threshold: thresholdFormData.cpu_threshold,
+            ram_threshold_message: thresholdFormData.ram_threshold,
+            disk_threshold: thresholdFormData.disk_threshold,
+            network_threshold: thresholdFormData.network_threshold,
+          };
+
+          await serverThresholdService.updateServerThreshold(selectedThreshold.id, updateThresholdData);
+          
+          // Update local state
+          setSelectedThreshold({
+            ...selectedThreshold,
+            ...thresholdFormData,
+          });
+
+          // Update thresholds list
+          setThresholds(prev => prev.map(t => 
+            t.id === selectedThreshold.id 
+              ? { ...t, ...thresholdFormData }
+              : t
+          ));
+
+        } catch (error) {
+          toast({
+            variant: "destructive",
+            title: "Warning",
+            description: "Server updated but failed to update threshold values.",
+          });
+        }
+      }
 
       toast({
         title: "Server updated",
@@ -301,7 +289,6 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       onOpenChange(false);
       
     } catch (error) {
-    //  console.error('Error updating server:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -321,9 +308,9 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
       setFormData({
         name: server.name || "",
         check_interval: server.check_interval || 60,
-        retry_attempts: 3,
+        max_retries: server.max_retries || 3,
         docker_monitoring: server.docker === "true",
-        notification_enabled: notificationChannels.length > 0,
+        notification_enabled: server.notification_status === true,
         notification_channels: notificationChannels,
         threshold_id: server.threshold_id || "none",
         template_id: server.template_id || "none",
@@ -372,20 +359,20 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="retryAttempts">Retry Attempts</Label>
+              <Label htmlFor="maxRetries">Max Retries</Label>
               <Select
-                value={formData.retry_attempts.toString()}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, retry_attempts: parseInt(value) }))}
+                value={formData.max_retries.toString()}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, max_retries: parseInt(value) }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select retry attempts" />
+                  <SelectValue placeholder="Select max retries" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">1 attempt</SelectItem>
-                  <SelectItem value="2">2 attempts</SelectItem>
-                  <SelectItem value="3">3 attempts</SelectItem>
-                  <SelectItem value="5">5 attempts</SelectItem>
-                  <SelectItem value="10">10 attempts</SelectItem>
+                  <SelectItem value="1">1 retry</SelectItem>
+                  <SelectItem value="2">2 retries</SelectItem>
+                  <SelectItem value="3">3 retries</SelectItem>
+                  <SelectItem value="5">5 retries</SelectItem>
+                  <SelectItem value="10">10 retries</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -416,10 +403,8 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
                 checked={formData.notification_enabled}
                 onCheckedChange={(checked) => setFormData(prev => ({ 
                   ...prev, 
-                  notification_enabled: checked,
-                  notification_channels: checked ? prev.notification_channels : [],
-                  threshold_id: checked ? prev.threshold_id : "none",
-                  template_id: checked ? prev.template_id : "none"
+                  notification_enabled: checked
+                  // Remove the automatic clearing of notification_channels, threshold_id, and template_id
                 }))}
               />
               <Label htmlFor="notificationEnabled">Enable Notifications</Label>
@@ -516,16 +501,8 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
                   {/* Editable Threshold Details */}
                   {selectedThreshold && (
                     <Card className="bg-muted/50">
-                      <CardHeader className="flex flex-row items-center justify-between">
+                      <CardHeader>
                         <CardTitle className="text-base">Threshold Details: {selectedThreshold.name}</CardTitle>
-                        <Button 
-                          type="button"
-                          onClick={handleThresholdUpdate}
-                          size="sm"
-                          variant="outline"
-                        >
-                          Update Thresholds
-                        </Button>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="grid grid-cols-2 gap-3 text-sm">
@@ -621,27 +598,39 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
                       <CardContent className="space-y-3">
                         <div className="grid grid-cols-1 gap-3 text-sm">
                           <div>
-                            <Label className="text-xs font-medium text-muted-foreground">RAM Threshold Message</Label>
+                            <Label className="text-xs font-medium text-muted-foreground">RAM Message</Label>
                             <p className="text-sm bg-background p-2 rounded border">
-                              {selectedTemplate.up_message || "No RAM threshold message defined"}
+                              {selectedTemplate.ram_message || "No RAM message defined"}
                             </p>
                           </div>
                           <div>
-                            <Label className="text-xs font-medium text-muted-foreground">CPU Threshold Message</Label>
+                            <Label className="text-xs font-medium text-muted-foreground">CPU Message</Label>
                             <p className="text-sm bg-background p-2 rounded border">
-                              {selectedTemplate.down_message || "No CPU threshold message defined"}
+                              {selectedTemplate.cpu_message || "No CPU message defined"}
                             </p>
                           </div>
                           <div>
-                            <Label className="text-xs font-medium text-muted-foreground">Disk Threshold Message</Label>
+                            <Label className="text-xs font-medium text-muted-foreground">Disk Message</Label>
                             <p className="text-sm bg-background p-2 rounded border">
-                              {selectedTemplate.incident_message || "No disk threshold message defined"}
+                              {selectedTemplate.disk_message || "No disk message defined"}
                             </p>
                           </div>
                           <div>
-                            <Label className="text-xs font-medium text-muted-foreground">Network Threshold Message</Label>
+                            <Label className="text-xs font-medium text-muted-foreground">Network Message</Label>
                             <p className="text-sm bg-background p-2 rounded border">
-                              {selectedTemplate.maintenance_message || "No network threshold message defined"}
+                              {selectedTemplate.network_message || "No network message defined"}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-muted-foreground">Up Message</Label>
+                            <p className="text-sm bg-background p-2 rounded border">
+                              {selectedTemplate.up_message || "No up message defined"}
+                            </p>
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-muted-foreground">Down Message</Label>
+                            <p className="text-sm bg-background p-2 rounded border">
+                              {selectedTemplate.down_message || "No down message defined"}
                             </p>
                           </div>
                         </div>
@@ -678,3 +667,5 @@ export const EditServerDialog: React.FC<EditServerDialogProps> = ({
     </Dialog>
   );
 };
+
+export default EditServerDialog;

@@ -55,7 +55,7 @@ sudo -E bash ./server-agent.sh`;
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
           <Download className="h-5 w-5" />
-          One-Click Install
+          One-Click Install (Recommended)
         </CardTitle>
         <CardDescription className="text-green-600 dark:text-green-300">
           Copy and paste this single command to install the monitoring agent instantly
