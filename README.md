@@ -117,7 +117,7 @@ docker run -d \
 ![Service Detail Page](https://cdn.checkcle.io/images/uptime/uptime-regional-detail.png)
 ![checkcle-server-instance](https://cdn.checkcle.io/images/server/server-list.png)
 ![SSL Monitoring](https://cdn.checkcle.io/images/ssl-domain/ssl-list.png)
-![Schedule Maintenance](https://pub-4a4062303020445f8f289a2fee84f9e8.r2.dev/images/checkcle-schedule-maintenance.png)
+![Notification System](https://cdn.checkcle.io/general/powerfull_notification.png)
 
 
 ## 🌟 CheckCle for Communities?
@@ -143,11 +143,17 @@ docker run -d \
 </a>
 
 ### 🤝 Ecosystem & Community Partner
-<a href="https://github.com/gitbookio">
+<a href="https://github.com/gitbookio" style="display: inline-block; margin-right: 10px; vertical-align: middle;">
   <img src="https://avatars.githubusercontent.com/u/7111340?s=200&v=4" 
        width="75" height="75" 
-       style="border-radius: 50%; display: block;" />
+       style="border-radius: 50%;" />
 </a>
+<a href="https://m.do.co/c/0c27ef82475f" style="display: inline-block; vertical-align: middle;">
+  <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" 
+       height="45" 
+       alt="DigitalOcean Logo">
+</a>
+
 
 ---
 
