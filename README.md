@@ -143,22 +143,22 @@ docker run -d \
 </a>
 
 ### 🤝 Ecosystem & Community Partner
-<table border="0" cellpadding="0" cellspacing="0">
-  <tr>
-    <td valign="middle">
-      <a href="https://github.com/gitbookio">
-        <img src="https://avatars.githubusercontent.com/u/7111340?s=200&v=4" 
-             width="60" height="60" style="border-radius: 50%;" alt="GitBook Logo" />
-      </a>
-    </td>
-    <td valign="middle" style="padding-left: 10px;">
-      <a href="https://m.do.co/c/0c27ef82475f">
-        <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" 
-             height="40" alt="DigitalOcean Logo" />
-      </a>
-    </td>
-  </tr>
-</table>
+<div style="display: flex; align-items: center; gap: 10px;">
+  <a href="https://github.com/gitbookio">
+    <img src="https://avatars.githubusercontent.com/u/7111340?s=200&v=4" 
+         width="75" height="75" 
+         style="border-radius: 50%;" 
+         alt="GitBook Logo" />
+  </a>
+
+  <a href="https://m.do.co/c/0c27ef82475f">
+    <img src="https://cdn.checkcle.io/images/sponsor/digitalocean_checkcle.png" 
+         height="50" 
+         alt="DigitalOcean Logo" />
+  </a>
+</div>
+
+
 
 
 
