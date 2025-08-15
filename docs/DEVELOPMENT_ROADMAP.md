@@ -73,11 +73,12 @@ The roadmap is divided into the following stages:
 - [ ] ✅ Improve Uptime Service and Server connection update based on status and notification.
 - [ ] ✅ Improve SSL perform the initial check automatically after creation 
 - [ ] ✅ Rate limiting and abuse protection
+- [ ] 🔧 Add ntfy push notifications
 - [ ] 🔧 Server Windows Agent
 - [ ] 🔧 Improve the Operational status page
 - [ ] 🔧 More Uptime Service Type (HTTP keyword, HTTP json)
 - [ ] 🔧 Server support with cpu temperature 
-- [ ] 🔧 Server upport with multiple disks 
+- [ ] 🔧 Server upport with multiple disks/volume
 - [ ] 🔧 Server support with Multiple Network Interfaces 
 - [ ] 🎯 Improve the Schedule and Incident for automation
 - [ ] 🎯 Uptime Monitoring option for choose: HTTP/HTTPS
@@ -91,8 +92,7 @@ These are community-suggested or experimental features under review:
 
 - [ ] Grouping uptime services
 - [ ] OIDC Connect | OAuth2 integration
-- [ ] Mobile PWA support
-- [ ] Cloud-native Helm/Kubernetes deployment
+- [ ] PWA support
 - [ ] Server outbound and inbound traffic usage
 
 You’re welcome to propose features via [GitHub Discussions](https://github.com/operacle/checkcle/discussions) or open an issue with the `feature-request` template.
