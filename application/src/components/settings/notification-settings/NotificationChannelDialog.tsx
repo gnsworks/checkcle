@@ -36,7 +36,7 @@ interface NotificationChannelDialogProps {
 
 const baseSchema = z.object({
   notify_name: z.string().min(1, "Name is required"),
-  notification_type: z.enum(["telegram", "discord", "slack", "signal", "google_chat", "email", "webhook"]),
+  notification_type: z.enum(["telegram", "discord", "slack", "signal", "google_chat", "email", "ntfy", "webhook"]),
   enabled: z.boolean().default(true),
   service_id: z.string().default("global"),
   template_id: z.string().optional(),
@@ -78,6 +78,11 @@ const emailSchema = baseSchema.extend({
   smtp_password: z.string().min(1, "SMTP password is required"),
 });
 
+const ntfySchema = baseSchema.extend({
+  notification_type: z.literal("ntfy"),
+  ntfy_endpoint: z.string().url("Must be a valid NTFY endpoint URL"),
+});
+
 const webhookSchema = baseSchema.extend({
   notification_type: z.literal("webhook"),
   webhook_url: z.string().url("Must be a valid URL"),
@@ -91,6 +96,7 @@ const formSchema = z.discriminatedUnion("notification_type", [
   signalSchema,
   googleChatSchema,
   emailSchema,
+  ntfySchema,
   webhookSchema
 ]);
 
@@ -132,6 +138,12 @@ const notificationTypeOptions = [
     label: "Email", 
     description: "Send notifications via email",
     icon: "/upload/notification/email.png"
+  },
+  { 
+    value: "ntfy", 
+    label: "NTFY", 
+    description: "Send notifications via NTFY push service",
+    icon: "/upload/notification/ntfy.png" 
   },
   { 
     value: "webhook", 
@@ -540,6 +552,25 @@ export const NotificationChannelDialog = ({
               </>
             )}
 
+             {notificationType === "ntfy" && (
+              <FormField
+                control={form.control}
+                name="ntfy_endpoint"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>NTFY Endpoint</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://ntfy.sh/your-topic" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The NTFY endpoint URL including your topic (e.g., https://ntfy.sh/checkcle)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            
             {notificationType === "webhook" && (
               <>
                 <FormField

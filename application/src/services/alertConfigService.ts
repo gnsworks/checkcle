@@ -7,7 +7,7 @@ export interface AlertConfiguration {
   collectionId?: string;
   collectionName?: string;
   service_id: string;
-  notification_type: "telegram" | "discord" | "slack" | "signal" | "google_chat" | "email" | "webhook";
+  notification_type: "telegram" | "discord" | "slack" | "signal" | "google_chat" | "email" | "ntfy" | "webhook";
   telegram_chat_id?: string;
   discord_webhook_url?: string;
   signal_number?: string;
@@ -28,7 +28,7 @@ export interface AlertConfiguration {
   smtp_password?: string;
   webhook_id?: string;
   channel_id?: string;
-  // Webhook fields for alert_configurations
+  ntfy_endpoint?: string;
   webhook_url?: string;
   webhook_payload_template?: string;
 }
@@ -82,9 +82,11 @@ export const alertConfigService = {
         cleanConfig.smtp_server = config.smtp_server || "";
         cleanConfig.smtp_port = config.smtp_port || "";
         cleanConfig.smtp_password = config.smtp_password || "";
-
-      } else if (config.notification_type === "webhook") {
+       
+      } else if (config.notification_type === "ntfy") { 
+        cleanConfig.ntfy_endpoint = config.ntfy_endpoint || "";
         
+      } else if (config.notification_type === "webhook") {
         cleanConfig.webhook_url = config.webhook_url || "";
         cleanConfig.webhook_payload_template = config.webhook_payload_template || "";
         
