@@ -130,7 +130,7 @@ docker run -d \
 ## Sponsors
 🙏 We're incredibly thankful to our sponsors. Your contributions enable us to maintain infrastructure (hosting, domains), run tests, and continue developing valuable features.
 
-### 🥈 Silver Uptime Ally
+### 🥈 Silver Uptime 
 
 <a href="https://github.com/michaelortnerit">
   <img src="https://avatars.githubusercontent.com/u/135371107?v=4" width="75" height="75" style="border-radius: 50%; display: block;" />
@@ -143,16 +143,21 @@ docker run -d \
 </a>
 
 ### 🤝 Ecosystem & Community Partner
-<a href="https://github.com/gitbookio" style="display: inline-block; margin-right: 10px; vertical-align: middle;">
-  <img src="https://avatars.githubusercontent.com/u/7111340?s=200&v=4" 
-       width="75" height="75" 
-       style="border-radius: 50%;" />
-</a>
-<a href="https://m.do.co/c/0c27ef82475f" style="display: inline-block; vertical-align: middle;">
-  <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" 
-       height="45" 
-       alt="DigitalOcean Logo">
-</a>
+<div style="display: flex; align-items: center; gap: 10px;">
+  <a href="https://github.com/gitbookio">
+    <img src="https://avatars.githubusercontent.com/u/7111340?s=200&v=4" 
+         width="75" height="75" 
+         style="border-radius: 50%;" 
+         alt="GitBook Logo" />
+  </a>
+
+  <a href="https://m.do.co/c/0c27ef82475f">
+    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" 
+         height="50" 
+         alt="DigitalOcean Logo" />
+  </a>
+</div>
+
 
 
 ---
