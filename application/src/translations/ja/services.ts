@@ -2,6 +2,7 @@ import { ServicesTranslations } from '../types/services';
 
 export const servicesTranslations: ServicesTranslations = {
   serviceName: "サービス名",
+  serviceNameDesc: "サービスのわかりやすい名前を入力してください",
   serviceType: "サービスタイプ",
   serviceStatus: "サービスステータス",
   responseTime: "応答時間",

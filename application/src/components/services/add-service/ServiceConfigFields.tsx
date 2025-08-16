@@ -6,12 +6,14 @@ import { UseFormReturn } from "react-hook-form";
 import { ServiceFormData } from "./types";
 import { ServiceUrlField } from "./ServiceUrlField";
 import { useState } from "react";
+import {useLanguage} from "@/contexts/LanguageContext.tsx";
 
 interface ServiceConfigFieldsProps {
   form: UseFormReturn<ServiceFormData>;
 }
 
 export function ServiceConfigFields({ form }: ServiceConfigFieldsProps) {
+  const { t } = useLanguage();
   const [isCustomInterval, setIsCustomInterval] = useState(false);
   const intervalValue = form.watch("interval");
 

@@ -3,6 +3,7 @@ import { ServicesTranslations } from '../types/services';
 
 export const servicesTranslations: ServicesTranslations = {
   serviceName: "ឈ្មោះសេវាកម្ម",
+  serviceNameDesc: "បញ្ចូលឈ្មោះពិពណ៌នាសម្រាប់សេវាកម្មរបស់អ្នក",
   serviceType: "ប្រភេទសេវាកម្ម",
   serviceStatus: "ស្ថានភាពសេវាកម្ម",
   responseTime: "ពេលវេលាឆ្លើយតប",

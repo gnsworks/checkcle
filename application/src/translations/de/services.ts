@@ -4,6 +4,7 @@ import { ServicesTranslations } from '../types/services';
 export const servicesTranslations: ServicesTranslations = {
 // Dienst-Tabelle
   serviceName: "Dienstname",
+  serviceNameDesc: "Geben Sie einen aussagekräftigen Namen für Ihren Service ein",
   serviceType: "Diensttyp",
   serviceStatus: "Dienststatus",
   responseTime: "Antwortzeit",

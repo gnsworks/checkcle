@@ -1,6 +1,7 @@
 
 export interface ServicesTranslations {
   serviceName: string;
+  serviceNameDesc: string;
   serviceType: string;
   serviceStatus: string;
   responseTime: string;

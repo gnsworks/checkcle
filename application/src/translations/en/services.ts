@@ -3,6 +3,7 @@ import { ServicesTranslations } from '../types/services';
 
 export const servicesTranslations: ServicesTranslations = {
   serviceName: "Service Name",
+  serviceNameDesc: "Enter a descriptive name for your service",
   serviceType: "Service Type",
   serviceStatus: "Service Status",
   responseTime: "Response Time",

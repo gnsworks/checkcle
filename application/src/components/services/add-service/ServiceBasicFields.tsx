@@ -3,22 +3,24 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { ServiceFormData } from "./types";
+import {useLanguage} from "@/contexts/LanguageContext.tsx";
 
 interface ServiceBasicFieldsProps {
   form: UseFormReturn<ServiceFormData>;
 }
 
 export function ServiceBasicFields({ form }: ServiceBasicFieldsProps) {
+  const { t } = useLanguage();
   return (
     <FormField
       control={form.control}
       name="name"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Service Name</FormLabel>
+          <FormLabel>{t('serviceName')}</FormLabel>
           <FormControl>
             <Input 
-              placeholder="Enter a descriptive name for your service" 
+              placeholder={t('serviceNameDesc')}
               {...field} 
             />
           </FormControl>
