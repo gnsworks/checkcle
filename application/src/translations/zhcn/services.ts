@@ -89,4 +89,10 @@ export const servicesTranslations: ServicesTranslations = {
 	serviceNameRequired: "服务名称是必填项",
 	urlDomainHostRequired: "URL/域名/主机名是必填项",
 	enterValidUrlHostnameDomain: "请输入有效的URL、主机名或域名",
+
+	// Dashboard
+	upServices: "在线服务",
+	downServices: "下线服务",
+	pausedServices: "暂停服务",
+	warningServices: "告警服务",
 };

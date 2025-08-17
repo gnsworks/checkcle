@@ -87,4 +87,10 @@ export interface ServicesTranslations {
 	serviceNameRequired: string;
 	urlDomainHostRequired: string;
 	enterValidUrlHostnameDomain: string;
+
+	// Dashboard
+	upServices: string;
+	downServices: string;
+	pausedServices: string;
+	warningServices: string;
 }

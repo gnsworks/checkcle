@@ -89,4 +89,10 @@ export const servicesTranslations: ServicesTranslations = {
 	serviceNameRequired: "Service name is required",
 	urlDomainHostRequired: "URL/Domain/Host is required",
 	enterValidUrlHostnameDomain: "Please enter a valid URL, hostname, or domain",
+
+	// Dashboard
+	upServices: "UP SERVICES",
+	downServices: "DOWN SERVICES",
+	pausedServices: "PAUSED SERVICES",
+	warningServices: "WARNING SERVICES",
 };
