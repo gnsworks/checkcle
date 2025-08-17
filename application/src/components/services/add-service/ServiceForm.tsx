@@ -150,7 +150,7 @@ export function ServiceForm({
         <ServiceFormActions 
           isSubmitting={isSubmitting} 
           onCancel={onCancel} 
-          submitLabel={isEdit ? "Update Service" : "Create Service"}
+          submitLabel={isEdit ? t("updateService") : t("createService")}
         />
       </form>
     </Form>

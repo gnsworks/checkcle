@@ -9,12 +9,14 @@ import { regionalService } from "@/services/regionalService";
 import { MapPin, Loader2, X, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext.tsx";
 
 interface ServiceRegionalFieldsProps {
   form: UseFormReturn<ServiceFormData>;
 }
 
 export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
+	const { t } = useLanguage();
   const regionalMonitoringEnabled = form.watch("regionalMonitoringEnabled");
   const currentRegionalAgents = form.watch("regionalAgents") || [];
 
@@ -79,10 +81,10 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
             <div className="space-y-0.5">
               <FormLabel className="text-base font-medium flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Regional Monitoring
+	              {t("regionalMonitoring")}
               </FormLabel>
               <div className="text-sm text-muted-foreground">
-                Assign this service to regional monitoring agents for distributed monitoring
+	              {t("regionalMonitoringDesc")}
               </div>
             </div>
             <FormControl>
@@ -107,7 +109,7 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
           name="regionalAgents"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Regional Agents</FormLabel>
+              <FormLabel>{t("regionalAgents")}</FormLabel>
               
               {/* Display selected agents */}
               {currentRegionalAgents.length > 0 && (
@@ -140,12 +142,12 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
                   <SelectTrigger>
                     <SelectValue placeholder={
                       isLoading 
-                        ? "Loading agents..." 
+                        ? t("regionalAgentsLoading")
                         : availableAgents.length > 0 
-                          ? "Select additional regional agents..."
+                          ? t("regionalAgentsAvailablePlaceholder")
                           : currentRegionalAgents.length > 0 
-                            ? "All available agents selected"
-                            : "No regional agents available"
+                            ? t("regionalAgentsAllSelected")
+                            : t("regionalAgentsNoAvailable")
                     } />
                   </SelectTrigger>
                 </FormControl>
@@ -154,14 +156,14 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
                     <SelectItem value="loading" disabled>
                       <div className="flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Loading agents...
+	                      t("regionalAgentsLoading")
                       </div>
                     </SelectItem>
                   ) : availableAgents.length === 0 ? (
                     <SelectItem value="no-agents" disabled>
                       {currentRegionalAgents.length > 0 
-                        ? "All available agents selected"
-                        : "No online regional agents available"
+                        ? t("regionalAgentsAllSelected")
+                        : t("regionalAgentsNoOnlineAvailable")
                       }
                     </SelectItem>
                   ) : (
@@ -190,13 +192,13 @@ export function ServiceRegionalFields({ form }: ServiceRegionalFieldsProps) {
               
               {regionalMonitoringEnabled && onlineAgents.length === 0 && !isLoading && (
                 <p className="text-sm text-amber-600">
-                  No online regional agents found. Services will use default monitoring.
+	                {t("regionalAgentsNotFoundMessage")}
                 </p>
               )}
               
               {currentRegionalAgents.length === 0 && regionalMonitoringEnabled && (
                 <p className="text-sm text-orange-600">
-                  No regional agents selected. Service will use default monitoring.
+	                {t("regionalAgentsNotSelectedMessage")}
                 </p>
               )}
               

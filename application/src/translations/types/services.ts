@@ -1,8 +1,6 @@
 
 export interface ServicesTranslations {
-  serviceName: string;
-  serviceNameDesc: string;
-  serviceType: string;
+
   serviceStatus: string;
   responseTime: string;
   uptime: string;
@@ -17,4 +15,71 @@ export interface ServicesTranslations {
   allTypes: string;
   createNewService: string;
   createNewServiceDesc: string;
+
+	// ServiceBasicFields.tsx
+	serviceName: string;
+	serviceNameDesc: string;
+
+	// ServiceConfigFields.tsx
+	checkInterval: string;
+	seconds: string;
+	minute: string;
+	minutes: string;
+	hour: string;
+	hours: string;
+	custom: string;
+	checkIntervalPlaceholder: string;
+	backToPresets: string;
+	checkIntervalDesc: string;
+	checkIntervalDescCustom: string;
+	retryAttempts: string;
+	attempt: string;
+	attempts: string;
+	retryAttemptsDesc: string;
+
+	// ServiceForm.tsx
+	updateService: string;
+	createService: string;
+
+	// ServiceNotificationFields.tsx
+	enableNotifications: string;
+	enableNotificationsDesc: string;
+	notificationChannels: string;
+	notificationChannelsEnabledDesc: string;
+	notificationChannelsDesc: string;
+	notificationChannelsPlaceholder: string;
+	alertTemplate: string;
+	alertTemplateLoading: string;
+	alertTemplatePlaceholder: string;
+	alertTemplateEnabledDesc: string;
+	alertTemplateDesc: string;
+
+	// ServiceTypeField.tsx
+	serviceType: string;
+	serviceTypeHTTPDesc: string;
+	serviceTypePINGDesc: string;
+	serviceTypeTCPDesc: string;
+	serviceTypeDNSDesc: string;
+
+	// ServiceRegionalFields.tsx
+	regionalMonitoring: string;
+	regionalMonitoringDesc: string;
+	regionalAgents: string;
+	regionalAgentsLoading: string;
+	regionalAgentsAvailablePlaceholder: string;
+	regionalAgentsAllSelected: string;
+	regionalAgentsNoAvailable: string;
+	regionalAgentsNotFoundMessage: string;
+	regionalAgentsNotSelectedMessage: string;
+
+	// ServiceUrlField.tsx
+	targetDefault: string;
+	targetDNS: string;
+	targetHTTPDesc: string;
+	targetPINGDesc: string;
+	targetTCPDesc: string;
+	targetTCPPortDesc: string;
+	targetDNSDesc: string;
+	targetDefaultDesc: string;
+	targetDefaultPlaceholder: string;
 }

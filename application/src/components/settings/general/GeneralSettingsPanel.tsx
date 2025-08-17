@@ -143,7 +143,7 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = () => {
             <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
               <ShieldAlert className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <AlertDescription className="text-blue-700 dark:text-blue-300">
-                <span className="font-medium">Permission Notice:</span> As an admin user, you do not have access to view or modify system and mail settings. These settings can only be accessed and modified by Super Admins. Contact your Super Admin if you need to make changes to system configuration or mail settings.
+                <span className="font-medium">{t("permissionNotice")}</span> {t("permissionNoticeAddUser")}
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -153,11 +153,11 @@ const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = () => {
   }
 
   if (isLoading) {
-    return <div className="p-4">Loading settings...</div>;
+    return <div className="p-4">{t("loadingSettings")}</div>;
   }
 
   if (error) {
-    return <div className="p-4 text-red-500">Error loading settings</div>;
+    return <div className="p-4 text-red-500">{t("loadingSettingsError")}</div>;
   }
 
   return (

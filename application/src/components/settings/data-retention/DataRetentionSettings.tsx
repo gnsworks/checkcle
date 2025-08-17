@@ -170,7 +170,7 @@ const DataRetentionSettings = () => {
             <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
               <AlertTriangle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <AlertDescription className="text-blue-700 dark:text-blue-300">
-                <span className="font-medium">Permission Notice:</span> As an admin user, you do not have access to data retention settings. These settings can only be accessed and modified by Super Admins.
+                <span className="font-medium">{t("permissionNotice")}</span> As an admin user, you do not have access to data retention settings. These settings can only be accessed and modified by Super Admins.
               </AlertDescription>
             </Alert>
           </CardContent>

@@ -37,7 +37,7 @@ export function ServiceConfigFields({ form }: ServiceConfigFieldsProps) {
           name="interval"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Check Interval</FormLabel>
+              <FormLabel>{t("checkInterval")}</FormLabel>
               {!isCustomInterval ? (
                 <FormControl>
                   <Select onValueChange={handleIntervalChange} value={isCustomInterval ? "custom" : field.value}>
@@ -45,13 +45,13 @@ export function ServiceConfigFields({ form }: ServiceConfigFieldsProps) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="30">30 seconds</SelectItem>
-                      <SelectItem value="60">1 minute</SelectItem>
-                      <SelectItem value="300">5 minutes</SelectItem>
-                      <SelectItem value="900">15 minutes</SelectItem>
-                      <SelectItem value="1800">30 minutes</SelectItem>
-                      <SelectItem value="3600">1 hour</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
+                      <SelectItem value="30">30 {t("seconds")}</SelectItem>
+                      <SelectItem value="60">1 {t("minute")}</SelectItem>
+                      <SelectItem value="300">5 {t("minutes")}</SelectItem>
+                      <SelectItem value="900">15 {t("minutes")}</SelectItem>
+                      <SelectItem value="1800">30 {t("minutes")}</SelectItem>
+                      <SelectItem value="3600">1 {t("hour")}</SelectItem>
+                      <SelectItem value="custom">{t("custom")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -60,7 +60,7 @@ export function ServiceConfigFields({ form }: ServiceConfigFieldsProps) {
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter interval in seconds"
+                      placeholder={t("checkIntervalPlaceholder")}
                       value={field.value}
                       onChange={field.onChange}
                       min="10"
@@ -74,14 +74,14 @@ export function ServiceConfigFields({ form }: ServiceConfigFieldsProps) {
                     }}
                     className="text-sm text-blue-600 hover:text-blue-800"
                   >
-                    Back to presets
+	                  {t("backToPresets")}
                   </button>
                 </div>
               )}
               <FormDescription className="text-xs">
                 {isCustomInterval 
-                  ? "Enter custom interval in seconds (minimum 10 seconds)"
-                  : "How often to check the service status"
+                  ? t("checkIntervalDescCustom")
+                  : t("checkIntervalDesc")
                 }
               </FormDescription>
               <FormMessage />
@@ -94,22 +94,22 @@ export function ServiceConfigFields({ form }: ServiceConfigFieldsProps) {
           name="retries"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Retry Attempts</FormLabel>
+              <FormLabel>{t("retryAttempts")}</FormLabel>
               <FormControl>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">1 attempt</SelectItem>
-                    <SelectItem value="2">2 attempts</SelectItem>
-                    <SelectItem value="3">3 attempts</SelectItem>
-                    <SelectItem value="5">5 attempts</SelectItem>
+                    <SelectItem value="1">1 {t("attempt")}</SelectItem>
+                    <SelectItem value="2">2 {t("attempts")}</SelectItem>
+                    <SelectItem value="3">3 {t("attempts")}</SelectItem>
+                    <SelectItem value="5">5 {t("attempts")}</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
               <FormDescription className="text-xs">
-                Number of retry attempts before marking as down
+	              {t("retryAttemptsDesc")}
               </FormDescription>
               <FormMessage />
             </FormItem>

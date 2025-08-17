@@ -3,12 +3,14 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescripti
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { ServiceFormData } from "./types";
+import { useLanguage } from "@/contexts/LanguageContext.tsx";
 
 interface ServiceUrlFieldProps {
   form: UseFormReturn<ServiceFormData>;
 }
 
 export function ServiceUrlField({ form }: ServiceUrlFieldProps) {
+	const { t } = useLanguage();
   const serviceType = form.watch("type");
   
   const getPlaceholder = () => {
@@ -22,35 +24,35 @@ export function ServiceUrlField({ form }: ServiceUrlFieldProps) {
       case "dns":
         return "example.com";
       default:
-        return "Enter URL or hostname";
+        return t("targetDefaultPlaceholder");
     }
   };
 
   const getDescription = () => {
     switch (serviceType) {
       case "http":
-        return "Enter the full URL including protocol (http:// or https://)";
+        return t("targetHTTPDesc");
       case "ping":
-        return "Enter hostname or IP address to ping";
+        return t("targetPINGDesc");
       case "tcp":
-        return "Enter hostname or IP address for TCP connection test";
+        return t("targetTCPDesc");
       case "dns":
-        return "Enter domain name for DNS record monitoring (A, AAAA, MX, etc.)";
+        return t("targetDNSDesc");
       default:
-        return "Enter the target URL or hostname for monitoring";
+        return t("targetDefaultDesc");
     }
   };
 
   const getFieldLabel = () => {
     switch (serviceType) {
       case "dns":
-        return "Domain Name";
+        return t("targetDNS");
       case "ping":
         return "Hostname/IP";
       case "tcp":
         return "Hostname/IP";
       default:
-        return "Target URL/Host";
+        return t("targetDefault");
     }
   };
 
@@ -99,7 +101,7 @@ export function ServiceUrlField({ form }: ServiceUrlFieldProps) {
                 />
               </FormControl>
               <FormDescription className="text-xs">
-                Enter the port number for TCP connection test
+	              {t("targetTCPPortDesc")}
               </FormDescription>
               <FormMessage />
             </FormItem>
