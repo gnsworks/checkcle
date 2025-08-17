@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { serviceSchema, ServiceFormData } from "./types";
+import { useServiceSchema, ServiceFormData } from "./types";
 import { ServiceBasicFields } from "./ServiceBasicFields";
 import { ServiceTypeField } from "./ServiceTypeField";
 import { ServiceConfigFields } from "./ServiceConfigFields";
@@ -35,6 +35,8 @@ export function ServiceForm({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+
+	const serviceSchema = useServiceSchema();
 
   // Initialize form with default values
   const form = useForm<ServiceFormData>({

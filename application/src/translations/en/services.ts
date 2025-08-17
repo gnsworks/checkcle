@@ -84,4 +84,9 @@ export const servicesTranslations: ServicesTranslations = {
 	targetDNSDesc: "Enter domain name for DNS record monitoring (A, AAAA, MX, etc.)",
 	targetDefaultDesc: "Enter the target URL or hostname for monitoring",
 	targetDefaultPlaceholder: "Enter URL or hostname",
+
+	// types.ts
+	serviceNameRequired: "Service name is required",
+	urlDomainHostRequired: "URL/Domain/Host is required",
+	enterValidUrlHostnameDomain: "Please enter a valid URL, hostname, or domain",
 };

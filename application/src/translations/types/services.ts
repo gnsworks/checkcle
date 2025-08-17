@@ -82,4 +82,9 @@ export interface ServicesTranslations {
 	targetDNSDesc: string;
 	targetDefaultDesc: string;
 	targetDefaultPlaceholder: string;
+
+	// types.ts
+	serviceNameRequired: string;
+	urlDomainHostRequired: string;
+	enterValidUrlHostnameDomain: string;
 }

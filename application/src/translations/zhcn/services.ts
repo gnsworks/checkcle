@@ -84,4 +84,9 @@ export const servicesTranslations: ServicesTranslations = {
 	targetDNSDesc: "输入要监控的 DNS 记录域名（A、AAAA、MX等）",
 	targetDefaultDesc: "输入要监控的目标 URL 或主机名",
 	targetDefaultPlaceholder: "输入 URL 或主机名",
+
+	// types.ts
+	serviceNameRequired: "服务名称是必填项",
+	urlDomainHostRequired: "URL/域名/主机名是必填项",
+	enterValidUrlHostnameDomain: "请输入有效的URL、主机名或域名",
 };
