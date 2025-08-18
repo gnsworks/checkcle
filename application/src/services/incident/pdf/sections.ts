@@ -158,7 +158,7 @@ export const addAssignmentSection = (doc: jsPDF, incident: IncidentItem, yPos: n
   yPos += 10;
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
-  const assignedTo = incident.assigned_to || 'Not assigned';
+  const assignedTo = incident.assigned_users || incident.assigned_to || 'Not assigned';
   doc.text(`Assigned to: ${assignedTo}`, 15, yPos);
   
   return yPos + 10;
