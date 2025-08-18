@@ -22,7 +22,7 @@ export const updateIncidentStatus = async (id: string, status: string): Promise<
     
     console.log(`Incident ${id} status updated successfully to ${status}`);
   } catch (error) {
-    console.error('Error updating incident status:', error);ok gib mir die 
+    console.error('Error updating incident status:', error);
     throw error;
   }
 };

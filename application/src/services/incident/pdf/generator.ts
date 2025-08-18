@@ -1,6 +1,7 @@
 
 import jsPDF from 'jspdf';
 import { IncidentItem } from '../types';
+import { userService } from '@/services/userService';
 import {
   addBasicInfoSection,
   addDescriptionSection,
@@ -20,6 +21,18 @@ export const generatePdf = async (incident: IncidentItem): Promise<string> => {
   if (!incident?.id) {
     console.error('Invalid incident data for PDF generation');
     throw new Error('Invalid incident data');
+  }
+  
+  // Fetch assigned user data if available
+  let assignedUser = null;
+  const assigneeId = incident?.assigned_users || incident?.assigned_to;
+  if (assigneeId) {
+    try {
+      assignedUser = await userService.getUser(assigneeId);
+    } catch (error) {
+      console.warn('Failed to fetch assigned user for PDF:', error);
+      // Continue without user data
+    }
   }
   
   try {
@@ -85,7 +98,7 @@ export const generatePdf = async (incident: IncidentItem): Promise<string> => {
     }
     
     // Add assignment section
-    yPos = addAssignmentSection(doc, incident, yPos);
+    yPos = addAssignmentSection(doc, incident, yPos, assignedUser);
     
     // Check if we need to add a new page
     if (yPos > 250) {

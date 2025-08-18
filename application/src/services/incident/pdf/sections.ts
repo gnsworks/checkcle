@@ -146,7 +146,7 @@ export const addResolutionSection = (doc: jsPDF, incident: IncidentItem, yPos: n
 /**
  * Add the assignment information section to the PDF
  */
-export const addAssignmentSection = (doc: jsPDF, incident: IncidentItem, yPos: number): number => {
+export const addAssignmentSection = (doc: jsPDF, incident: IncidentItem, yPos: number, assignedUser?: any): number => {
   doc.setFontSize(14);
   doc.setTextColor(30, 64, 175); // Blue-800
   doc.text('Assignment Information', 15, yPos);
@@ -158,8 +158,16 @@ export const addAssignmentSection = (doc: jsPDF, incident: IncidentItem, yPos: n
   yPos += 10;
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
-  const assignedTo = incident.assigned_users || incident.assigned_to || 'Not assigned';
-  doc.text(`Assigned to: ${assignedTo}`, 15, yPos);
+  
+  if (assignedUser) {
+    // Show user name if available
+    const userName = assignedUser.full_name || assignedUser.username || 'Unknown User';
+    doc.text(`Assigned to: ${userName}`, 15, yPos);
+  } else {
+    // Fallback to ID if no user data available
+    const assignedTo = incident.assigned_users || incident.assigned_to || 'Not assigned';
+    doc.text(`Assigned to: ${assignedTo}`, 15, yPos);
+  }
   
   return yPos + 10;
 };
