@@ -4,12 +4,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Globe, Wifi, Server, Globe2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { ServiceFormData } from "./types";
+import { useLanguage } from "@/contexts/LanguageContext.tsx";
 
 interface ServiceTypeFieldProps {
   form: UseFormReturn<ServiceFormData>;
 }
 
 export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
+	const { t } = useLanguage();
   const getServiceIcon = (type: string) => {
     switch (type) {
       case "http":
@@ -31,7 +33,7 @@ export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
       name="type"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Service Type</FormLabel>
+          <FormLabel>{t("serviceType")}</FormLabel>
           <FormControl>
             <Select 
               onValueChange={field.onChange} 
@@ -56,7 +58,7 @@ export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
                       <span>HTTP/S</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Monitor websites and REST APIs with HTTP/HTTPS Protocol 
+	                    {t("serviceTypeHTTPDesc")}
                     </p>
                   </div>
                 </SelectItem>
@@ -67,7 +69,7 @@ export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
                       <span>PING</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Monitor host availability with PING Protocol
+	                    {t("serviceTypePINGDesc")}
                     </p>
                   </div>
                 </SelectItem>
@@ -78,7 +80,7 @@ export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
                       <span>TCP</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Monitor TCP port connectivity with TCP Protocol
+	                    {t("serviceTypeTCPDesc")}
                     </p>
                   </div>
                 </SelectItem>
@@ -89,7 +91,7 @@ export function ServiceTypeField({ form }: ServiceTypeFieldProps) {
                       <span>DNS</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Monitor DNS resolution
+	                    {t("serviceTypeDNSDesc")}
                     </p>
                   </div>
                 </SelectItem>

@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { serviceSchema, ServiceFormData } from "./types";
+import { useServiceSchema, ServiceFormData } from "./types";
 import { ServiceBasicFields } from "./ServiceBasicFields";
 import { ServiceTypeField } from "./ServiceTypeField";
 import { ServiceConfigFields } from "./ServiceConfigFields";
@@ -14,6 +14,7 @@ import { Service } from "@/types/service.types";
 import { ServiceRegionalFields } from "./ServiceRegionalFields";
 import { getServiceFormDefaults, mapServiceToFormData, mapFormDataToServiceData } from "./serviceFormUtils";
 import { useQueryClient } from "@tanstack/react-query";
+import {useLanguage} from "@/contexts/LanguageContext.tsx";
 
 interface ServiceFormProps {
   onSuccess: () => void;
@@ -30,9 +31,12 @@ export function ServiceForm({
   isEdit = false,
   onSubmitStart
 }: ServiceFormProps) {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+
+	const serviceSchema = useServiceSchema();
 
   // Initialize form with default values
   const form = useForm<ServiceFormData>({
@@ -124,23 +128,23 @@ export function ServiceForm({
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 pb-6">
         <div className="space-y-6">
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Basic Information</h3>
+            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">{t('basicInformation')}</h3>
             <ServiceBasicFields form={form} />
             <ServiceTypeField form={form} />
           </div>
           
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Configuration</h3>
+            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">{t('configuration')}</h3>
             <ServiceConfigFields form={form} />
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Regional Monitoring</h3>
+            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">{t('regionalMonitoring')}</h3>
             <ServiceRegionalFields form={form} />
           </div>
           
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">Notifications</h3>
+            <h3 className="text-sm font-medium text-muted-foreground border-b pb-2">{t('notifications')}</h3>
             <ServiceNotificationFields form={form} />
           </div>
         </div>
@@ -148,7 +152,7 @@ export function ServiceForm({
         <ServiceFormActions 
           isSubmitting={isSubmitting} 
           onCancel={onCancel} 
-          submitLabel={isEdit ? "Update Service" : "Create Service"}
+          submitLabel={isEdit ? t("updateService") : t("createService")}
         />
       </form>
     </Form>

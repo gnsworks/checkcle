@@ -9,12 +9,14 @@ import { useQuery } from "@tanstack/react-query";
 import { alertConfigService, AlertConfiguration } from "@/services/alertConfigService";
 import { serviceNotificationTemplateService, ServiceNotificationTemplate } from "@/services/serviceNotificationTemplateService";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext.tsx";
 
 interface ServiceNotificationFieldsProps {
   form: UseFormReturn<ServiceFormData>;
 }
 
 export function ServiceNotificationFields({ form }: ServiceNotificationFieldsProps) {
+	const { t } = useLanguage();
   const [alertConfigs, setAlertConfigs] = useState<AlertConfiguration[]>([]);
   
   // Get the current form values for debugging
@@ -88,10 +90,10 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
             <div className="space-y-0.5">
               <FormLabel className="text-base">
-                Enable Notifications
+	              {t("enableNotifications")}
               </FormLabel>
               <FormDescription>
-                Enable or disable notifications for this service
+	              {t("enableNotificationsDesc")}
               </FormDescription>
             </div>
             <FormControl>
@@ -115,11 +117,11 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
         name="notificationChannels"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Notification Channels</FormLabel>
+            <FormLabel>{t("notificationChannels")}</FormLabel>
             <FormDescription>
               {notificationStatus === "enabled" 
-                ? "Select notification channels for this service"
-                : "Enable notifications first to select channels"}
+                ? t("notificationChannelsEnabledDesc")
+                : t("notificationChannelsDesc")}
             </FormDescription>
             
             {/* Display selected channels as badges */}
@@ -144,7 +146,7 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
                 value="" // Always reset to empty after selection
               >
                 <SelectTrigger className={notificationStatus !== "enabled" ? 'opacity-50' : ''}>
-                  <SelectValue placeholder="Add a notification channel" />
+                  <SelectValue placeholder={t("notificationChannelsPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {alertConfigs
@@ -169,7 +171,7 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
           
           return (
             <FormItem>
-              <FormLabel>Alert Template</FormLabel>
+              <FormLabel>{t("alertTemplate")}</FormLabel>
               <FormControl>
                 <Select 
                   onValueChange={(value) => {
@@ -179,7 +181,7 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
                   disabled={notificationStatus !== "enabled" || isLoadingTemplates}
                 >
                   <SelectTrigger className={notificationStatus !== "enabled" ? 'opacity-50' : ''}>
-                    <SelectValue placeholder={isLoadingTemplates ? "Loading templates..." : "Select an alert template"} />
+                    <SelectValue placeholder={isLoadingTemplates ? t("alertTemplateLoading") : t("alertTemplatePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     {serviceTemplates?.map((template) => (
@@ -192,8 +194,8 @@ export function ServiceNotificationFields({ form }: ServiceNotificationFieldsPro
               </FormControl>
               <FormDescription>
                 {notificationStatus === "enabled"
-                  ? "Choose a template for alert messages"
-                  : "Enable notifications first to select template"}
+                  ? t("alertTemplateEnabledDesc")
+                  : t("alertTemplateDesc")}
               </FormDescription>
             </FormItem>
           );

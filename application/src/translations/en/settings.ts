@@ -2,18 +2,18 @@
 import { SettingsTranslations } from '../types/settings';
 
 export const settingsTranslations: SettingsTranslations = {
-  // Tabs
+	// General Settings - Tabs
   systemSettings: "System Settings",
   mailSettings: "Mail Settings",
   
-  // System Settings
+	// General Settings - System Settings
   appName: "Application Name",
   appURL: "Application URL",
   senderName: "Sender Name",
   senderEmail: "Sender Email Address",
   hideControls: "Hide Controls",
   
-  // Mail Settings
+	// General Settings - Mail Settings
   smtpSettings: "SMTP Configuration",
   smtpEnabled: "Enable SMTP",
   smtpHost: "SMTP Host",
@@ -24,7 +24,7 @@ export const settingsTranslations: SettingsTranslations = {
   enableTLS: "Enable TLS",
   localName: "Local Name",
   
-  // Test Email
+	// General Settings - Test Email
   testEmail: "Test Email",
   sendTestEmail: "Send test email",
   emailTemplate: "Email template",
@@ -39,7 +39,7 @@ export const settingsTranslations: SettingsTranslations = {
   enterEmailAddress: "Enter email address",
   sending: "Sending...",
   
-  // Actions and status
+  // General Settings - Actions and status
   save: "Save Changes",
   saving: "Saving...",
   settingsUpdated: "Settings updated successfully",
@@ -48,5 +48,12 @@ export const settingsTranslations: SettingsTranslations = {
   testConnection: "Test Connection",
   testingConnection: "Testing Connection...",
   connectionSuccess: "Connection successful",
-  connectionFailed: "Connection failed"
+  connectionFailed: "Connection failed",
+
+	// User Management
+	addUser: "Add User",
+	permissionNotice: "Permission Notice:",
+	permissionNoticeAddUser: "As an admin user, you do not have access to view or modify system and mail settings. These settings can only be accessed and modified by Super Admins. Contact your Super Admin if you need to make changes to system configuration or mail settings.",
+	loadingSettings: "Loading settings...",
+	loadingSettingsError: "Error loading settings",
 };
