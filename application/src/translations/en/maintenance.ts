@@ -65,4 +65,6 @@ export const maintenanceTranslations: MaintenanceTranslations = {
   noScheduledMaintenance: 'No Scheduled Maintenance',
   noMaintenanceWindows: 'There are no maintenance windows for this period. Create one by clicking the "Create Maintenance" button.',
   maintenanceCreatedSuccess: 'Maintenance window created successfully',
+  editMaintenanceWindow: 'Edit Maintenance',
+  editMaintenanceDesc: '',
 };
