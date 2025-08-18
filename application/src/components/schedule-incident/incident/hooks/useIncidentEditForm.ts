@@ -25,7 +25,7 @@ export const useIncidentEditForm = (
       impact: (incident.impact?.toLowerCase() || 'minor') as any,
       priority: (incident.priority?.toLowerCase() || 'medium') as any,
       service_id: incident.service_id || '',
-      assigned_to: incident.assigned_to || '',
+      assigned_to: incident.assigned_users || incident.assigned_to || '',
       root_cause: incident.root_cause || '',
       resolution_steps: incident.resolution_steps || '',
       lessons_learned: incident.lessons_learned || '',
@@ -45,11 +45,14 @@ export const useIncidentEditForm = (
         impact: data.impact,
         priority: data.priority,
         service_id: data.service_id,
-        assigned_to: data.assigned_to, // This is the user ID from the form
+        ...(data.assigned_to
+          ? { assigned_to: data.assigned_to, assigned_users: data.assigned_to }
+          : {}),
         root_cause: data.root_cause,
         resolution_steps: data.resolution_steps,
         lessons_learned: data.lessons_learned,
       });
+
       
       toast({
         title: t('incidentUpdated'),
