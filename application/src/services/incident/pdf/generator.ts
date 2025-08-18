@@ -24,7 +24,7 @@ export const generatePdf = async (incident: IncidentItem): Promise<string> => {
   }
   
   // Fetch assigned user data if available
-  let assignedUser = null;
+  let assignedUser: { full_name?: string; username?: string } | null = null;
   const assigneeId = incident?.assigned_users || incident?.assigned_to;
   if (assigneeId) {
     try {

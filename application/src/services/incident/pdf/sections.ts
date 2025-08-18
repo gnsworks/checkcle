@@ -146,7 +146,7 @@ export const addResolutionSection = (doc: jsPDF, incident: IncidentItem, yPos: n
 /**
  * Add the assignment information section to the PDF
  */
-export const addAssignmentSection = (doc: jsPDF, incident: IncidentItem, yPos: number, assignedUser?: any): number => {
+export const addAssignmentSection = (doc: jsPDF, incident: IncidentItem, yPos: number, assignedUser?: { full_name?: string; username?: string } | null): number => {
   doc.setFontSize(14);
   doc.setTextColor(30, 64, 175); // Blue-800
   doc.text('Assignment Information', 15, yPos);
