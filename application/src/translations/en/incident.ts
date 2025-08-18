@@ -53,4 +53,12 @@ export const incidentTranslations: IncidentTranslations = {
   failedToUpdateStatus: 'Failed to update status',
   inProgress: 'In Progress',
   enterRootCause: 'Enter Root Cause',
+  enterIncidentTitle: 'Enter Incident Title',
+  enterIncidentDescription: 'Enter Incident Description',
+  enterServiceId: 'Enter Service-IDs seperated by comma',
+  selectAssignedUser: 'Select Assigned User',
+  noAssignedUser: 'Incident is currently not assigned to any user',
+  affectedSystems: 'Affected Systems',
+  enterAffectedSystems: 'Enter Affected Systems',
+  separateSystemsWithComma: 'Enter affected systems seperated by comma',
 };
