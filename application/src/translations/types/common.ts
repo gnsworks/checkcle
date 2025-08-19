@@ -6,6 +6,7 @@ export interface CommonTranslations {
   english: string;
   khmer: string;
   german: string;
+  korean: string;
   japanese: string;
   simplifiedChinese: string;
   goodMorning: string;

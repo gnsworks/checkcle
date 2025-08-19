@@ -51,4 +51,12 @@ export interface IncidentTranslations {
   failedToUpdateStatus: string;
   inProgress: string;
   enterRootCause: string;
+  enterIncidentTitle: string;
+  enterIncidentDescription: string;
+  enterServiceId: string;
+  selectAssignedUser: string;
+  noAssignedUser: string;
+  affectedSystems: string;
+  enterAffectedSystems: string;
+  separateSystemsWithComma: string;
 }
