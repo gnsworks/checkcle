@@ -1,0 +1,117 @@
+
+import { SSLTranslations } from '../types/ssl';
+
+export const sslTranslations: SSLTranslations = {
+  // Page and section titles
+  sslDomainManagement: "SSL & 도메인 관리",
+  monitorSSLCertificates: "도메인의 SSL 인증서를 모니터링하고 관리",
+  addSSLCertificate: "SSL 인증서 추가",
+  editSSLCertificate: "SSL 인증서 편집",
+  deleteSSLCertificate: "SSL 인증서 삭제",
+  sslCertificateDetails: "SSL 인증서 상세",
+  detailedInfo: "상세 정보",
+  viewDetailedInformation: "상세 정보 보기",
+
+  // Status related
+  valid: "유효",
+  expiringSoon: "곧 만료",
+  expired: "만료됨",
+  pending: "대기 중",
+
+  // Statistics and cards
+  validCertificates: "유효 인증서",
+  expiringSoonCertificates: "곧 만료 인증서",
+  expiredCertificates: "만료 인증서",
+
+  // Form fields
+  domain: "도메인",
+  domainName: "도메인 이름",
+  domainCannotChange: "생성 후 도메인은 변경할 수 없습니다",
+  warningThreshold: "경고 임계값",
+  warningThresholdDays: "경고 임계값(일)",
+  expiryThreshold: "만료 임계값",
+  expiryThresholdDays: "만료 임계값(일)",
+  notificationChannel: "알림 채널",
+  chooseChannel: "알림 채널 선택",
+  whereToSend: "알림 전송 위치",
+  daysBeforeExpiration: "만료 전 경고 받을 일수",
+  daysBeforeCritical: "만료 임박 시 알림 받을 일수",
+  getNotifiedExpiration: "인증서 만료 시 알림 받기",
+  getNotifiedCritical: "인증서 임박 시 알림 받기",
+
+  // Table headers and fields
+  issuer: "발급자",
+  expirationDate: "만료일",
+  daysLeft: "남은 일수",
+  status: "상태",
+  lastNotified: "마지막 알림",
+  actions: "작업",
+  validFrom: "유효 시작",
+  validUntil: "유효 종료",
+  validityDays: "유효 일수",
+  validityPeriod: "유효 기간",
+  organization: "조직",
+  commonName: "공통 이름",
+  serialNumber: "일련번호",
+  algorithm: "알고리즘",
+  subjectAltNames: "대체 이름",
+  subjectAlternativeNames: "대체 이름",
+  resolvedIP: "해결된 IP",
+  issuedTo: "발급 대상",
+  days: "일",
+  
+  // Buttons and actions
+  addDomain: "도메인 추가",
+  refreshAll: "모두 새로고침",
+  cancel: "취소",
+  addCertificate: "인증서 추가",
+  check: "확인",
+  view: "보기",
+  edit: "편집",
+  delete: "삭제",
+  close: "닫기",
+  saveChanges: "변경 사항 저장",
+  updating: "업데이트 중",
+  
+  // Sections in detail view
+  basicInformation: "기본 정보",
+  validity: "유효성",
+  issuerInfo: "발급자 정보",
+  technicalDetails: "기술 세부정보",
+  technicalInformation: "기술 정보",
+  monitoringConfig: "모니터링 구성",
+  monitoringConfiguration: "모니터링 구성",
+  recordInfo: "레코드 정보",
+  certificateDetails: "인증서 상세",
+  
+  // Notifications and messages
+  sslCertificateAdded: "SSL 인증서가 성공적으로 추가되었습니다",
+  sslCertificateUpdated: "SSL 인증서가 성공적으로 업데이트되었습니다",
+  sslCertificateDeleted: "SSL 인증서가 성공적으로 삭제되었습니다",
+  sslCertificateRefreshed: "{domain}의 SSL 인증서가 성공적으로 갱신되었습니다",
+  allCertificatesRefreshed: "총 {count}개의 인증서가 성공적으로 갱신되었습니다",
+  someCertificatesFailed: "{success}개의 인증서 갱신 성공, {failed}개 실패",
+  failedToAddCertificate: "SSL 인증서 추가 실패",
+  failedToLoadCertificates: "SSL 인증서 불러오기 실패",
+  failedToUpdateCertificate: "SSL 인증서 업데이트 실패",
+  failedToDeleteCertificate: "SSL 인증서 삭제 실패",
+  failedToCheckCertificate: "SSL 인증서 확인 실패",
+  noCertificatesToRefresh: "갱신할 인증서 없음",
+  startingRefreshAll: "{count}개의 인증서 갱신 시작",
+  checkingSSLCertificate: "SSL 인증서 확인 중...",
+  deleteConfirmation: "인증서를 삭제하시겠습니까?",
+  deleteWarning: "이 작업은 되돌릴 수 없으며 인증서를 영구적으로 삭제합니다.",
+  
+  // Misc
+  unknown: "알 수 없음",
+  never: "없음",
+  none: "없음",
+  loadingChannels: "채널 로딩 중...",
+  noChannelsFound: "알림 채널 없음",
+  noSSLCertificates: "SSL 인증서 없음",
+  created: "생성됨",
+  lastUpdated: "마지막 업데이트",
+  lastNotification: "마지막 알림",
+  collectionId: "컬렉션 ID",
+  noCertificatesFound: "인증서 없음",
+};

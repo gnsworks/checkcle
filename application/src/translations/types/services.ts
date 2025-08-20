@@ -69,6 +69,7 @@ export interface ServicesTranslations {
 	regionalAgentsAvailablePlaceholder: string;
 	regionalAgentsAllSelected: string;
 	regionalAgentsNoAvailable: string;
+	regionalAgentsNoOnlineAvailable: string;
 	regionalAgentsNotFoundMessage: string;
 	regionalAgentsNotSelectedMessage: string;
 
@@ -92,5 +93,5 @@ export interface ServicesTranslations {
 	upServices: string;
 	downServices: string;
 	pausedServices: string;
-	warningServices: string;
+	warningServices: string;	
 }
