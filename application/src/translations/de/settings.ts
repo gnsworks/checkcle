@@ -23,7 +23,7 @@ export const settingsTranslations: SettingsTranslations = {
   enableTLS: "TLS aktivieren",
   localName: "Lokaler Name",
 
-    // Test Email
+  // Test Email
   testEmail: "Test Email",
   sendTestEmail: "Send test email",
   emailTemplate: "Email template",
@@ -47,5 +47,12 @@ export const settingsTranslations: SettingsTranslations = {
   testConnection: "Verbindung testen",
   testingConnection: "Verbindung wird getestet...",
   connectionSuccess: "Verbindung erfolgreich",
-  connectionFailed: "Verbindung fehlgeschlagen"
+  connectionFailed: "Verbindung fehlgeschlagen",
+
+  // Ergänzte fehlende Einträge
+  addUser: "Benutzer hinzufügen",
+  permissionNotice: "Berechtigungshinweis:",
+  permissionNoticeAddUser: "Als Admin-Benutzer haben Sie keinen Zugriff auf die Anzeige oder Änderung von System- und E-Mail-Einstellungen. Diese Einstellungen können nur von Super-Admins aufgerufen und geändert werden. Wenden Sie sich an Ihren Super-Admin, wenn Sie Änderungen an der Systemkonfiguration oder den E-Mail-Einstellungen vornehmen müssen.",
+  loadingSettings: "Einstellungen werden geladen...",
+  loadingSettingsError: "Fehler beim Laden der Einstellungen",
 };
