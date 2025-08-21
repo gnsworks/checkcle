@@ -63,4 +63,17 @@ export interface MaintenanceTranslations {
   noScheduledMaintenance: string;
   noMaintenanceWindows: string;
   maintenanceCreatedSuccess: string;
+  editMaintenanceWindow: string;
+  editMaintenanceDesc: string;
+  priorityDescription: string;
+  statusDescription: string;
+  impactLevel: string;
+  impactLevelDescription: string;
+  selectAssignedUsers: string;
+  assignedPersonnelDescription: string;
+  mutedNotifications: string;
+  notificationsAreMuted: string;
+  selectNotificationChannel: string;
+  enableNotificationsFirst: string;
+  updateMaintenance: string;
 }
