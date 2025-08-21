@@ -24,5 +24,6 @@ dist-ssr
 *.sw?
 pocketbase.exe
 application/src/lib/pocketbase.ts
+server/pb_data/
 Dockerfile
 application/src/lib/pocketbase-prod.ts
