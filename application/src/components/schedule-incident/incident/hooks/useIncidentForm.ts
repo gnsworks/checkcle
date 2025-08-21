@@ -57,6 +57,7 @@ export const useIncidentForm = (onSuccess: () => void, onClose: () => void) => {
         priority: data.priority,
         service_id: data.service_id,
         assigned_to: data.assigned_to,
+        assigned_users: data.assigned_to, // map to server field
         root_cause: data.root_cause,
         resolution_steps: data.resolution_steps,
         lessons_learned: data.lessons_learned,

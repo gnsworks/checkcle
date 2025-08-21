@@ -56,7 +56,9 @@ export const createIncident = async (data: CreateIncidentInput): Promise<void> =
       affected_systems: data.affected_systems,
       priority: data.priority.toLowerCase(),
       service_id: data.service_id || '',
-      assigned_to: data.assigned_to || '', // Direct user ID assignment
+      //assigned_to: data.assigned_to || '', // Direct user ID assignment
+      //2025-08-18: // map UI field -> server schema
+      assigned_users: typeof data.assigned_to === 'string' ? data.assigned_to : '',
       root_cause: data.root_cause || '',
       resolution_steps: data.resolution_steps || '',
       lessons_learned: data.lessons_learned || '',
@@ -82,28 +84,41 @@ export const createIncident = async (data: CreateIncidentInput): Promise<void> =
 export const updateIncident = async (id: string, data: Partial<IncidentItem>): Promise<void> => {
   try {
     console.log(`Updating incident ${id} with:`, data);
-    
-    // Make sure impact and priority are lowercase
-    const payload = {
+
+    const payload: Record<string, any> = {
       ...data,
-      impact: data.impact?.toLowerCase(),
-      priority: data.priority?.toLowerCase(),
-      status: data.status ? formatStatus(data.status) : undefined,
-      impact_status: data.status ? data.status.toLowerCase() : undefined,
-      ...(data.status?.toLowerCase() === 'resolved' && !data.resolution_time 
-        ? { resolution_time: new Date().toISOString() } 
-        : {})
+      ...(data.impact ? { impact: data.impact.toLowerCase() } : {}),
+      ...(data.priority ? { priority: data.priority.toLowerCase() } : {}),
+      ...(data.status
+        ? {
+            status: formatStatus(data.status),
+            impact_status: data.status.toLowerCase(),
+          }
+        : {}),
+      // set only if assigned_to was provided
+      ...(typeof data.assigned_to === 'string'
+        ? {
+            assigned_users: data.assigned_to, // server field
+            assigned_to: data.assigned_to,    // legacy field for backward compatibility
+          }
+        : {}),
+      // add resolution_time only if status changes to resolved
+      ...((data.status?.toLowerCase() === 'resolved' && !data.resolution_time)
+        ? { resolution_time: new Date().toISOString() }
+        : {}),
     };
-    
+
     console.log("Final payload for update:", payload);
     await pb.collection('incidents').update(id, payload);
-    
+
     // Invalidate cache after update
     invalidateCache();
-    
+
     console.log(`Incident ${id} updated successfully`);
   } catch (error) {
     console.error('Error updating incident:', error);
     throw error;
   }
 };
+
+

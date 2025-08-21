@@ -25,19 +25,20 @@ export const IncidentDetailContent = ({
   onClose, 
   assignedUser 
 }: IncidentDetailContentProps) => {
-  // Fetch assigned user details if one wasn't provided and there's an assigned_to field
+  // Fetch assigned user details if none was provided; prefer server field
+  const assigneeId = incident?.assigned_users || incident?.assigned_to;
   const { data: fetchedUser } = useQuery({
-    queryKey: ['user', incident?.assigned_to],
+    queryKey: ['user', assigneeId],
     queryFn: async () => {
-      if (!incident?.assigned_to) return null;
+      if (!assigneeId) return null;
       try {
-        return await userService.getUser(incident.assigned_to);
+        return await userService.getUser(assigneeId);
       } catch (error) {
         console.error("Failed to fetch assigned user:", error);
         return null;
       }
     },
-    enabled: !!incident?.assigned_to && !assignedUser,
+    enabled: !!assigneeId && !assignedUser,
     staleTime: 300000 // Cache for 5 minutes
   });
 

@@ -5,7 +5,8 @@ export type IncidentItem = {
   service_id?: string;
   timestamp?: string;
   description: string;
-  assigned_to?: string;
+  assigned_to?: string; // legacy UI field
+  assigned_users?: string; // server field
   resolution_time?: string;
   impact: string;
   affected_systems: string;
@@ -32,7 +33,8 @@ export type CreateIncidentInput = {
   affected_systems: string;
   priority: string;
   service_id?: string;
-  assigned_to?: string;
+  assigned_to?: string; // legacy UI field
+  assigned_users?: string; // server field
   root_cause?: string;
   resolution_steps?: string;
   lessons_learned?: string;
@@ -50,7 +52,8 @@ export type UpdateIncidentInput = {
   affected_systems?: string;
   priority?: string;
   service_id?: string;
-  assigned_to?: string;
+  assigned_to?: string; // legacy UI field
+  assigned_users?: string; // server field
   root_cause?: string;
   resolution_steps?: string;
   lessons_learned?: string;

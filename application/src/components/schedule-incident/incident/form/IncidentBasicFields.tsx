@@ -68,7 +68,7 @@ export const IncidentBasicFields: React.FC = () => {
   const selectedUser = users.find(user => user.id === form.getValues('assigned_to'));
 
   // Function to get user initials from name
-  const getUserInitials = (user: any): string => {
+  const getUserInitials = (user: { full_name?: string; username: string }): string => {
     if (user.full_name) {
       const nameParts = user.full_name.split(' ');
       if (nameParts.length > 1) {
