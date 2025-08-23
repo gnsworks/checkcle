@@ -64,6 +64,8 @@ type AlertConfiguration struct {
 	WebhookURL            string `json:"webhook_url"`
 	WebhookPayloadTemplate string `json:"webhook_payload_template"`
 	NtfyEndpoint          string `json:"ntfy_endpoint"`
+	APIToken              string `json:"api_token"`
+	UserKey               string `json:"user_key"`
 }
 
 // ServerNotificationTemplate represents a server notification template
