@@ -36,7 +36,7 @@ interface NotificationChannelDialogProps {
 
 const baseSchema = z.object({
   notify_name: z.string().min(1, "Name is required"),
-  notification_type: z.enum(["telegram", "discord", "slack", "signal", "google_chat", "email", "ntfy", "webhook"]),
+  notification_type: z.enum(["telegram", "discord", "slack", "signal", "google_chat", "email", "ntfy", "pushover", "webhook"]),
   enabled: z.boolean().default(true),
   service_id: z.string().default("global"),
   template_id: z.string().optional(),
@@ -89,6 +89,12 @@ const webhookSchema = baseSchema.extend({
   webhook_payload_template: z.string().optional(),
 });
 
+const pushoverSchema = baseSchema.extend({
+  notification_type: z.literal("pushover"),
+  api_token: z.string().min(1, "API token is required"),
+  user_key: z.string().min(1, "User key is required"),
+});
+
 const formSchema = z.discriminatedUnion("notification_type", [
   telegramSchema,
   discordSchema,
@@ -97,7 +103,8 @@ const formSchema = z.discriminatedUnion("notification_type", [
   googleChatSchema,
   emailSchema,
   ntfySchema,
-  webhookSchema
+  pushoverSchema,
+  webhookSchema,
 ]);
 
 type FormValues = z.infer<typeof formSchema>;
@@ -144,6 +151,12 @@ const notificationTypeOptions = [
     label: "NTFY", 
     description: "Send notifications via NTFY push service",
     icon: "/upload/notification/ntfy.png" 
+  },
+  { 
+    value: "pushover", 
+    label: "Pushover", 
+    description: "Send push notifications via Pushover",
+    icon: "/upload/notification/pushover.png" 
   },
   { 
     value: "webhook", 
@@ -569,6 +582,43 @@ export const NotificationChannelDialog = ({
                   </FormItem>
                 )}
               />
+            )}
+
+             {notificationType === "pushover" && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="api_token"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>API Token</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your Pushover API token" {...field} type="password" />
+                      </FormControl>
+                      <FormDescription>
+                        Your Pushover application API token
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="user_key"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>User Key</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your Pushover user key" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Your Pushover user key (or group key)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
             )}
             
             {notificationType === "webhook" && (
