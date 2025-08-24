@@ -84,12 +84,12 @@ The roadmap is divided into the following stages:
 - [ ] ✅ improve i18n and add new translations. @sqkkyzx [#132](https://github.com/operacle/checkcle/pull/132)
 - [ ] ✅ fix(incident): unify assigned user handling with fallback and UI update. By @ghotso [#142](https://github.com/operacle/checkcle/pull/142)
 - [ ] ✅ sync German translations across incident, maintenance, services & settings. By @ghotso [#141](https://github.com/operacle/checkcle/pull/141)
-
+- [ ] ✅ fix(services-form): max retry attempts. By @ghotso [#147](https://github.com/operacle/checkcle/pull/147)
+- [ ] ✅ Add Pushover notifications
 - [ ] 🔧 Enhance the Data retention feature
 - [ ] 🔧 Improve docker agent for server monitoring
 - [ ] 🔧 Improve the Server Agent on Unraid
 - [ ] 🔧 Server Windows Agent
-- [ ] 🔧 Add Pushover notifications
 - [ ] 🔧 More Uptime Service Type (HTTP keyword, HTTP json)
 - [ ] 🔧 Server support with cpu temperature 
 - [ ] 🔧 Server upport with multiple disks/volume
