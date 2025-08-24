@@ -96,7 +96,7 @@ export function ServiceConfigFields({ form }: ServiceConfigFieldsProps) {
             <FormItem>
               <FormLabel>{t("retryAttempts")}</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value ?? "3"}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
