@@ -152,7 +152,8 @@
                     "webhook",
                     "google_chat",
                     "email",
-                    "ntfy"
+                    "ntfy",
+                    "pushover"
                 ]
             },
             {
@@ -302,6 +303,34 @@
                 "max": 0,
                 "min": 0,
                 "name": "ntfy_endpoint",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text2074277355",
+                "max": 0,
+                "min": 0,
+                "name": "api_token",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text1636223522",
+                "max": 0,
+                "min": 0,
+                "name": "user_key",
                 "pattern": "",
                 "presentable": false,
                 "primaryKey": false,
