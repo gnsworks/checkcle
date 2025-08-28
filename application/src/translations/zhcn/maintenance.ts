@@ -4,7 +4,7 @@ import { MaintenanceTranslations } from '../types/maintenance';
 export const maintenanceTranslations: MaintenanceTranslations = {
   scheduledMaintenance: '计划维护',
   scheduledMaintenanceDesc: '查看和管理您系统和服务的计划维护窗口',
-  upcomingMaintenance: '即将',
+  upcomingMaintenance: '计划中',
   ongoingMaintenance: '进行中',
   completedMaintenance: '已完成',
   createMaintenanceWindow: '创建维护',

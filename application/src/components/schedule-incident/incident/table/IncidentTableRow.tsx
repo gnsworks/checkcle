@@ -86,7 +86,7 @@ export const IncidentTableRow = memo(({
         </Badge>
       </TableCell>
       <TableCell>
-        <AssignedUserCell userId={localItem.assigned_to} />
+        <AssignedUserCell userId={localItem.assigned_users || localItem.assigned_to} />
       </TableCell>
       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-end items-center space-x-2">

@@ -17,7 +17,7 @@ export const IncidentDetailDialog = ({
   onOpenChange, 
   incident 
 }: IncidentDetailDialogProps) => {
-  // Fetch user data for assigned_to field
+  // Fetch user data for assigned field (prefer assigned_users, fallback to assigned_to)
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
@@ -25,12 +25,12 @@ export const IncidentDetailDialog = ({
       return Array.isArray(usersList) ? usersList : [];
     },
     staleTime: 300000, // Cache for 5 minutes
-    enabled: !!incident?.assigned_to && open // Only run query if there's an assigned_to value and dialog is open
+    enabled: !!(incident?.assigned_users || incident?.assigned_to) && open // Only run query if there's an assigned value and dialog is open
   });
 
-  // Find the assigned user
-  const assignedUser = incident?.assigned_to 
-    ? users.find(user => user.id === incident.assigned_to) 
+  // Find the assigned user (prefer assigned_users, fallback to assigned_to)
+  const assignedUser = (incident?.assigned_users || incident?.assigned_to)
+    ? users.find(user => user.id === (incident?.assigned_users || incident?.assigned_to)) 
     : null;
   
   if (!incident) return null;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import { translations, Language, TranslationModule, TranslationKey } from "@/translations";
 
 type LanguageContextType = {
@@ -21,23 +21,35 @@ export const useLanguage = () => {
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>("en");
+  const fallbackLanguage: Language = "en";
 
-  const t = <M extends TranslationModule>(key: string, module?: M): string => {
+  const t = useCallback(<M extends TranslationModule>(key: string, module?: M): string => {
+    const langPack = translations[language];
+    const fallbackPack = translations[fallbackLanguage];
     if (module) {
-      const translatedValue = translations[language][module][key as TranslationKey<M>];
-      return typeof translatedValue === "string" ? translatedValue : key;
+      const valCur = langPack?.[module]?.[key as TranslationKey<M>];
+      if (typeof valCur === "string") return valCur;
+
+      const valEn = fallbackPack?.[module]?.[key as TranslationKey<M>];
+      if (typeof valEn === "string") return valEn;
+
+      return key;
     }
 
-    for (const mod in translations[language]) {
-      const moduleKey = mod as TranslationModule;
-      const translatedValue = translations[language][moduleKey][key as any];
-      if (translatedValue && typeof translatedValue === "string") {
-        return translatedValue;
-      }
+    for (const mod in langPack) {
+      const m = mod as TranslationModule;
+      const val = langPack[m]?.[key as any];
+      if (typeof val === "string") return val;
+    }
+
+    for (const mod in fallbackPack) {
+      const m = mod as TranslationModule;
+      const val = fallbackPack[m]?.[key as any];
+      if (typeof val === "string") return val;
     }
 
     return key;
-  };
+  }, [language]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

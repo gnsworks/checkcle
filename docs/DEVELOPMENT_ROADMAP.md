@@ -55,7 +55,7 @@ The roadmap is divided into the following stages:
 
 ## 🗂 Milestone Overview
 
-### 📦 v1.0.0-1.3.0 – Initial Release _(Target: Q2 2025)_
+### 🚀 v1.0.0-1.3.0 – Initial Release _(Target: Q2 2025)_
 **Status:** ✅ Completed 
 **Goal:** MVP feature completion, API stability, and core use-case readiness.
 
@@ -64,7 +64,7 @@ The roadmap is divided into the following stages:
 ---
 
 ### 🚀 v1.4 - 1.5 – Feature Enhancements _(Target: Q3 2025)_
-**Status:** 🔧 In Progress
+**Status:** ✅ Completed 
 #### Tentative Features:
 - [ ] ✅ Server and Service Table row clickable to detail page.
 - [ ] ✅ Implement pagination for the SSL dashboard table
@@ -73,14 +73,31 @@ The roadmap is divided into the following stages:
 - [ ] ✅ Improve Uptime Service and Server connection update based on status and notification.
 - [ ] ✅ Improve SSL perform the initial check automatically after creation 
 - [ ] ✅ Rate limiting and abuse protection
+- [ ] ✅ Add ntfy push notifications
+
+### 🚀 v1.6.0 – Feature Enhancements _(Target: Q3 2025)_
+**Status:** 🔧 In Progress
+#### Tentative Features:
+- [ ] ✅ Allow user to update the schema directly from the dashboard
+- [ ] ✅ Add Korean translations and update types. By @taking [#143](https://github.com/operacle/checkcle/pull/143)
+- [ ] ✅ Add Simplified Chinese translation. By @sqkkyzx [#128](https://github.com/operacle/checkcle/pull/128)
+- [ ] ✅ improve i18n and add new translations. @sqkkyzx [#132](https://github.com/operacle/checkcle/pull/132)
+- [ ] ✅ fix(incident): unify assigned user handling with fallback and UI update. By @ghotso [#142](https://github.com/operacle/checkcle/pull/142)
+- [ ] ✅ sync German translations across incident, maintenance, services & settings. By @ghotso [#141](https://github.com/operacle/checkcle/pull/141)
+- [ ] ✅ fix(services-form): max retry attempts. By @ghotso [#147](https://github.com/operacle/checkcle/pull/147)
+- [ ] ✅ Add Pushover notifications
+- [ ] 🔧 Enhance the Data retention feature
+- [ ] 🔧 Improve docker agent for server monitoring
+- [ ] 🔧 Improve the Server Agent on Unraid
 - [ ] 🔧 Server Windows Agent
-- [ ] 🔧 Improve the Operational status page
 - [ ] 🔧 More Uptime Service Type (HTTP keyword, HTTP json)
 - [ ] 🔧 Server support with cpu temperature 
-- [ ] 🔧 Server upport with multiple disks 
+- [ ] 🔧 Server upport with multiple disks/volume
 - [ ] 🔧 Server support with Multiple Network Interfaces 
+- [ ] 🔧 Improve the Operational status page
+- [ ] 🔧 Server network bandwidth monitoring
 - [ ] 🎯 Improve the Schedule and Incident for automation
-- [ ] 🎯 Uptime Monitoring option for choose: HTTP/HTTPS
+- [ ] 🎯 Uptime Monitoring option for choose: HTTP/HTTPS. Add Option to Bypass SSL Verification in Uptime
 - [ ] 🎯 Add 2FA support
 
 ---
@@ -91,8 +108,7 @@ These are community-suggested or experimental features under review:
 
 - [ ] Grouping uptime services
 - [ ] OIDC Connect | OAuth2 integration
-- [ ] Mobile PWA support
-- [ ] Cloud-native Helm/Kubernetes deployment
+- [ ] PWA support
 - [ ] Server outbound and inbound traffic usage
 
 You’re welcome to propose features via [GitHub Discussions](https://github.com/operacle/checkcle/discussions) or open an issue with the `feature-request` template.

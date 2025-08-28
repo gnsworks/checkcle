@@ -51,4 +51,13 @@ export const incidentTranslations: IncidentTranslations = {
   configuration: 'Konfiguration',
   failedToUpdateStatus: 'Fehler beim Aktualisieren des Status',
   inProgress: 'In Bearbeitung',
+  enterRootCause: 'Grundursache eingeben',
+  enterIncidentTitle: 'Vorfalltitel eingeben',
+  enterIncidentDescription: 'Vorfallbeschreibung eingeben',
+  enterServiceId: 'Service-IDs durch Komma getrennt eingeben',
+  selectAssignedUser: 'Zugewiesenen Benutzer auswählen',
+  noAssignedUser: 'Der Vorfall ist derzeit keinem Benutzer zugewiesen',
+  affectedSystems: 'Betroffene Systeme',
+  enterAffectedSystems: 'Betroffene Systeme eingeben',
+  separateSystemsWithComma: 'Betroffene Systeme durch Komma getrennt eingeben',
 };

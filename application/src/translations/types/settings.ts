@@ -1,17 +1,17 @@
 
 export interface SettingsTranslations {
-  // Tabs
+	// General Settings - Tabs
   systemSettings: string;
   mailSettings: string;
   
-  // System Settings
+	// General Settings - System Settings
   appName: string;
   appURL: string;
   senderName: string;
   senderEmail: string;
   hideControls: string;
   
-  // Mail Settings
+	// General Settings - Mail Settings
   smtpSettings?: string;
   smtpEnabled: string;
   smtpHost: string;
@@ -22,7 +22,7 @@ export interface SettingsTranslations {
   enableTLS: string;
   localName: string;
   
-  // Test Email
+	// General Settings - Test Email
   testEmail: string;
   sendTestEmail: string;
   emailTemplate: string;
@@ -37,7 +37,7 @@ export interface SettingsTranslations {
   enterEmailAddress: string;
   sending: string;
   
-  // Actions and status
+	// General Settings - Actions and status
   save: string;
   saving: string;
   settingsUpdated: string;
@@ -47,4 +47,11 @@ export interface SettingsTranslations {
   testingConnection: string;
   connectionSuccess: string;
   connectionFailed: string;
+
+  // User Management
+	addUser: string;
+	permissionNotice: string;
+	permissionNoticeAddUser: string;
+	loadingSettings: string;
+	loadingSettingsError: string;
 }

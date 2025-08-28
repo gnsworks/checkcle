@@ -50,8 +50,8 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({ incident, as
                 </Avatar>
                 <span>{assignedUser.full_name || assignedUser.username}</span>
               </div>
-            ) : incident.assigned_to ? (
-              <span>{incident.assigned_to}</span>
+            ) : (incident.assigned_users || incident.assigned_to) ? (
+              <span>{incident.assigned_users || incident.assigned_to}</span>
             ) : (
               <span className="text-muted-foreground italic">{t('unassigned')}</span>
             )}
