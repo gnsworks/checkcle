@@ -86,6 +86,7 @@ The roadmap is divided into the following stages:
 - [ ] ✅ sync German translations across incident, maintenance, services & settings. By @ghotso [#141](https://github.com/operacle/checkcle/pull/141)
 - [ ] ✅ fix(services-form): max retry attempts. By @ghotso [#147](https://github.com/operacle/checkcle/pull/147)
 - [ ] ✅ Add Pushover notifications
+- [ ] ✅ fix(ssl):  Ensure edit form saves notification_id and template_id in DB.
 - [ ] 🔧 Enhance the Data retention feature
 - [ ] 🔧 Improve docker agent for server monitoring
 - [ ] 🔧 Improve the Server Agent on Unraid
@@ -96,6 +97,7 @@ The roadmap is divided into the following stages:
 - [ ] 🔧 Server support with Multiple Network Interfaces 
 - [ ] 🔧 Improve the Operational status page
 - [ ] 🔧 Server network bandwidth monitoring
+- [ ] 🔧 Add Notifiarr notifications
 - [ ] 🎯 Improve the Schedule and Incident for automation
 - [ ] 🎯 Uptime Monitoring option for choose: HTTP/HTTPS. Add Option to Bypass SSL Verification in Uptime
 - [ ] 🎯 Add 2FA support
