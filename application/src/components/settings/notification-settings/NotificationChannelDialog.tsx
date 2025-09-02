@@ -36,7 +36,7 @@ interface NotificationChannelDialogProps {
 
 const baseSchema = z.object({
   notify_name: z.string().min(1, "Name is required"),
-  notification_type: z.enum(["telegram", "discord", "slack", "signal", "google_chat", "email", "ntfy", "pushover", "webhook"]),
+  notification_type: z.enum(["telegram", "discord", "slack", "signal", "google_chat", "email", "ntfy", "pushover", "notifiarr", "webhook"]),
   enabled: z.boolean().default(true),
   service_id: z.string().default("global"),
   template_id: z.string().optional(),
@@ -83,16 +83,21 @@ const ntfySchema = baseSchema.extend({
   ntfy_endpoint: z.string().url("Must be a valid NTFY endpoint URL"),
 });
 
-const webhookSchema = baseSchema.extend({
-  notification_type: z.literal("webhook"),
-  webhook_url: z.string().url("Must be a valid URL"),
-  webhook_payload_template: z.string().optional(),
-});
-
 const pushoverSchema = baseSchema.extend({
   notification_type: z.literal("pushover"),
   api_token: z.string().min(1, "API token is required"),
   user_key: z.string().min(1, "User key is required"),
+});
+
+const notifiarrSchema = baseSchema.extend({
+  notification_type: z.literal("notifiarr"),
+  api_token: z.string().min(1, "API token is required"),
+});
+
+const webhookSchema = baseSchema.extend({
+  notification_type: z.literal("webhook"),
+  webhook_url: z.string().url("Must be a valid URL"),
+  webhook_payload_template: z.string().optional(),
 });
 
 const formSchema = z.discriminatedUnion("notification_type", [
@@ -104,6 +109,7 @@ const formSchema = z.discriminatedUnion("notification_type", [
   emailSchema,
   ntfySchema,
   pushoverSchema,
+  notifiarrSchema,
   webhookSchema,
 ]);
 
@@ -157,6 +163,13 @@ const notificationTypeOptions = [
     label: "Pushover", 
     description: "Send push notifications via Pushover",
     icon: "/upload/notification/pushover.png" 
+  },
+
+  { 
+    value: "notifiarr", 
+    label: "Notifiarr", 
+    description: "Send notifications via Notifiarr",
+    icon: "/upload/notification/notifiarr.png" 
   },
   { 
     value: "webhook", 
@@ -619,6 +632,25 @@ export const NotificationChannelDialog = ({
                   )}
                 />
               </>
+            )}
+
+             {notificationType === "notifiarr" && (
+              <FormField
+                control={form.control}
+                name="api_token"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>API Token</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your Notifiarr API token" {...field} type="password" />
+                    </FormControl>
+                    <FormDescription>
+                      Your Notifiarr API token for sending notifications
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
             
             {notificationType === "webhook" && (

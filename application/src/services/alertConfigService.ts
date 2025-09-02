@@ -7,7 +7,7 @@ export interface AlertConfiguration {
   collectionId?: string;
   collectionName?: string;
   service_id: string;
-  notification_type: "telegram" | "discord" | "slack" | "signal" | "google_chat" | "email" | "ntfy" | "pushover" | "webhook";
+  notification_type: "telegram" | "discord" | "slack" | "signal" | "google_chat" | "email" | "ntfy" | "pushover" | "notifiarr" | "webhook";
   telegram_chat_id?: string;
   discord_webhook_url?: string;
   signal_number?: string;
@@ -91,6 +91,9 @@ export const alertConfigService = {
       } else if (config.notification_type === "pushover") {       
         cleanConfig.api_token = config.api_token || "";
         cleanConfig.user_key = config.user_key || "";
+
+      } else if (config.notification_type === "notifiarr") {   
+        cleanConfig.api_token = config.api_token || "";
         
       } else if (config.notification_type === "webhook") {
         cleanConfig.webhook_url = config.webhook_url || "";
