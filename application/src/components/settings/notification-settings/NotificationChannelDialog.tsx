@@ -92,6 +92,7 @@ const pushoverSchema = baseSchema.extend({
 const notifiarrSchema = baseSchema.extend({
   notification_type: z.literal("notifiarr"),
   api_token: z.string().min(1, "API token is required"),
+  channel_id: z.string().min(1, "Channel ID is required"),
 });
 
 const webhookSchema = baseSchema.extend({
@@ -635,22 +636,40 @@ export const NotificationChannelDialog = ({
             )}
 
              {notificationType === "notifiarr" && (
-              <FormField
-                control={form.control}
-                name="api_token"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>API Token</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Your Notifiarr API token" {...field} type="password" />
-                    </FormControl>
-                    <FormDescription>
-                      Your Notifiarr API token for sending notifications
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <>
+                <FormField
+                  control={form.control}
+                  name="api_token"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>API Token</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your Notifiarr API token" {...field} type="password" />
+                      </FormControl>
+                      <FormDescription>
+                        Your Notifiarr API token for sending notifications
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="channel_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Channel ID</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Discord Channel ID" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The Discord channel ID where notifications will be sent
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
             )}
             
             {notificationType === "webhook" && (

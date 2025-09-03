@@ -94,6 +94,7 @@ export const alertConfigService = {
 
       } else if (config.notification_type === "notifiarr") {   
         cleanConfig.api_token = config.api_token || "";
+        cleanConfig.channel_id = config.channel_id || "";
         
       } else if (config.notification_type === "webhook") {
         cleanConfig.webhook_url = config.webhook_url || "";
