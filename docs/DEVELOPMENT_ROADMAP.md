@@ -87,6 +87,7 @@ The roadmap is divided into the following stages:
 - [ ] ✅ fix(services-form): max retry attempts. By @ghotso [#147](https://github.com/operacle/checkcle/pull/147)
 - [ ] ✅ Add Pushover notifications
 - [ ] ✅ fix(ssl):  Ensure edit form saves notification_id and template_id in DB.
+- [ ] ✅ Add Notifiarr notifications
 - [ ] 🔧 Enhance the Data retention feature
 - [ ] 🔧 Improve docker agent for server monitoring
 - [ ] 🔧 Improve the Server Agent on Unraid
@@ -97,10 +98,10 @@ The roadmap is divided into the following stages:
 - [ ] 🔧 Server support with Multiple Network Interfaces 
 - [ ] 🔧 Improve the Operational status page
 - [ ] 🔧 Server network bandwidth monitoring
-- [ ] 🔧 Add Notifiarr notifications
 - [ ] 🎯 Improve the Schedule and Incident for automation
 - [ ] 🎯 Uptime Monitoring option for choose: HTTP/HTTPS. Add Option to Bypass SSL Verification in Uptime
 - [ ] 🎯 Add 2FA support
+- [ ] Grouping uptime services
 
 ---
 
@@ -108,7 +109,7 @@ The roadmap is divided into the following stages:
 
 These are community-suggested or experimental features under review:
 
-- [ ] Grouping uptime services
+
 - [ ] OIDC Connect | OAuth2 integration
 - [ ] PWA support
 - [ ] Server outbound and inbound traffic usage
@@ -127,12 +128,6 @@ To get involved:
 - Join us in shaping the roadmap via [Discussions](https://github.com/operacle/checkcle/discussions)
 
 ---
-
-## 📅 Last Updated
-_This roadmap was last updated on **July 26, 2025**._
-
----
-
 With ❤️ from the CheckCle  
 [Website](https://checkcle.io) | [GitHub](https://github.com/operacle/checkcle)
 
